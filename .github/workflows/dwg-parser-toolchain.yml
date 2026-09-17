@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p .toolchain
           cd .toolchain
-          npm init -y
+          printf '%s\n' '{"name":"dwg-parser-toolchain","version":"1.0.0","private":true,"type":"module"}' > package.json
           npm install --no-audit --no-fund --ignore-scripts @mlightcad/libredwg-web@0.7.11
           node -e "const p=require('./node_modules/@mlightcad/libredwg-web/package.json'); console.log('libredwg-web', p.version)"
       - name: Package toolchain artifact
