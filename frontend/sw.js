@@ -1,0 +1,5 @@
+const VERSION='offset5-shell-v1';
+const SHELL=['./','./index.html','./config.json','./assets/favicon.svg','./src/model.js','./src/engine.js','./vendor/three/build/three.module.js','./vendor/three/build/three.core.js','./vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL))));
+self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('offset5-shell-')&&k!==VERSION).map(k=>caches.delete(k)))),self.clients.claim()])));
+self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(event.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.includes('/api/'))return;event.respondWith(fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(VERSION).then(c=>c.put(event.request,copy)));}return response;}).catch(()=>caches.match(event.request).then(cached=>cached||new Response('Offline: berkas belum tersimpan.',{status:503}))));});
