@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import {OffsetMachineTemplate} from '../frontend/src/offset5.js';
+
+test('selected assembly explosion leaves unrelated assemblies fixed and reset restores all descendants',()=>{
+ const t=new OffsetMachineTemplate(),selected=t.nodes.find(n=>n.userData.nodeId==='press-3');
+ const before=new Map(t.nodes.map(n=>[n,n.position.toArray()]));
+ for(let i=0;i<10;i++){
+  t.explode(.85,selected);
+  for(const n of t.nodes)if(n.parent!==selected)assert.deepEqual(n.position.toArray(),before.get(n));
+  assert.ok(selected.children.filter(n=>n.userData.selectable).every(n=>JSON.stringify(n.position.toArray())!==JSON.stringify(before.get(n))));
+  t.reset();for(const n of t.nodes)assert.deepEqual(n.position.toArray(),before.get(n));
+ }
+ t.dispose();
+});
+test('subassembly selection resolves meshes and isolation preserves parent chain',()=>{
+ const t=new OffsetMachineTemplate(),cover=t.nodes.find(n=>n.userData.nodeId==='press-2-cover'),mesh=cover.children.find(n=>n.isMesh);
+ assert.equal(t.resolvePart(mesh),cover);t.isolate(cover);
+ for(let p=mesh;p;p=p.parent)assert.equal(p.visible,true);
+ assert.equal(t.parts.find(n=>n.userData.nodeId==='delivery').visible,false);
+ t.ghost(true,cover);assert.equal(mesh.material.opacity,1);
+ t.reset();assert.ok(t.nodes.every(n=>n.visible));t.dispose();
+});
+test('geometry is finite, sourced and instanced; visual dimensions remain nonengineering',()=>{
+ const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'VISUAL_ONLY');
+ assert.equal(t.root.userData.installedConfiguration,'UNVERIFIED');
+ assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
+ for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
+ const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<20);
+ t.setLow(true);assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.reset();assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.dispose();
+});
