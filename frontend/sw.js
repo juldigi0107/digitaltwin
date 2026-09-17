@@ -1,4 +1,4 @@
-const VERSION='offset5-shell-photo-v2';
+const VERSION='offset5-shell-photo-v3';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg','./src/model.js','./src/engine.js','./src/offset5.js','./vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js','./vendor/three/build/three.module.js','./vendor/three/build/three.core.js','./vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL))));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('offset5-shell-')&&k!==VERSION).map(k=>caches.delete(k)))),self.clients.claim()])));
