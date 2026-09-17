@@ -1,0 +1,33 @@
+name: Build DWG parser toolchain
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dwg-parser-toolchain.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package-parser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare isolated LibreDWG Web toolchain
+        run: |
+          mkdir -p .toolchain
+          cd .toolchain
+          npm init -y
+          npm install --no-audit --no-fund --ignore-scripts @mlightcad/libredwg-web@0.7.11
+          node -e "const p=require('./node_modules/@mlightcad/libredwg-web/package.json'); console.log('libredwg-web', p.version)"
+      - name: Package toolchain artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libredwg-web-toolchain
+          path: .toolchain
+          if-no-files-found: error
+          retention-days: 7
