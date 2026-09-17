@@ -2,90 +2,257 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-export const PHOTO_RECONSTRUCTION={
-  version:'offset5-photo-v4',status:'RECONSTRUCTED / APPROXIMATE',dimensionUnit:'VISUAL_ONLY',
-  installedConfiguration:'CD 102-8+L UV identity visible in user photo; exact optional equipment remains reviewable',
-  photoCount:16,
-  orientation:{feedDirection:'+X',feederEnd:'-X',deliveryEnd:'+X',operatorSide:'+Z',oppositeSide:'-Z'},
-  photos:['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg']
+// Photo-based reconstruction. Coordinates are visual units only, not surveyed metres.
+// External housings are reconstructed from user photos; hidden/internal mechanisms are not claimed.
+export const PHOTO_RECONSTRUCTION = {
+  version: 'offset5-photo-v3',
+  status: 'RECONSTRUCTED / APPROXIMATE',
+  dimensionUnit: 'VISUAL_ONLY',
+  installedConfiguration: 'UNVERIFIED',
+  repeatedHousings: 8,
+  photos: [
+    'IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg',
+    'IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'
+  ]
 };
-
 const V=a=>new THREE.Vector3(...a);
-const TAXONOMY=['MESIN','UNIT UTAMA','SUB','BLOCK','PART','SPESIFIK PART'];
 
-export class OffsetMachineTemplate{
+export class OffsetMachineTemplate {
   constructor(){
-    this.root=new THREE.Group();this.root.name='OFFSET 5 · Heidelberg Speedmaster CD 102-8+L UV';
-    this.root.userData={assetId:'MACHINE-OFFSET5',nodeId:'offset5',selectable:false,taxonomyLevel:1,taxonomyLabel:TAXONOMY[0],...PHOTO_RECONSTRUCTION};
-    this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
-    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,blue:0x243e70,dial:0xe9e2c4};
-    this.build();this.batchMeshes();
+    this.root=new THREE.Group();
+    this.root.name='MACHINE-OFFSET5';
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION};
+    this.parts=[];this.nodes=[];this.meshes=[];
+    this.geometries=new Map();this.materials=new Map();this.ghosted=false;
+    this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70,dial:0xe9e2c4};
+    this.build();
+    this.batchMeshes();
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
   }
-  group(parent,id,name,level,pos=[0,0,0],explode=[0,0,0],sources=[],note='',confidence='PHOTO_VERIFIED'){
+
+  group(parent,id,name,pos,dir,sources,note='Bentuk luar terlihat pada foto; proporsi dan jarak tetap perkiraan visual.'){
     const g=new THREE.Group();g.name=name;g.position.set(...pos);
-    g.userData={assetId:'MACHINE-OFFSET5',nodeId:id,selectable:true,taxonomyLevel:level,taxonomyLabel:TAXONOMY[level-1],visualOnly:true,confidence,source:'USER_PHOTOS + RESEARCH',sourceFiles:sources,note,explode:V(explode)};
+    g.userData={assetId:'MACHINE-OFFSET5',nodeId:id,selectable:true,visualOnly:true,technicalComponent:null,confidence:'APPROXIMATE',source:'USER_PHOTOS',sourceFiles:sources,note,explode:V(dir)};
     parent.add(g);this.nodes.push(g);if(parent===this.root)this.parts.push(g);return g;
   }
-  material(kind,owner){const key=(owner.userData.nodeId||'root')+':'+kind;if(!this.materials.has(key))this.materials.set(key,new THREE.MeshStandardMaterial({color:this.palette[kind]??this.palette.graphite,metalness:['silver','steel'].includes(kind)?.62:kind==='paper'||kind==='dial'?0:.24,roughness:kind==='paper'?.9:kind==='glass'?.18:kind==='dial'?.72:.46,transparent:kind==='glass',opacity:kind==='glass'?.64:1}));return this.materials.get(key);}
-  mesh(parent,geo,key,kind,pos,rot){if(!this.geometries.has(key))this.geometries.set(key,geo());const m=new THREE.Mesh(this.geometries.get(key),this.material(kind,parent));m.position.set(...pos);if(rot)m.rotation.set(...rot);m.castShadow=kind!=='glass';m.receiveShadow=true;m.userData={assetId:'MACHINE-OFFSET5',ownerId:parent.userData.nodeId};parent.add(m);this.meshes.push(m);return m;}
-  box(g,size,pos,kind='graphite',radius=0,rot=null){return this.mesh(g,()=>radius?new RoundedBoxGeometry(...size,2,radius):new THREE.BoxGeometry(...size),'box:'+size+':'+radius,kind,pos,rot);}
-  cylinder(g,r,len,pos,kind='steel',axis='z'){return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,len,18),'cyl:'+r+':'+len,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);}
-  tube(g,pts,r=.024,kind='rubber'){const c=new THREE.CatmullRomCurve3(pts.map(V));return this.mesh(g,()=>new THREE.TubeGeometry(c,24,r,7,false),'tube:'+JSON.stringify(pts)+':'+r,kind,[0,0,0]);}
-  gauge(g,pos){this.cylinder(g,.07,.028,pos,'black','z');this.cylinder(g,.056,.012,[pos[0],pos[1],pos[2]+.018],'dial','z');}
-  grille(g,pos,w,h,axis='x'){const [x,y,z]=pos;if(axis==='x'){this.box(g,[.035,h,w],[x,y,z],'black');for(let i=0;i<13;i++)this.box(g,[.05,.014,w],[x+.025,y-h/2+i*h/12,z],'steel');for(let i=0;i<9;i++)this.box(g,[.05,h,.012],[x+.028,y,z-w/2+i*w/8],'graphite');}else{this.box(g,[w,h,.035],[x,y,z],'black');for(let i=0;i<10;i++)this.box(g,[w,.014,.05],[x,y-h/2+i*h/9,z+.025],'steel');for(let i=0;i<10;i++)this.box(g,[.012,h,.05],[x-w/2+i*w/9,y,z+.028],'graphite');}}
-  tread(g,size,pos){this.box(g,size,pos,'steel',.035);const key='tread-rib';if(!this.geometries.has(key))this.geometries.set(key,new THREE.BoxGeometry(.065,.008,.017));const nx=Math.max(1,Math.floor(size[0]/.14)),nz=Math.max(1,Math.floor(size[2]/.14));const m=new THREE.InstancedMesh(this.geometries.get(key),this.material('silver',g),nx*nz),d=new THREE.Object3D();let k=0;for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){d.position.set(pos[0]-size[0]/2+(i+.5)*size[0]/nx,pos[1]+size[1]/2+.004,pos[2]-size[2]/2+(j+.5)*size[2]/nz);d.rotation.y=(i+j)%2?Math.PI/4:-Math.PI/4;d.updateMatrix();m.setMatrixAt(k++,d.matrix);}m.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true};m.receiveShadow=true;g.add(m);this.meshes.push(m);}
-  batchMeshes(){for(const g of this.nodes){const b=new Map();for(const m of g.children.filter(c=>c.isMesh&&!c.isInstancedMesh)){if(!b.has(m.material))b.set(m.material,[]);b.get(m.material).push(m);}for(const [mat,meshes] of b){if(meshes.length<2)continue;const pieces=meshes.map(m=>{m.updateMatrix();return (m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone()).applyMatrix4(m.matrix);});const merged=mergeGeometries(pieces);pieces.forEach(x=>x.dispose());if(!merged)continue;this.geometries.set('merged:'+g.userData.nodeId+':'+mat.uuid,merged);const out=new THREE.Mesh(merged,mat);out.castShadow=true;out.receiveShadow=true;out.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId};for(const old of meshes){g.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}g.add(out);this.meshes.push(out);}}}
+  material(kind,owner){
+    const key=(owner.userData.nodeId||'root')+':'+kind;
+    if(!this.materials.has(key))this.materials.set(key,new THREE.MeshStandardMaterial({
+      color:this.palette[kind]??this.palette.graphite,
+      metalness:['silver','steel'].includes(kind)?.65:kind==='paper'||kind==='dial'?0:.25,
+      roughness:kind==='paper'?.9:kind==='glass'?.18:kind==='dial'?.75:.46,
+      transparent:kind==='glass',opacity:kind==='glass'?.65:1
+    }));
+    return this.materials.get(key);
+  }
+  mesh(parent,geo,key,kind,pos,rotation){
+    if(!this.geometries.has(key))this.geometries.set(key,geo());
+    const m=new THREE.Mesh(this.geometries.get(key),this.material(kind,parent));
+    m.position.set(...pos);if(rotation)m.rotation.set(...rotation);
+    m.castShadow=kind!=='glass';m.receiveShadow=true;
+    m.userData={assetId:'MACHINE-OFFSET5',ownerId:parent.userData.nodeId};
+    parent.add(m);this.meshes.push(m);return m;
+  }
+  box(g,size,pos,kind='graphite',radius=0,rot=null){
+    const key='box:'+size+':'+radius;
+    return this.mesh(g,()=>radius?new RoundedBoxGeometry(...size,2,radius):new THREE.BoxGeometry(...size),key,kind,pos,rot);
+  }
+  cylinder(g,r,length,pos,kind='steel',axis='z'){
+    return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,length,18),'cyl:'+r+':'+length,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
+  }
+  torus(g,major,tube,pos,kind='rubber',rotation=[Math.PI/2,0,0]){
+    return this.mesh(g,()=>new THREE.TorusGeometry(major,tube,8,18),'torus:'+major+':'+tube,kind,pos,rotation);
+  }
+  tube(g,pts,r=.024,kind='rubber'){
+    const curve=new THREE.CatmullRomCurve3(pts.map(V));
+    return this.mesh(g,()=>new THREE.TubeGeometry(curve,24,r,7,false),'tube:'+JSON.stringify(pts)+':'+r,kind,[0,0,0]);
+  }
+  shell(g,center,width,height,depth,side=1){
+    const s=new THREE.Shape();
+    s.moveTo(-width/2,-depth/2);s.lineTo(width/2,-depth/2);s.lineTo(width/2,depth*.1);s.quadraticCurveTo(width*.38,depth*.8,-width/2,depth*.5);s.closePath();
+    const key='shell:'+width+':'+height+':'+depth;
+    return this.mesh(g,()=>{const geo=new THREE.ExtrudeGeometry(s,{depth:height,steps:1,bevelEnabled:true,bevelSegments:2,bevelSize:.025,bevelThickness:.025,curveSegments:8});geo.rotateX(-Math.PI/2);return geo;},key,'silver',center,[0,side===1?Math.PI:0,0]);
+  }
+  grille(g,pos,width,height,axis='x'){
+    const [x,y,z]=pos;
+    if(axis==='x'){
+      this.box(g,[.035,height,width],[x,y,z],'black');
+      for(let i=0;i<13;i++)this.box(g,[.05,.014,width],[x+.025,y-height/2+i*height/12,z],'steel');
+      for(let i=0;i<9;i++)this.box(g,[.05,height,.012],[x+.028,y,z-width/2+i*width/8],'graphite');
+    }else{
+      this.box(g,[width,height,.035],[x,y,z],'black');
+      for(let i=0;i<10;i++)this.box(g,[width,.014,.05],[x,y-height/2+i*height/9,z+.025],'steel');
+      for(let i=0;i<10;i++)this.box(g,[.012,height,.05],[x-width/2+i*width/9,y,z+.028],'graphite');
+    }
+  }
+  controls(g,pos,axis='z',count=4){
+    const [x,y,z]=pos;
+    this.box(g,axis==='z'?[.19,.55,.03]:[.03,.55,.19],pos,'light',.012);
+    for(let i=0;i<count;i++)this.cylinder(g,.023,.025,axis==='z'?[x,y+.17-i*.09,z+.026]:[x+.026,y+.17-i*.09,z],i===count-1?'red':'black',axis);
+  }
+  gauge(g,pos,axis='z'){
+    const [x,y,z]=pos;this.cylinder(g,.07,.028,pos,'black',axis);
+    const face=axis==='z'?[x,y,z+.018]:[x+.018,y,z];this.cylinder(g,.056,.012,face,'dial',axis);
+  }
+  tread(g,size,pos){
+    this.box(g,size,pos,'steel',.035);
+    const tileKey='tread-rib';if(!this.geometries.has(tileKey))this.geometries.set(tileKey,new THREE.BoxGeometry(.065,.008,.017));
+    const nx=Math.max(1,Math.floor(size[0]/.12)),nz=Math.max(1,Math.floor(size[2]/.12));
+    const m=new THREE.InstancedMesh(this.geometries.get(tileKey),this.material('silver',g),nx*nz),dummy=new THREE.Object3D();let k=0;
+    for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){
+      dummy.position.set(pos[0]-size[0]/2+(i+.5)*size[0]/nx,pos[1]+size[1]/2+.004,pos[2]-size[2]/2+(j+.5)*size[2]/nz);
+      dummy.rotation.y=(i+j)%2?Math.PI/4:-Math.PI/4;dummy.updateMatrix();m.setMatrixAt(k++,dummy.matrix);
+    }
+    m.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true};m.receiveShadow=true;g.add(m);this.meshes.push(m);
+  }
+  batchMeshes(){
+    for(const group of this.nodes){
+      const batches=new Map();
+      for(const mesh of group.children.filter(c=>c.isMesh&&!c.isInstancedMesh)){
+        if(!batches.has(mesh.material))batches.set(mesh.material,[]);batches.get(mesh.material).push(mesh);
+      }
+      for(const [material,meshes] of batches){
+        if(meshes.length<2)continue;
+        const pieces=meshes.map(m=>{m.updateMatrix();const geo=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();return geo.applyMatrix4(m.matrix);});
+        const merged=mergeGeometries(pieces);pieces.forEach(g=>g.dispose());if(!merged)continue;
+        this.geometries.set('merged:'+group.userData.nodeId+':'+material.uuid,merged);
+        const mesh=new THREE.Mesh(merged,material);mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData={assetId:'MACHINE-OFFSET5',ownerId:group.userData.nodeId};
+        for(const old of meshes){group.remove(old);this.meshes.splice(this.meshes.indexOf(old),1);}group.add(mesh);this.meshes.push(mesh);
+      }
+    }
+  }
 
-  build(){this.feeder(-8.55);this.printingGroup(-6.55);this.coatingUnit(3.25);this.deliveryTransfer(5.05);this.inspectionSystem(6.55);this.deliveryPile(8.15);this.platform();this.controlConsole(-8.25,0,-3.15);this.auxiliary();}
+  build(){
+    const refUnits=['IMG_1627.jpeg','IMG_1628.jpeg'];
+    const deck=this.group(this.root,'platform','Platform & tangga operator',[.25,0,0],[0,-.35,1.2],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg']);
+    this.box(deck,[18.1,.18,2.6],[0,.19,0],'black',.035);
+    for(let i=0;i<11;i++){const x=-7.3+i*1.45;this.tread(deck,[1.39,.12,.88],[x,.46,1.58]);this.box(deck,[.12,.33,.72],[x,.23,1.58],'black');}
+    this.tread(deck,[.62,.16,.9],[8.65,.16,1.58]);this.tread(deck,[.52,.14,.9],[8.18,.31,1.58]);this.tread(deck,[.62,.14,.86],[-8.65,.20,1.58]);
+
+    for(let i=0;i<8;i++)this.pressUnit(i,-5.35+i*1.22,refUnits);
+    this.feeder(-7.85);
+    this.feedBoard(-6.5);
+    this.rollerService(4.65);
+    this.longPassage(5.75);
+    this.inspectionGantry(6.95);
+    this.delivery(8.25);
+  }
+
+  pressUnit(i,x,sources){
+    const g=this.group(this.root,'press-'+(i+1),'Modul cetak visual '+(i+1),[x,0,0],[(i-3.5)*.28,.15,0],sources,'Pengulangan delapan housing untuk rekonstruksi visual; jumlah dan penomoran unit terpasang belum diverifikasi.');
+    const body=this.group(g,'press-'+i+'-frame','Rangka luar & kisi pelindung',[0,0,0],[0,.12,-.65],['IMG_1626.jpeg','IMG_1628.jpeg']);
+    this.box(body,[1.08,.4,2.04],[0,.48,0],'black',.035);
+    for(const side of [-1,1])this.box(body,[.87,1.85,.25],[0,1.4,side*1.03],'graphite',.04);
+    this.box(body,[.90,.2,1.92],[0,2.33,0],'graphite',.06);
+    this.grille(body,[.475,1.82,0],1.75,.75);this.grille(body,[-.475,1.82,0],1.75,.75);
+    this.cylinder(body,.065,1.78,[.50,1.25,0],'rubber');this.box(body,[.07,.24,1.8],[.50,.98,0],'graphite',.025);
+    for(const z of [-.62,.62])this.box(body,[.025,.10,.4],[.54,1,z],'glass');
+
+    const cover=this.group(g,'press-'+i+'-cover','Cover samping melengkung',[0,0,0],[0,.12,1.1],sources);
+    this.shell(cover,[0,.48,1.14],.86,1.92,.36,1);this.controls(cover,[.32,1.43,1.355]);
+    this.box(cover,[.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);this.box(cover,[.34,.026,.018],[-.11,1.72,1.36],'black',.005);
+
+    const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources);
+    this.tread(stair,[.48,.10,.51],[.55,.82,1.43]);this.tread(stair,[.43,.10,.4],[.55,1.10,1.35]);this.box(stair,[.10,.33,.14],[.55,.62,1.34],'graphite');
+
+    const ink=this.group(g,'press-'+i+'-ink','Bak tinta & roller atas terlihat',[0,0,0],[0,.9,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Bak dan roller atas terlihat pada foto. Warna tinta hanya ilustrasi visual.');
+    this.box(ink,[.42,.08,1.69],[-.10,2.4,0],'steel',.025);this.cylinder(ink,.105,1.6,[-.08,2.51,0],i===0?'red':i===1?'blue':'rubber');
+    const lip=this.box(ink,[.24,.035,1.63],[-.29,2.55,0],'light');lip.rotation.z=-.32;
+    for(const side of [-1,1]){this.box(ink,[.08,.4,.075],[.26,2.55,side*.81],'graphite',.018);this.cylinder(ink,.064,.08,[.25,2.48,side*.83],'steel');}
+    this.box(ink,[.26,.10,1.70],[.28,2.8,0],'graphite',.02);this.tube(ink,[[.24,2.62,-.70],[.42,2.5,-.79],[.34,2.37,-.94]],.018);
+  }
 
   feeder(x){
-    const u=this.group(this.root,'feeder','Feeder / Anleger',2,[x,0,0],[-1.7,0,0],['IMG_2312.jpeg','IMG_1634.jpeg'],'Ujung pile dengan fascia putih dan pagar vertikal pada IMG_2312 dipakai sebagai feeder. Ini membalik assignment v3 yang sebelumnya tertukar.');
-    const pile=this.group(u,'feeder-pile-system','Pile inlet system',3,[0,0,0],[-.45,0,0],['IMG_2312.jpeg']);const frame=this.group(pile,'feeder-pile-frame','Pile frame',4,[0,0,0],[-.3,.15,0],['IMG_2312.jpeg']);const table=this.group(frame,'feeder-pile-table','Pile table',5,[0,0,0],[0,-.35,0],['IMG_2312.jpeg']);const stack=this.group(table,'feeder-paper-stack','Visible paper pile',6,[0,0,0],[0,-.25,0],['IMG_2312.jpeg'],'Isi visual; tinggi pile bukan data produksi.');this.box(stack,[1.08,.82,1.7],[0,.73,0],'paper',.01);this.box(table,[1.18,.10,1.82],[0,.25,0],'steel');
-    const guard=this.group(frame,'feeder-front-guard','Front pile guard',5,[0,0,0],[.35,0,0],['IMG_2312.jpeg']);const bars=this.group(guard,'feeder-guard-bars','Vertical guard bars',6,[0,0,0],[.3,0,0],['IMG_2312.jpeg']);for(let i=0;i<13;i++)this.cylinder(bars,.014,1.25,[.72,.92,-.9+i*.15],'steel','y');
-    const fascia=this.group(u,'feeder-upper-housing','Upper feeder housing',3,[0,0,0],[0,.55,0],['IMG_2312.jpeg','IMG_1634.jpeg']);const shell=this.group(fascia,'feeder-fascia-block','White fascia and inspection window',4,[0,0,0],[0,.35,0],['IMG_2312.jpeg']);const upper=this.group(shell,'feeder-upper-panel','Upper fascia panel',5,[0,0,0],[0,.25,0],['IMG_2312.jpeg']);this.box(upper,[1.85,.25,2.28],[0,2.43,0],'light',.025);const window=this.group(shell,'feeder-window','Dark inspection window',5,[0,0,0],[.25,0,0],['IMG_2312.jpeg']);const glass=this.group(window,'feeder-window-glass','Inspection glass',6,[0,0,0],[.2,0,0],['IMG_2312.jpeg']);this.box(glass,[.05,.58,1.35],[.93,1.95,0],'glass',.015);
-    const controls=this.group(fascia,'feeder-controls','Local feeder controls',4,[0,0,0],[0,.25,1.0],['IMG_2312.jpeg']);const buttons=this.group(controls,'feeder-control-buttons','Visible control buttons',5,[0,0,0],[0,.2,0],['IMG_2312.jpeg']);const eStop=this.group(buttons,'feeder-estop','Emergency-stop / local button cluster',6,[0,0,0],[0,.2,0],['IMG_2312.jpeg'],'Visual placement only; electrical function not inferred.');for(let i=0;i<5;i++)this.cylinder(eStop,.025,.024,[.78,2.35-i*.11,1.08],i===0?'red':'black','x');
-    const board=this.group(u,'feeder-feed-board','Feed board / transfer-in',3,[1.15,0,0],[.45,.2,0],['IMG_2312.jpeg']);const boardBlock=this.group(board,'feeder-board-block','Feed board block',4,[0,0,0],[.35,.15,0],['IMG_2312.jpeg']);const boardPart=this.group(boardBlock,'feeder-board-surface','Feed board surface',5,[0,0,0],[.25,.1,0],['IMG_2312.jpeg']);const boardTop=this.group(boardPart,'feeder-board-top','Visible board top',6,[0,0,0],[.2,.1,0],['IMG_2312.jpeg']);this.box(boardTop,[1.05,.09,1.92],[0,.93,0],'steel',.02);
+    const g=this.group(this.root,'feeder','Feeder · rangka terbuka',[x,0,0],[-1.6,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);
+    const frame=this.group(g,'feeder-frame','Portal & rel pengangkat',[0,0,0],[-.4,0,-.4],['IMG_1624.jpeg','IMG_1625.jpeg']);
+    for(const a of [-.67,.67])for(const z of [-1.02,1.02]){this.box(frame,[.20,2.48,.23],[a,1.29,z],'graphite',.025);this.box(frame,[.29,.06,.32],[a,.065,z],'black');this.cylinder(frame,.018,2.10,[a+.08,1.14,z-.1],'steel','y');}
+    this.box(frame,[1.64,.38,2.32],[0,2.62,0],'graphite',.05);this.box(frame,[1.34,.055,1.85],[0,2.39,0],'steel');this.box(frame,[1.24,.02,.045],[0,2.35,.84],'light');
+    const feed=this.group(g,'feeder-head','Kepala feeder & selang terlihat',[0,0,0],[0,.8,0],['IMG_1625.jpeg']);
+    this.cylinder(feed,.045,1.82,[.1,2.06,0],'steel');this.box(feed,[.4,.37,.62],[-.15,1.98,0],'light',.025);
+    for(const z of [-.42,.42]){this.tube(feed,[[-.24,2.16,z],[.03,2.02,z],[.03,1.66,z],[.26,1.62,z]],.032);this.cylinder(feed,.027,.19,[.24,1.60,z],'steel','y');this.cylinder(feed,.065,.025,[.24,1.5,z],'rubber','y');}
+    const pile=this.group(g,'feeder-pile','Tumpukan lembar & alas',[0,0,0],[-.85,0,0],['IMG_1625.jpeg'],'Tumpukan lembar hanya isi visual; tinggi tidak menunjukkan jumlah produksi.');
+    this.box(pile,[1.15,.12,1.6],[0,.18,0],'steel');this.box(pile,[1.06,1.00,1.48],[0,.74,0],'paper',.008);for(let i=0;i<24;i++)this.box(pile,[1.064,.007,1.484],[0,.28+i*.041,0],'light');
+    const panel=this.group(g,'feeder-panel','Meja kontrol feeder',[0,0,0],[0,0,.8],['IMG_1624.jpeg']);
+    this.box(panel,[1.22,.64,.3],[.1,.61,1.13],'graphite',.04);const desk=this.box(panel,[1.3,.075,.45],[.1,.99,1.17],'light',.035);desk.rotation.x=.12;
+    for(let i=0;i<5;i++)this.cylinder(panel,.025,.028,[-.30+i*.12,1.047,1.23],i===0?'red':'black','y');
   }
 
-  printingGroup(x0){const u=this.group(this.root,'printing-units','Printing Units Group · PU1–PU8',2,[0,0,0],[0,.35,0],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2312.jpeg'],'Urutan delapan unit mengikuti identitas CD 102-8+L dan kontinuitas foto; internal tersembunyi tidak dimodelkan sebagai fakta terpasang.');for(let i=0;i<8;i++)this.printUnit(u,i+1,x0+i*1.22);}
-  printUnit(parent,n,x){
-    const src=['IMG_1627.jpeg','IMG_1628.jpeg'];const s=this.group(parent,'pu'+n,'Printing Unit '+n,3,[x,0,0],[(n-4.5)*.18,.16,0],src);
-    const housing=this.group(s,'pu'+n+'-housing','External housing',4,[0,0,0],[0,.15,1.0],src);const op=this.group(housing,'pu'+n+'-operator-cover','Operator-side curved cover',5,[0,0,0],[0,.12,1.0],src);const opPanel=this.group(op,'pu'+n+'-operator-panel','Curved side panel',6,[0,0,0],[0,.12,.8],src);this.box(opPanel,[.88,1.88,.28],[0,1.38,1.05],'silver',.12);
-    const drive=this.group(housing,'pu'+n+'-opposite-cover','Opposite-side cover / grille',5,[0,0,0],[0,.12,-1.0],['IMG_0947.jpeg','IMG_1628.jpeg'],'Opposite side visualized from visible grilles; drive-side designation not asserted.');const grille=this.group(drive,'pu'+n+'-guard-grille','Protective grille',6,[0,0,0],[0,.1,-.7],['IMG_0947.jpeg','IMG_1628.jpeg']);this.grille(grille,[.47,1.72,0],1.72,.78,'x');
-    const ink=this.group(s,'pu'+n+'-ink-dampening','Inking / dampening visible zone',4,[0,0,0],[0,.7,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Taxonomy follows Heidelberg press architecture; only visible upper roller/fountain geometry is rendered.');const fountain=this.group(ink,'pu'+n+'-ink-fountain','Ink fountain / upper trough',5,[0,0,0],[0,.45,0],['IMG_1970.jpeg','IMG_1971.jpeg']);const roller=this.group(fountain,'pu'+n+'-upper-roller','Visible upper roller',6,[0,0,0],[0,.35,0],['IMG_1970.jpeg','IMG_1971.jpeg']);this.cylinder(roller,.105,1.6,[-.05,2.47,0],n===1?'red':n===2?'blue':'rubber');this.box(fountain,[.42,.08,1.68],[-.08,2.36,0],'steel',.025);
-    const cylinderZone=this.group(s,'pu'+n+'-cylinder-zone','Cylinder zone',4,[0,0,0],[0,-.15,-.45],src,'CD 102 platform uses large-diameter cylinder architecture in official Heidelberg material; exact installed internal geometry is not exposed here.','REFERENCE_ONLY');const guard=this.group(cylinderZone,'pu'+n+'-cylinder-guard','Cylinder guard',5,[0,0,0],[0,-.1,-.4],src);const visible=this.group(guard,'pu'+n+'-visible-cylinder-guard','Visible guard surface',6,[0,0,0],[0,-.1,-.3],src);this.box(visible,[1.02,.58,1.9],[0,.74,0],'graphite',.04);
-    const access=this.group(s,'pu'+n+'-access','Access & step',4,[0,0,0],[0,-.2,1.2],src);const step=this.group(access,'pu'+n+'-step','Operator step',5,[0,0,0],[0,-.2,1.0],src);const tread=this.group(step,'pu'+n+'-step-tread','Step tread plate',6,[0,0,0],[0,-.18,.8],src);this.tread(tread,[.47,.10,.52],[.48,.77,1.42]);
+  feedBoard(x){
+    const g=this.group(this.root,'feed-board','Meja transfer awal',[x,0,0],[-.5,.25,0],['IMG_1626.jpeg']);
+    this.box(g,[1.0,1.00,1.94],[0,.77,0],'graphite',.035);this.box(g,[1.0,.055,1.88],[0,1.30,0],'steel');
+    for(const z of [-.56,0,.56])this.box(g,[.98,.018,.10],[0,1.337,z],'rubber');
   }
 
-  coatingUnit(x){
-    const u=this.group(this.root,'coating-unit','Coating Unit · L',2,[x,0,0],[.65,.25,0],['IMG_1165.jpeg','IMG_0947.jpeg','IMG_1631.jpeg'],'Unit L wajib berada setelah PU8 dan sebelum delivery berdasarkan CD 102-8+L. Detail roller-service dari IMG_1165/0947 ditempatkan di sini sebagai posisi inferensi, bukan ukuran teknik.','INFERRED_POSITION');const body=this.group(u,'coating-body','Coating housing',3,[0,0,0],[.3,.2,0],['IMG_1631.jpeg','IMG_1629.jpeg']);const housing=this.group(body,'coating-housing-block','Main housing block',4,[0,0,0],[.25,.15,0],['IMG_1631.jpeg']);const cover=this.group(housing,'coating-side-cover','Side cover',5,[0,0,0],[.2,.1,1.0],['IMG_1631.jpeg']);const panel=this.group(cover,'coating-cover-panel','Visible cover panel',6,[0,0,0],[.15,.1,.8],['IMG_1631.jpeg']);this.box(panel,[1.25,1.62,2.05],[0,1.2,0],'graphite',.05);
-    const rollerZone=this.group(u,'coating-roller-zone','Roller / service zone',3,[0,0,0],[.25,.45,-.6],['IMG_1165.jpeg','IMG_0947.jpeg'],'Visible roller/gauge details assigned to coating-service zone by line order; exact sub-function remains reviewable.','INFERRED_POSITION');const guard=this.group(rollerZone,'coating-roller-guard','Roller guard block',4,[0,0,0],[.2,.2,-.5],['IMG_0947.jpeg']);const rollerPart=this.group(guard,'coating-visible-rollers','Visible roller set',5,[0,0,0],[.15,.15,-.35],['IMG_0947.jpeg']);const segmented=this.group(rollerPart,'coating-segmented-roller','Segmented roller',6,[0,0,0],[.1,.1,-.3],['IMG_0947.jpeg']);this.cylinder(segmented,.10,1.82,[-.18,1.08,0],'steel');for(let i=0;i<10;i++)this.cylinder(segmented,.108,.09,[-.18,1.08,-.78+i*.173],'rubber');
-    const service=this.group(rollerZone,'coating-service-panel','Service panel',4,[0,0,0],[.25,.2,.65],['IMG_1165.jpeg']);const gauges=this.group(service,'coating-gauge-panel','Three-gauge panel',5,[0,0,0],[.2,.15,.5],['IMG_1165.jpeg']);for(let i=0;i<3;i++){const q=this.group(gauges,'coating-gauge-'+(i+1),'Gauge '+(i+1),6,[0,0,0],[.1,.1,0],['IMG_1165.jpeg']);this.gauge(q,[.32+i*.15,1.15,1.04]);}const hose=this.group(service,'coating-service-hose','Corrugated service hose',5,[0,0,0],[.15,.15,.4],['IMG_1165.jpeg']);const hoseLeaf=this.group(hose,'coating-hose-line','Visible hose line',6,[0,0,0],[.1,.1,.3],['IMG_1165.jpeg']);this.tube(hoseLeaf,[[.04,1.2,.82],[-.06,.98,.94],[-.06,.72,.91],[.1,.57,.84]],.055,'rubber');
+  rollerService(x){
+    const g=this.group(this.root,'roller-service','Area roller terbuka & panel gauge',[x,0,0],[.55,.55,-.55],['IMG_1165.jpeg','IMG_0947.jpeg'],'Foto memperlihatkan roller bersegmen, tiga gauge, kisi, serta selang. Fungsi teknis rinci dan lokasi presisi di dalam line belum diverifikasi.');
+    this.box(g,[1.18,.72,2.08],[0,.68,0],'graphite',.035);
+    this.grille(g,[-.54,1.68,0],1.94,.84,'x');
+    this.cylinder(g,.13,1.86,[-.42,1.14,0],'rubber');
+    this.cylinder(g,.09,1.82,[-.22,1.02,0],'steel');
+    for(let i=0;i<10;i++)this.cylinder(g,.105,.085,[-.22,1.02,-.77+i*.17],'rubber');
+    this.cylinder(g,.035,1.92,[.05,.83,0],'steel');this.cylinder(g,.028,1.92,[.17,.76,0],'steel');
+    const console=this.group(g,'roller-service-console','Panel tiga gauge & selang',[0,0,0],[.2,.4,.65],['IMG_1165.jpeg']);
+    this.box(console,[.55,.34,.72],[.36,1.16,.73],'graphite',.035);
+    for(let i=0;i<3;i++)this.gauge(console,[.38+i*.14,1.19,1.095],'z');
+    this.tube(console,[[.12,1.17,.86],[.02,.94,.98],[-.02,.72,.93],[.13,.58,.86]],.055,'rubber');
+    for(let i=0;i<12;i++)this.torus(console,.063,.011,[.05,1.03-i*.035,.94],'rubber',[Math.PI/2,0,0]);
   }
 
-  deliveryTransfer(x){const u=this.group(this.root,'delivery','Delivery / Ausleger',2,[0,0,0],[1.6,0,0],['IMG_1624.jpeg','IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'],'Delivery adalah ujung +X. Assignment v3 yang memakai IMG_2312 sebagai delivery telah dikoreksi.');const transfer=this.group(u,'delivery-transfer','Delivery transfer section',3,[x,0,0],[.55,.15,0],['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg']);const deck=this.group(transfer,'delivery-transfer-deck','Transfer deck',4,[0,0,0],[.4,.12,0],['IMG_1633.jpeg']);const deckPart=this.group(deck,'delivery-deck-surface','Deck surface',5,[0,0,0],[.3,.1,0],['IMG_1633.jpeg']);const deckLeaf=this.group(deckPart,'delivery-deck-tread','Tread surface',6,[0,0,0],[.2,.08,0],['IMG_1633.jpeg']);this.tread(deckLeaf,[3.1,.10,2.08],[0,.95,0]);const hood=this.group(transfer,'delivery-hood-block','Sloped hood block',4,[0,0,0],[0,.7,-.35],['IMG_1629.jpeg','IMG_1631.jpeg']);const hoodPart=this.group(hood,'delivery-sloped-cover','Sloped cover',5,[0,0,0],[0,.5,-.3],['IMG_1629.jpeg','IMG_1631.jpeg']);const left=this.group(hoodPart,'delivery-sloped-cover-main','Main sloped panel',6,[0,0,0],[0,.4,-.2],['IMG_1629.jpeg','IMG_1631.jpeg']);this.box(left,[2.15,.12,2.02],[-.25,1.62,0],'graphite',.025,[0,0,-.34]);this._deliveryRoot=u;}
-
-  inspectionSystem(x){
-    const u=this.group(this.root,'inspection-system','Inline Inspection System · FA-Swan / Focusight powered by AVT',2,[x,0,0],[.8,.7,0],['IMG_1630.jpeg','IMG_1633.jpeg'],'Branding is directly visible on user photos. Focusight sources describe FA-SWAN as an offset-printing online inspection system; exact installed camera/light specification remains unverified.');const bridge=this.group(u,'inspection-bridge','Inspection bridge frame',3,[0,0,0],[0,.45,0],['IMG_1630.jpeg','IMG_1633.jpeg']);const supports=this.group(bridge,'inspection-support-block','Support block',4,[0,0,0],[0,.35,0],['IMG_1630.jpeg']);for(const z of [-1.13,1.13]){const leg=this.group(supports,'inspection-leg-'+(z>0?'operator':'opposite'),z>0?'Operator-side support leg':'Opposite support leg',5,[0,0,0],[0,.25,z>0?.35:-.35],['IMG_1630.jpeg']);const leaf=this.group(leg,'inspection-leg-'+(z>0?'operator':'opposite')+'-column','Support column',6,[0,0,0],[0,.2,z>0?.3:-.3],['IMG_1630.jpeg']);this.box(leaf,[.20,2.35,.24],[0,1.46,z],'light',.035);}const beam=this.group(bridge,'inspection-top-beam','Top beam',4,[0,0,0],[0,.35,0],['IMG_1630.jpeg','IMG_1633.jpeg']);const beamPart=this.group(beam,'inspection-beam-housing','Beam housing',5,[0,0,0],[0,.25,0],['IMG_1630.jpeg']);const beamLeaf=this.group(beamPart,'inspection-beam-visible','FA-Swan visible beam',6,[0,0,0],[0,.2,0],['IMG_1630.jpeg']);this.box(beamLeaf,[.20,.23,2.52],[0,2.68,0],'graphite',.03);
-    const imaging=this.group(u,'inspection-imaging','Visual imaging assembly',3,[0,0,0],[0,.65,0],['IMG_1630.jpeg','IMG_1633.jpeg'],'Official Focusight taxonomy: visual imaging system includes cooled lighting and dual camera options; installed internals are not assumed.','REFERENCE_PLUS_PHOTO');const pods=this.group(imaging,'inspection-pods-block','Visible imaging pod block',4,[0,0,0],[0,.45,0],['IMG_1630.jpeg']);for(let i=0;i<4;i++){const z=-.72+i*.48;const pod=this.group(pods,'inspection-pod-'+(i+1),'Visible pod '+(i+1),5,[0,0,0],[0,.3,z<0?-.25:.25],['IMG_1630.jpeg']);const podLeaf=this.group(pod,'inspection-pod-'+(i+1)+'-housing','Pod housing',6,[0,0,0],[0,.2,z<0?-.2:.2],['IMG_1630.jpeg']);this.box(podLeaf,[.34,.30,.24],[.04,2.43,z],'graphite',.035,[0,0,z<0?-.10:.10]);this.cylinder(podLeaf,.075,.03,[.205,2.35,z],'black','x');}
+  longPassage(x){
+    const g=this.group(this.root,'passage','Passage panjang menuju delivery',[x,0,0],[.9,.25,0],['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'],'Panjang dan sudut cover diperkirakan dari foto perspektif; bukan ukuran teknik.');
+    this.box(g,[3.0,.58,2.14],[0,.64,0],'graphite',.045);
+    this.tread(g,[2.95,.085,2.06],[0,.985,0]);
+    for(const side of [-1,1])this.box(g,[2.95,.38,.13],[0,.78,side*1.03],'graphite',.02);
+    const hood=this.group(g,'passage-hood','Cover miring passage',[0,0,0],[0,.75,-.3],['IMG_1629.jpeg','IMG_1631.jpeg']);
+    this.box(hood,[1.62,.10,2.02],[-.66,1.63,0],'graphite',.02,[0,0,-.43]);
+    this.box(hood,[1.45,.12,2.02],[.74,1.84,0],'graphite',.025,[0,0,-.12]);
+    this.box(hood,[.56,.56,2.04],[1.22,1.44,0],'graphite',.025);
+    for(const z of [-.78,.78])this.box(hood,[.06,.035,.28],[.17,2.01,z],'black',.01);
   }
 
-  deliveryPile(x){const u=this._deliveryRoot;const pile=this.group(u,'delivery-pile','Delivery pile section',3,[x,0,0],[.75,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);const frame=this.group(pile,'delivery-pile-frame','Open delivery pile frame',4,[0,0,0],[.5,.15,0],['IMG_1624.jpeg']);const columns=this.group(frame,'delivery-frame-columns','Delivery frame columns',5,[0,0,0],[.4,.1,0],['IMG_1624.jpeg']);const columnsLeaf=this.group(columns,'delivery-frame-visible','Visible open frame',6,[0,0,0],[.3,.1,0],['IMG_1624.jpeg']);for(const z of [-1.02,1.02])for(const a of [-.67,.67])this.box(columnsLeaf,[.20,2.48,.23],[a,1.29,z],'graphite',.025);this.box(columnsLeaf,[1.64,.38,2.32],[0,2.62,0],'graphite',.05);const pileTable=this.group(frame,'delivery-pile-table','Delivery pile table',5,[0,0,0],[.35,-.2,0],['IMG_1624.jpeg','IMG_1625.jpeg']);const sheetPile=this.group(pileTable,'delivery-sheet-pile','Visible output pile',6,[0,0,0],[.25,-.18,0],['IMG_1624.jpeg','IMG_1625.jpeg']);this.box(sheetPile,[1.08,.85,1.55],[0,.68,0],'paper',.008);this.box(pileTable,[1.18,.11,1.68],[0,.20,0],'steel');}
+  inspectionGantry(x){
+    const g=this.group(this.root,'inspection-gantry','Gantry inspeksi terlihat · FA-Swan / Focusight powered by AVT',[x,0,0],[.65,.7,0],['IMG_1630.jpeg','IMG_1633.jpeg','IMG_1634.jpeg'],'Tulisan FA-Swan / Focusight powered by AVT terlihat pada foto. Fungsi, tipe sensor, dan spesifikasi sistem tidak disimpulkan lebih jauh.');
+    for(const z of [-1.13,1.13])this.box(g,[.20,2.35,.24],[0,1.46,z],'light',.035);
+    this.box(g,[.20,.23,2.52],[0,2.68,0],'graphite',.03);
+    this.box(g,[.10,.10,1.76],[.04,2.54,0],'silver',.02);
+    const housings=this.group(g,'inspection-housings','Housing sensor/kamera yang tampak',[0,0,0],[0,.8,-.5],['IMG_1630.jpeg','IMG_1633.jpeg'],'Jumlah housing dibuat sesuai yang tampak pada sudut foto; jenis sensor dan konfigurasi teknis tidak diverifikasi.');
+    for(const z of [-.72,-.24,.24,.72]){
+      this.box(housings,[.34,.30,.24],[.04,2.43,z],'graphite',.035,[0,0,z<0?-.10:.10]);
+      this.cylinder(housings,.075,.03,[.205,2.35,z],'black','x');
+      this.box(housings,[.10,.05,.15],[-.12,2.63,z],'steel',.015);
+    }
+  }
 
-  platform(){const u=this.group(this.root,'operator-platform','Operator Platform & Walkway',2,[0,0,0],[0,-.35,1.3],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg']);const walk=this.group(u,'platform-main','Main operator-side walkway',3,[0,0,0],[0,-.25,1.0],['IMG_1629.jpeg','IMG_1633.jpeg']);const structure=this.group(walk,'platform-structure','Walkway support block',4,[0,0,0],[0,-.2,.8],['IMG_1629.jpeg']);const deck=this.group(structure,'platform-deck','Walkway deck',5,[0,0,0],[0,-.15,.7],['IMG_1629.jpeg']);const tread=this.group(deck,'platform-tread','Diamond tread surface',6,[0,0,0],[0,-.1,.6],['IMG_1629.jpeg']);this.tread(tread,[17.6,.14,1.05],[.2,.20,1.57]);const steps=this.group(u,'platform-steps','Unit access steps',3,[0,0,0],[0,-.25,1.35],['IMG_1627.jpeg','IMG_1628.jpeg']);for(let i=0;i<9;i++){const st=this.group(steps,'platform-step-'+(i+1),'Access step '+(i+1),4,[0,0,0],[0,-.15,1.0],['IMG_1627.jpeg']);const p=this.group(st,'platform-step-'+(i+1)+'-plate','Step plate',5,[0,0,0],[0,-.1,.8],['IMG_1627.jpeg']);const l=this.group(p,'platform-step-'+(i+1)+'-tread','Step tread',6,[0,0,0],[0,-.08,.7],['IMG_1627.jpeg']);this.tread(l,[.5,.10,.52],[-5.75+i*1.22,.68,1.45]);}}
-
-  controlConsole(x,y,z){const u=this.group(this.root,'control-console','Console & External Support',2,[x,y,z],[-.5,0,-1.1],['IMG_1634.jpeg','IMG_1656.jpeg'],'Console is spatially separate from main press body in the user photos; dimensions are visual only.');const s=this.group(u,'console-main','Main control console',3,[0,0,0],[0,.2,-.6],['IMG_1634.jpeg']);const b=this.group(s,'console-desk-block','Console desk block',4,[0,0,0],[0,.15,-.4],['IMG_1634.jpeg']);const p=this.group(b,'console-desk','Desk and cabinet',5,[0,0,0],[0,.1,-.3],['IMG_1634.jpeg']);const leaf=this.group(p,'console-desk-visible','Visible console body',6,[0,0,0],[0,.08,-.25],['IMG_1634.jpeg']);this.box(leaf,[2.2,.95,.9],[0,.62,0],'light',.08);const monitor=this.group(b,'console-monitor','Monitor',5,[0,0,0],[0,.35,-.2],['IMG_1634.jpeg']);const screen=this.group(monitor,'console-screen','Main screen',6,[0,0,0],[0,.3,-.18],['IMG_1634.jpeg']);this.box(screen,[.85,.55,.08],[0,1.45,0],'graphite',.035);}
-  auxiliary(){const u=this.group(this.root,'auxiliary','Auxiliary / Peripheral Attachments',2,[0,0,0],[0,.8,-1.1],['IMG_1165.jpeg','IMG_0947.jpeg']);const s=this.group(u,'aux-hoses','Visible hoses & utility lines',3,[3.55,0,0],[.2,.4,-.5],['IMG_1165.jpeg']);const b=this.group(s,'aux-hose-block','Hose block',4,[0,0,0],[.15,.3,-.4],['IMG_1165.jpeg']);const p=this.group(b,'aux-hose-line','Visible hose line',5,[0,0,0],[.1,.2,-.3],['IMG_1165.jpeg']);const l=this.group(p,'aux-hose-specific','Specific visible hose',6,[0,0,0],[.08,.15,-.25],['IMG_1165.jpeg']);this.tube(l,[[0,1.25,-.95],[.18,1.05,-1.02],[.12,.78,-.98],[.28,.62,-.92]],.045,'rubber');}
+  delivery(x){
+    const g=this.group(this.root,'delivery','Delivery · panel, jendela & pagar',[x,0,0],[1.8,0,0],['IMG_2312.jpeg','IMG_1656.jpeg','IMG_1634.jpeg']);
+    const frame=this.group(g,'delivery-frame','Rangka delivery',[0,0,0],[.15,0,-.45],['IMG_2312.jpeg']);
+    for(const x0 of [-.68,.77])for(const z of [-1.06,1.06])this.box(frame,[.22,1.65,.26],[x0,.94,z],'graphite',.025);
+    this.box(frame,[1.72,.16,2.24],[.04,1.61,0],'graphite',.025);this.box(frame,[1.12,.11,1.78],[.1,.26,0],'steel');this.box(frame,[1.05,.87,1.66],[.1,.76,0],'paper',.012);
+    const hood=this.group(g,'delivery-hood','Panel atas & jendela delivery',[0,0,0],[0,.7,0],['IMG_2312.jpeg','IMG_1656.jpeg','IMG_1634.jpeg']);
+    this.box(hood,[1.64,.78,.21],[0,2.05,-1.07],'graphite',.06);this.box(hood,[1.65,.15,2.3],[0,2.5,0],'light',.03);this.box(hood,[.16,.80,2.3],[.84,2.03,0],'graphite',.025);
+    for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.08,z],'light',.025);
+    this.box(hood,[.045,.53,1.40],[.948,2.05,0],'glass',.012);this.box(hood,[.06,.18,2.28],[.95,2.52,0],'light',.018);
+    for(const z of [-.97,.97])for(let i=0;i<4;i++)this.cylinder(hood,.025,.024,[1,2.35-i*.115,z],i===0?'red':'black','x');
+    this.cylinder(hood,.035,2.2,[1,1.72,0],'steel');
+    const side=this.group(g,'delivery-side-panel','Panel samping & papan identitas terlihat',[0,0,0],[.6,.2,1.0],['IMG_1634.jpeg'],'Foto mendukung keberadaan papan identitas dan panel samping. Teks teknis rinci tidak dimodelkan sebagai data engineering.');
+    this.box(side,[.72,1.58,.11],[.83,1.55,1.17],'graphite',.025);this.box(side,[.56,.72,.025],[.84,1.70,1.235],'light',.01);
+    const gate=this.group(g,'delivery-gate','Pagar vertikal delivery',[0,0,0],[.85,0,0],['IMG_2312.jpeg']);
+    for(let i=0;i<13;i++)this.cylinder(gate,.014,1.23,[.96,.92,-.88+i*.147],'steel','y');
+    this.cylinder(gate,.021,1.92,[.96,.3,0]);this.cylinder(gate,.021,1.92,[.96,1.53,0]);
+  }
 
   resolvePart(object){let p=object;while(p&&p!==this.root){if(p.userData.selectable)return p;p=p.parent;}return null;}
   contains(parent,node){for(let p=node;p;p=p.parent)if(p===parent)return true;return false;}
-  explode(t,selected=null){const amount=THREE.MathUtils.clamp(Number(t)||0,0,1);for(const n of this.nodes)n.position.copy(n.userData.rest);const children=selected?.children.filter(c=>c.userData.selectable);const targets=selected?(children.length?children:[selected]):this.parts;for(const n of targets)n.position.addScaledVector(n.userData.explode,amount);this.root.updateMatrixWorld(true);}
+  explode(t,selected=null){
+    const amount=THREE.MathUtils.clamp(Number(t)||0,0,1);for(const n of this.nodes)n.position.copy(n.userData.rest);
+    const children=selected?.children.filter(c=>c.userData.selectable);const targets=selected?(children.length?children:[selected]):this.parts;
+    for(const n of targets)n.position.addScaledVector(n.userData.explode,amount);this.root.updateMatrixWorld(true);
+  }
   highlight(part){for(const m of this.meshes){m.material.emissive.setHex(part&&this.contains(part,m)?0x174b47:0x000000);m.material.emissiveIntensity=.28;}}
-  ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.17:glass?.64:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}}
+  ghost(on,except=null){this.ghosted=on;for(const m of this.meshes){const faded=on&&(!except||!this.contains(except,m)),glass=m.material.color.getHex()===this.palette.glass;m.material.transparent=faded||glass;m.material.opacity=faded?.17:glass?.65:1;m.material.depthWrite=!faded;m.material.needsUpdate=true;}}
   isolate(part,on=true){for(const n of this.nodes)n.visible=!on||!part||this.contains(part,n)||this.contains(n,part);}
   setLow(on){for(const m of this.meshes)if(m.userData.detail)m.visible=!on;}
   reset(){this.explode(0);this.highlight(null);this.isolate(null,false);this.ghost(false);for(const n of this.nodes)n.quaternion.copy(n.userData.restQuaternion);}
-  dispose(){for(const g of this.geometries.values())g.dispose();for(const m of this.materials.values())m.dispose();for(const x of this.meshes)if(x.isInstancedMesh)x.dispose();}
+  dispose(){for(const geo of this.geometries.values())geo.dispose();for(const mat of this.materials.values())mat.dispose();for(const m of this.meshes)if(m.isInstancedMesh)m.dispose();}
 }
