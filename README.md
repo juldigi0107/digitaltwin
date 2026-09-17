@@ -2,17 +2,19 @@
 
 Fondasi aplikasi web dari nol: **frontend GitHub Pages**, **backend Cloudflare Workers + D1**, Vanilla JavaScript dan Three.js. Hanya satu aset: `MACHINE-OFFSET5` / Heidelberg Speedmaster CD 102-8+L.
 
-## Status yang jujur
+## Status rekonstruksi foto
 
-**Belum memenuhi penerimaan Phase 1 DWG.** Saat penulisan, hanya master prompt yang diberikan; DWG, manual, foto/nameplate, dan model CAD belum tersedia. Aplikasi membuka ruang inspeksi terpisah, bukan denah pabrik rekaan. Model saat ini adalah **selubung visual prosedural APPROXIMATE**, bukan replika teknis mesin atau konfigurasi 8 unit hasil tebakan.
+Model Offset 5 sudah direkonstruksi dari sembilan foto aktual pengguna: feeder terbuka, deretan cover melengkung, kisi dan roller atas, platform/tangga, serta delivery dengan pagar. Bentuk dan dimensi tetap **RECONSTRUCTED / APPROXIMATE**, bukan CAD resmi atau ukuran mesin terukur.
 
-Identitas berasal dari pernyataan pengguna di bagian 2 dan 15 master prompt. Komponen, dimensi, posisi, koneksi utilitas dan status operasi tetap UNKNOWN.
+**Layout Phase 1 belum lengkap.** DWG asli sudah diterima dan berhasil diekstrak awal; posisi label OFFSET 5 ditemukan. Footprint, orientasi dan transformasi penempatan belum divalidasi sehingga scene tetap ruang inspeksi terpisah. Tidak ada denah pabrik rekaan.
+
+Lihat [rincian geometri dan bukti foto](docs/OFFSET5-PHOTO-RECONSTRUCTION.md). Delapan housing adalah susunan visual yang perlu verifikasi konfigurasi terpasang. Komponen tersembunyi tidak dibuat.
 
 ## Sudah tersedia
 
 - Penampil WebGL 2 / Three.js lokal, orbit/pan/zoom, pemilihan, fokus bounding box dengan transisi, top/isometric/reset.
 - Satu aset dengan metadata, confidence, sumber dan penjelasan batas bukti.
-- Pemisahan bidang geometri visual, transparansi, isolasi dan pengembalian posisi exact. **Bukan** exploded technical assembly.
+- Hierarki bentuk luar, explode pilihan, transparansi, isolasi dan reset exact. Bukan katalog part internal terverifikasi.
 - UI Bahasa Indonesia, panel desktop dan panel geser mobile, mode ringan.
 - Import JSON hasil ekstraksi DWG yang sudah ditinjau; entitas mentah tidak dibuang. Ini **bukan parser DWG biner**.
 - Layer mapping, transformasi DWG X/Y → Three X/Z, kalibrasi, anchor, serta editor drag/rotate/scale dan angka.

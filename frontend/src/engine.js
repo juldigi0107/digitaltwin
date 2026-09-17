@@ -3,28 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { cadToWorld } from './model.js';
 
-export class OffsetMachineTemplate {
-  constructor(){
-    this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';this.root.userData={assetId:'MACHINE-OFFSET5',source:'PROCEDURAL',confidence:'APPROXIMATE',dimensionUnit:'VISUAL_ONLY'};
-    this.parts=[];this.original=[];
-    const material={metal:new THREE.MeshStandardMaterial({color:0xc3cbd0,metalness:.6,roughness:.38}),dark:new THREE.MeshStandardMaterial({color:0x243b48,metalness:.5,roughness:.43}),panel:new THREE.MeshStandardMaterial({color:0xe1e5e6,metalness:.3,roughness:.38})};
-    // Visual envelope only. There are deliberately no inferred printing units or technical internals.
-    const add=(name,size,pos,mat,dir)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(...size),mat.clone());m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;m.name=name;m.userData={assetId:'MACHINE-OFFSET5',visualOnly:true,confidence:'APPROXIMATE',source:'PROCEDURAL',technicalComponent:null};this.root.add(m);this.parts.push(m);this.original.push(m.position.clone());m.userData.explode=new THREE.Vector3(...dir);return m;};
-    add('Volume visual utama',[10,1.65,2.4],[0,1.38,0],material.panel,[0,0,0]);
-    add('Bidang visual bawah',[10.6,.38,2.8],[0,.38,0],material.dark,[0,-.1,0]);
-    add('Bidang visual atas',[9.8,.12,2.5],[0,2.26,0],material.metal,[0,1.6,0]);
-    add('Bidang visual sisi A',[9.8,.85,.11],[0,1.65,1.28],material.dark,[0,.25,1.6]);
-    add('Bidang visual sisi B',[9.8,.85,.11],[0,1.65,-1.28],material.dark,[0,.25,-1.6]);
-    add('Bidang visual ujung A',[.12,1.65,2.5],[-5.08,1.4,0],material.metal,[-1.6,.2,0]);
-    add('Bidang visual ujung B',[.12,1.65,2.5],[5.08,1.4,0],material.metal,[1.6,.2,0]);
-    for(const m of Object.values(material))m.dispose();
-  }
-  explode(t){this.parts.forEach((p,i)=>p.position.copy(this.original[i]).addScaledVector(p.userData.explode,t));}
-  highlight(part){for(const p of this.parts){p.material.emissive.setHex(part===p?0x164d40:0x000000);p.material.emissiveIntensity=.4;}}
-  ghost(on){for(const p of this.parts){p.material.transparent=on;p.material.opacity=on?.3:1;p.material.depthWrite=!on;}}
-  reset(){this.explode(0);this.highlight(null);this.parts.forEach(p=>p.visible=true);this.ghost(false);}
-  dispose(){for(const p of this.parts){p.geometry.dispose();p.material.dispose();}}
-}
+import {OffsetMachineTemplate} from './offset5.js';
+export {OffsetMachineTemplate} from './offset5.js';
 
 export class FactoryEngine {
   constructor(container,onSelect){
@@ -44,9 +24,9 @@ export class FactoryEngine {
     this.template=new OffsetMachineTemplate();this.machine=this.template.root;this.scene.add(this.machine);
     this.factory=new THREE.Group();this.scene.add(this.factory);
     this.gizmo=new TransformControls(this.camera,this.renderer.domElement);this.scene.add(this.gizmo.getHelper());this.gizmo.addEventListener('dragging-changed',e=>{this.controls.enabled=!e.value;});this.gizmo.addEventListener('objectChange',()=>{if(this.gizmo.mode==='scale')this.machine.scale.setScalar(Math.max(.0001,this.machine.scale.x));this.onTransform?.();});
-    this.ray=new THREE.Raycaster();this.down=null;
+    this.ray=new THREE.Raycaster();this.down=null;this.renderer.domElement.addEventListener('dblclick',()=>{this.template.reset();this.isolated=false;this.fit(this.view==='factory'?this.factory:this.machine);this.onReset?.();});
     this.renderer.domElement.addEventListener('pointerdown',e=>this.down=[e.clientX,e.clientY]);
-    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);const hit=this.ray.intersectObject(this.machine,true).find(h=>h.object.visible);if(hit&&this.machine.visible){this.onSelect(hit.object);}});
+    this.renderer.domElement.addEventListener('pointerup',e=>{if(!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5||this.gizmo.dragging)return;const r=this.renderer.domElement.getBoundingClientRect();this.ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),this.camera);const hit=this.ray.intersectObject(this.machine,true).find(h=>{for(let p=h.object;p;p=p.parent)if(!p.visible)return false;return true;});if(hit&&this.machine.visible){const part=this.template.resolvePart(hit.object);if(part)this.onSelect(part);}});
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);
     this.last=0;this.render=this.render.bind(this);this.fit(this.machine,'iso',false);this.resize();this.frame=requestAnimationFrame(this.render);
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.onError?.('Konteks grafis terputus. Muat ulang halaman untuk memulihkan penampil.');});
@@ -55,8 +35,8 @@ export class FactoryEngine {
   fit(object=this.machine,mode='iso',animate=true){
     object.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;
     const c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
-    const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*1.4;
-    const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(1,.82,1.08).normalize();
+    const radius=Math.max(size.length()*.5,.5),v=this.camera.fov*Math.PI/360,h=Math.atan(Math.tan(v)*this.camera.aspect),distance=radius/Math.sin(Math.min(v,h))*1.18;
+    const direction=mode==='top'?new THREE.Vector3(0,1,.0001):new THREE.Vector3(.85,.7,1.25).normalize();
     const end=c.clone().addScaledVector(direction,distance);
     if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){this.controls.target.copy(c);this.camera.position.copy(end);this.controls.update();return;}
     this.transition={start:performance.now(),from:this.camera.position.clone(),to:end,fromTarget:this.controls.target.clone(),target:c};
@@ -92,6 +72,6 @@ export class FactoryEngine {
   }
   clearFactory(){this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material?.dispose();});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
-  setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.resize();}
+  setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   dispose(){cancelAnimationFrame(this.frame);this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
 }
