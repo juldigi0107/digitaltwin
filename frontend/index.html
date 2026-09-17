@@ -9,7 +9,7 @@
 <div class="scene-heading"><div><span class="eyebrow" id="view-kicker">RUANG INSPEKSI</span><h1 id="view-title">OFFSET 5</h1><p id="view-subtitle">Heidelberg Speedmaster · CD 102-8+L</p></div><button id="panel-toggle" class="icon-btn" aria-label="Buka detail aset">☷</button></div>
 <div id="viewport"><div id="boot" class="boot"><strong>Menyiapkan ruang 3D…</strong><p>Memuat penampil dan data aset.</p></div></div>
 <div id="machine-label" class="machine-label" hidden><span>◇</span><div><strong>OFFSET 5</strong><small id="label-detail">CD 102-8+L · UNKNOWN</small></div></div>
-<div class="notice" id="scene-notice"><span class="notice-icon">!</span><div><strong>Rekonstruksi foto Offset 5</strong><span>9 foto aktual menjadi acuan bentuk. Skala dan posisi DWG belum diterapkan.</span></div><button id="notice-details" aria-label="Detail kebutuhan DWG">Detail ↗</button></div>
+<div class="notice" id="scene-notice"><span class="notice-icon">!</span><div><strong>Rekonstruksi foto Offset 5</strong><span>16 foto unik aktual menjadi acuan bentuk. Skala dan posisi DWG belum diterapkan.</span></div><button id="notice-details" aria-label="Detail kebutuhan DWG">Detail ↗</button></div>
 <div class="scene-bottom"><div class="view-switch" role="group" aria-label="Sudut pandang"><button data-camera="iso" class="active">◈ <span>Isometrik</span></button><button data-camera="top">▱ <span>Atas</span></button><button data-camera="fit">⌖ <span>Fokus</span></button><button data-camera="reset">↺ <span>Reset</span></button></div><div class="scene-options"><button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan/sembunyikan label">Aa</button><button id="fullscreen" class="icon-btn" title="Layar penuh" aria-label="Layar penuh">⛶</button></div></div>
 <div class="scene-caption"><span id="geometry-caption">REKONSTRUKSI FOTO · APPROXIMATE · TANPA SKALA TEKNIS</span><span id="scene-hint">Geser: putar · Scroll: zoom · Klik: pilih</span></div>
 </section>
@@ -22,5 +22,6 @@
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <script type="module" src="./src/app.js"></script>
+<script type="module" src="./src/ui-v4.js"></script>
 <script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Penampil 3D belum berhasil dimuat</strong><p>Pastikan folder vendor tersedia dan buka aplikasi melalui HTTP/HTTPS. Perangkat harus mendukung WebGL 2.</p>'; }},15000);</script>
 </body></html>
