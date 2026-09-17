@@ -1,0 +1,98 @@
+const PHOTO_REGISTRY=[
+  {id:'p01',file:'IMG_2312.jpeg',zone:'Feeder / machine end',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p02',file:'IMG_1970.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p03',file:'IMG_1971.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p04',file:'IMG_1656.jpeg',zone:'Delivery / panel view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p05',file:'IMG_1624.jpeg',zone:'Machine end / controls',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p06',file:'IMG_1625.jpeg',zone:'Pile / open frame detail',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p07',file:'IMG_1626.jpeg',zone:'Transfer / grille detail',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p08',file:'IMG_1627.jpeg',zone:'Printing units / operator side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p09',file:'IMG_1628.jpeg',zone:'Printing units / upper side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p10',file:'IMG_1629.jpeg',zone:'Long platform / end housing',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p11',file:'IMG_1630.jpeg',zone:'Sloped hood / service area',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p12',file:'IMG_1631.jpeg',zone:'Inspection gantry / camera pods',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p13',file:'IMG_1633.jpeg',zone:'Inspection gantry / top beam',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p14',file:'IMG_1634.jpeg',zone:'Control / machine-end overview',kind:'orientation_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p15',file:'IMG_1165.jpeg',zone:'Gauge / hose / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
+  {id:'p16',file:'IMG_0947.jpeg',zone:'Roller / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'}
+];
+
+const UNIQUE_PHOTOS=PHOTO_REGISTRY.length;
+const ACTIVE_GEOMETRY_PHOTOS=PHOTO_REGISTRY.filter(p=>p.kind==='active_geometry_reference').length;
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
+function setText(selector,value){const el=$(selector);if(el)el.textContent=value;}
+
+function patchReferenceCopy(){
+  const notice=$('#scene-notice div>span');
+  if(notice)notice.textContent=`${UNIQUE_PHOTOS} foto unik terdaftar · ${ACTIVE_GEOMETRY_PHOTOS} foto aktif pada geometry baseline stabil. Skala dan posisi DWG belum diterapkan.`;
+  setText('#photo-unique-count',String(UNIQUE_PHOTOS));
+  setText('#photo-active-count',String(ACTIVE_GEOMETRY_PHOTOS));
+  setText('#source-photo-count',`${UNIQUE_PHOTOS} UNIQUE / ${ACTIVE_GEOMETRY_PHOTOS} ACTIVE`);
+  const panel=$('#panel-content');
+  if(!panel)return;
+  const walker=document.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
+  const texts=[];while(walker.nextNode())texts.push(walker.currentNode);
+  for(const node of texts){
+    if(node.nodeValue?.includes('9 foto aktual'))node.nodeValue=node.nodeValue.replaceAll('9 foto aktual',`${ACTIVE_GEOMETRY_PHOTOS} foto aktif pada geometry stabil`);
+    if(node.nodeValue?.includes('Sumber: 9 foto aktual pengguna'))node.nodeValue=node.nodeValue.replace('Sumber: 9 foto aktual pengguna',`Sumber geometry aktif: ${ACTIVE_GEOMETRY_PHOTOS} foto · registry: ${UNIQUE_PHOTOS} foto unik`);
+  }
+  if(panel.textContent.includes('Sumber geometri')&&!panel.querySelector('.photo-registry-card')){
+    const card=document.createElement('div');card.className='card photo-registry-card';
+    card.innerHTML=`<h4>Photo Registry</h4><p>${UNIQUE_PHOTOS} foto unik tersimpan sebagai evidence registry. ${ACTIVE_GEOMETRY_PHOTOS} foto dipakai oleh geometry baseline stabil; ${UNIQUE_PHOTOS-ACTIVE_GEOMETRY_PHOTOS} foto tambahan tetap dipertahankan sebagai supplementary/orientation/detail reference dan belum dipakai untuk rewrite geometry.</p><span class="tag">${UNIQUE_PHOTOS} UNIQUE</span><span class="tag">${ACTIVE_GEOMETRY_PHOTOS} ACTIVE</span>`;
+    panel.prepend(card);
+  }
+}
+
+function bindNav(){
+  $('#ui-menu-toggle')?.addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+  document.addEventListener('click',e=>{if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');});
+  $('#mode-2d')?.addEventListener('click',()=>{$('#nav-layout')?.click();$('#mode-2d').classList.add('active');$('#mode-3d')?.classList.remove('active');});
+  $('#mode-3d')?.addEventListener('click',()=>{$('#nav-machine')?.click();$('#mode-3d').classList.add('active');$('#mode-2d')?.classList.remove('active');});
+  $('#ui-theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-mode'));
+  $('#ui-workbench-toggle')?.addEventListener('click',()=>document.body.classList.toggle('ui-workbench-open'));
+  $('#ui-close-workbench')?.addEventListener('click',()=>document.body.classList.remove('ui-workbench-open'));
+  $('#ui-asset-panel')?.addEventListener('click',()=>{document.body.classList.remove('panel-hidden');$('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});});
+}
+
+function bindWorkbench(){
+  const buttons=$$('[data-workbench]');
+  const cards=$$('.wb-card[data-workbench-card]');
+  const activate=name=>{
+    buttons.forEach(b=>b.classList.toggle('active',b.dataset.workbench===name));
+    cards.forEach(c=>c.classList.toggle('active-mobile',c.dataset.workbenchCard===name));
+  };
+  buttons.forEach(b=>b.addEventListener('click',()=>activate(b.dataset.workbench)));
+  activate('dwg');
+}
+
+function bindZoomProxy(){
+  $('#zoom-plus')?.addEventListener('click',()=>window.dispatchEvent(new WheelEvent('wheel',{deltaY:-320,bubbles:true,cancelable:true})));
+  $('#zoom-minus')?.addEventListener('click',()=>window.dispatchEvent(new WheelEvent('wheel',{deltaY:320,bubbles:true,cancelable:true})));
+  $('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
+}
+
+function bindHierarchy(){
+  $$('.asset-tree [data-focus-unit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const needle=btn.dataset.focusUnit.toLowerCase();
+    const node=[...document.querySelectorAll('[data-node]')].find(n=>n.textContent.toLowerCase().includes(needle));
+    if(node){document.body.classList.remove('panel-hidden');node.click();}
+  }));
+}
+
+function observePanel(){
+  const panel=$('#panel-content');if(!panel)return;
+  const observer=new MutationObserver(()=>patchReferenceCopy());
+  observer.observe(panel,{childList:true,subtree:true,characterData:true});
+  patchReferenceCopy();
+}
+
+function stampGeometryFreeze(){
+  document.documentElement.dataset.geometryBaseline='offset5-photo-v2';
+  const status=$('#geometry-safety-status');if(status)status.textContent='FROZEN · V2 BASELINE';
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  bindNav();bindWorkbench();bindZoomProxy();bindHierarchy();observePanel();stampGeometryFreeze();patchReferenceCopy();
+});
