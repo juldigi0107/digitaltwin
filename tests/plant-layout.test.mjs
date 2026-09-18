@@ -68,3 +68,38 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
   assert.ok(!l.identifiedLabels.some(x=>/OFFSET\s*5|CD\s*102/i.test(x.text)));
   assert.equal(l.machineAnchor,null);
 });
+
+
+test('DXF deep-dive overlay preserves source-labelled assets without assigning OFFSET 5',async()=>{
+  const l=await loadBundledPlantLayout();
+  assert.equal(l.extractionRevision,2);
+  assert.equal(l.source.layerCount,23);
+  assert.equal(l.source.xrefCount,0);
+  assert.equal(l.assetCandidates.length,22);
+  assert.equal(l.areaCandidates.length,16);
+  const names=l.assetCandidates.map(x=>x.label);
+  for(const name of ['CX104','SX 52','Polar-115','AUTOPLATEN 02','AUTOPLATEN 05','AUTOPLATEN 06','AUTOPLATEN 07','AUTOPLATEN 08','AUTOPLATEN 09','FOLDER GLUER 01','FOLDER GLUER 02','FOLDER GLUER 03','CTP#1','CTP#2','Digital Printing']) assert.ok(names.includes(name),name+' missing');
+  assert.ok(!names.some(x=>/OFFSET\s*5|CD\s*102/i.test(x)));
+  assert.equal(l.machineAnchor,null);
+  assert.equal(l.positionStatus,'POSITION REVIEW REQUIRED');
+});
+
+test('printing press source labels keep context but never become inferred footprints',async()=>{
+  const l=await loadBundledPlantLayout();
+  const cx=l.assetCandidates.find(x=>x.label==='CX104');
+  const sx=l.assetCandidates.find(x=>x.label==='SX 52');
+  assert.ok(cx.contextLabels.some(x=>/Prinect Press Center XL3/i.test(x.text)));
+  assert.ok(cx.contextLabels.some(x=>/DryStar|Coating|Varnish|UV/i.test(x.text)));
+  assert.ok(sx.contextLabels.some(x=>/Prinect Press/i.test(x.text)));
+  assert.equal(cx.placementStatus,'LABEL_POSITION_ONLY');
+  assert.equal(sx.placementStatus,'LABEL_POSITION_ONLY');
+  assert.equal(cx.footprintStatus,'UNKNOWN');
+  assert.equal(sx.footprintStatus,'UNKNOWN');
+});
+
+test('duplicate source area labels are consolidated without inventing area boundaries',async()=>{
+  const l=await loadBundledPlantLayout();
+  const oven=l.areaCandidates.find(x=>x.label==='R.OVEN');
+  assert.deepEqual(oven.sourceHandles,['5CD13','7D7CC']);
+  assert.ok(l.areaCandidates.every(x=>x.placementStatus==='LABEL_POSITION_ONLY'&&x.footprintStatus==='UNKNOWN'));
+});
