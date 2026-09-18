@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { cadToWorld } from './model.js';
+import { plantDisplayPoint } from './data/plant-layout-data.js';
 
 import {OffsetMachineTemplate} from './offset5.js';
 export {OffsetMachineTemplate} from './offset5.js';
@@ -48,14 +49,33 @@ export class FactoryEngine {
   }
   updateLabel(){const el=document.getElementById('machine-label');if(!el)return;el.hidden=!this.labels||!this.machine.visible;if(el.hidden)return;this.machine.updateWorldMatrix(true,true);const p=new THREE.Vector3(0,2.9,0).applyMatrix4(this.machine.matrixWorld);const distance=p.distanceTo(this.camera.position);p.project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.97||Math.abs(p.y)>.94){el.hidden=true;return;}el.style.left=((p.x*.5+.5)*this.container.clientWidth)+'px';el.style.top=((-p.y*.5+.5)*this.container.clientHeight)+'px';document.getElementById('label-detail').hidden=distance>80;}
   setView(view,state){this.view=view;this.gizmo.detach();this.template.reset();this.isolated=false;this.machine.position.set(0,0,0);this.machine.rotation.set(0,0,0);this.machine.scale.setScalar(1);this.studio.visible=view==='machine';this.factory.visible=view==='factory';
-    if(view==='factory')this.applyPlacement(state);else this.machine.visible=true;
+    if(view==='factory')this.applyPlacement(state,this.layout||state.layout);else this.machine.visible=true;
     this.fit(view==='factory'?this.factory:this.machine);
   }
-  applyPlacement(state){const a=state.asset,l=state.layout;this.machine.visible=false;if(!l)return;
+  applyPlacement(state,layout=this.layout||state.layout){const a=state.asset,l=layout;this.machine.visible=false;if(!l)return;
     if(a.layout_x!==null){this.machine.position.set(a.layout_x,a.layout_y,a.layout_z);this.machine.rotation.y=a.rotation*Math.PI/180;this.machine.scale.setScalar(a.scale);this.machine.visible=true;}
     else if(l.machineAnchor){const anchor=l.machineAnchor,p=cadToWorld(anchor.x,anchor.y,l.transform);this.machine.position.set(p.x,anchor.z*(l.transform.scale??1),p.z);this.machine.rotation.y=-(anchor.rotation+l.transform.rotation)*Math.PI/180;this.machine.visible=true;}
   }
-  loadLayout(l){this.clearFactory();this.layout=l;if(!l)return;const t=l.transform;this.layoutStats={total:l.entities.length,rendered:0,unimplemented:0};
+  loadLayout(l){this.clearFactory();this.layout=l;if(!l)return;
+    if(Array.isArray(l.referenceBatches)){
+      this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
+      const colors={CAD_REFERENCE:0x315363,WALL:0x91aab5,COLUMN:0x5f8fa5,WINDOW:0x5aa6c8,SECURITY:0xa58d58};
+      for(const batch of l.referenceBatches){
+        if(!Array.isArray(batch.points)||batch.points.length<4)continue;
+        const verts=[];
+        for(let i=0;i<batch.points.length;i+=4){
+          const a=plantDisplayPoint(batch.points[i],batch.points[i+1],l),b=plantDisplayPoint(batch.points[i+2],batch.points[i+3],l);
+          verts.push(new THREE.Vector3(a.x,.025,a.z),new THREE.Vector3(b.x,.025,b.z));
+        }
+        const geo=new THREE.BufferGeometry().setFromPoints(verts),mat=new THREE.LineBasicMaterial({color:colors[batch.semantic]||colors.CAD_REFERENCE,transparent:true,opacity:batch.semantic==='CAD_REFERENCE'?.48:.92});
+        const line=new THREE.LineSegments(geo,mat),group=new THREE.Group();group.name='CAD '+batch.layer;
+        group.userData={sourceType:'DXF_DERIVED_FROM_DWG',sourceFile:l.source.file,derivedFile:l.source.derivedFile,sourceLayer:batch.layer,confidence:batch.confidence||'UNVERIFIED',semantic:batch.semantic||'CAD_REFERENCE',renderStatus:'2D_REFERENCE',engineeringScale:'UNKNOWN'};
+        group.add(line);this.factory.add(group);this.layoutStats.rendered++;
+      }
+      this.layoutStats.unimplemented=Math.max(0,this.layoutStats.total-this.layoutStats.rendered);
+      return;
+    }
+    const t=l.transform;this.layoutStats={total:l.entities.length,rendered:0,unimplemented:0};
     const allowed=new Set(['FLOOR','WALL','COLUMN','DOOR','OPENING','CORRIDOR','AREA','FOOTPRINT','BOUNDARY','STAIRS','RAMP']);
     for(const e of l.entities){const semantic=l.layerMapping?.[e.layer]||e.semantic||'UNKNOWN';const group=new THREE.Group();group.name=e.id;group.userData={sourceType:'DWG',sourceFile:l.source.file,sourceLayer:e.layer,sourceEntityId:e.id,confidence:e.confidence,semantic,raw:e,renderStatus:'NOT_IMPLEMENTED'};this.factory.add(group);
       if(!allowed.has(semantic)||!e.points||e.points.length<2){this.layoutStats.unimplemented++;continue;}
