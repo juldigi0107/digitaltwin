@@ -8,6 +8,7 @@ const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8'
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
 const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.meta.url),'utf8');
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
+const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 
 test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
   for(const id of ['viewport','detail-panel','panel-content','nav-machine','nav-layout','nav-assets','nav-sources','nav-help','focus-machine','edit-position','settings','connect','modal','toast']) assert.match(html,new RegExp(`id="${id}"`));
@@ -50,7 +51,13 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/dxf-mm-calibration-phase11c-20260918/);
+  assert.match(sw,/machine-visible-phase11d-20260918/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
+});
+
+
+test('DXF loading does not hide the machine inspection scene on startup',()=>{
+  assert.match(app,/loadBundledPlantLayout\(\)[\s\S]*setView\('machine'\)/);
+  assert.doesNotMatch(app,/loadBundledPlantLayout\(\)[\s\S]{0,220}setView\('factory'\)/);
 });
