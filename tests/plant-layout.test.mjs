@@ -74,7 +74,7 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
 
 test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identity stays user-confirmed',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.extractionRevision,3);
+  assert.equal(l.extractionRevision,4);
   assert.equal(l.source.layerCount,23);
   assert.equal(l.source.xrefCount,0);
   assert.equal(l.assetCandidates.length,22);
@@ -134,4 +134,30 @@ test('OFU-1 approximate anchor follows the high-confidence CAD geometric match o
   const p=plantDisplayPoint(a.x,a.y,l);
   assert.ok(Math.abs(p.x-(a.x-l.displayTransform.originX)*l.displayTransform.scale)<1e-9);
   assert.ok(Math.abs(p.z-(a.y-l.displayTransform.originY)*l.displayTransform.scale)<1e-9);
+});
+
+
+test('OFU-1 repeated module pitch is source-derived and does not fabricate unit count',async()=>{
+  const l=await loadBundledPlantLayout(),f=l.machineFootprint;
+  assert.equal(f.repeatedModuleCentersCadY.length,7);
+  assert.equal(f.repeatedModulePitchMm.count,7);
+  assert.ok(Math.abs(f.repeatedModulePitchMm.median-1378.05)<.01);
+  assert.equal(f.repeatedModulePitchMm.status,'SEVEN_REPEATED_VISIBLE_MOTIFS');
+  assert.equal(f.flowArrowHeadsCadY.length,6);
+  assert.equal(f.feedDirectionCad,'NEGATIVE_Y');
+  assert.ok(f.feedEndCandidateCadY>f.deliveryEndCandidateCadY);
+  assert.equal(f.operatorSideCad,'NEGATIVE_X');
+  assert.equal(f.driveSideCad,'POSITIVE_X');
+  assert.equal(f.externalCrossCheck.status,'REFERENCE_ONLY');
+});
+
+test('factory engine draws OFU-1 inferred CAD overlay without modifying machine template source',async()=>{
+  const fs=await import('node:fs/promises');
+  const engine=await fs.readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+  const machine=await fs.readFile(new URL('../frontend/src/offset5.js',import.meta.url),'utf8');
+  assert.match(engine,/OFU-1 structural body candidate/);
+  assert.match(engine,/DXF_GEOMETRIC_INFERENCE/);
+  assert.match(engine,/serviceInclusiveBounds/);
+  assert.match(machine,/offset5-photo-v8/);
+  assert.doesNotMatch(machine,/OFU-1 structural body candidate|DXF_GEOMETRIC_INFERENCE/);
 });
