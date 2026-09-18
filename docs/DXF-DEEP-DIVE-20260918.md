@@ -63,3 +63,20 @@ Entity types requiring separate semantic handling rather than automatic physical
 ## Safety invariant
 
 This phase changes DXF-derived metadata/layout interpretation only. It does not modify the OFFSET 5 procedural geometry or its taxonomy.
+
+
+## OFU-1 geometry refinement — pass 2
+
+A second, geometry-only pass separates three different measurements that must not be conflated:
+
+- CAD centerline/service analysis span: about 19.37 m. This includes the long reference centerline and end/service context and is not treated as machine-body length.
+- Conservative structural body envelope: approximately 18.33 m longitudinal × 3.54 m lateral.
+- Service-inclusive analysis envelope: approximately 19.37 m longitudinal × 4.38 m lateral.
+
+Seven clearly repeated external module motifs are visible in the source linework. Their center positions are approximately Y 65098.3, 66477.4, 67856.6, 69232.2, 70609.2, 71982.8 and 73362.8, yielding a median repeated pitch of about 1378.05 mm. This is retained as a geometric fingerprint only; it is not silently converted into an exact installed printing-unit count.
+
+Six independently reconstructed arrowheads on the machine centerline point toward negative CAD Y. Therefore the inferred sheet-flow direction is negative CAD Y. The high-Y end is treated as the feeder candidate and the low-Y end as the delivery candidate. The service-heavy positive-CAD-X side remains correlated with drive-side evidence, while negative CAD X is the operator-side candidate.
+
+A reference-only family-scale cross-check uses Heidelberg Speedmaster CD 102 technical data: a CD 102-6+L sample with Preset Plus feeder/delivery and two delivery extension modules is documented at 15.85 m. This is used only as plausibility context; it is not proof of the installed OFU-1 configuration.
+
+The factory scene renders two dashed OFU-1 overlays: a conservative structural-body candidate and a lower-confidence service-inclusive analysis envelope. The detailed OFFSET 5 procedural model is centered/oriented to the candidate anchor but remains unscaled. This deliberately avoids stretching or changing the machine reconstruction to force a fit to CAD.
