@@ -65,7 +65,7 @@ function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v6';const status=$('#geometry-safety-status');if(status)status.textContent='FEEDER→VACUUM · V6';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v7';const status=$('#geometry-safety-status');if(status)status.textContent='PRINTING UNIT 1 · V7';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{

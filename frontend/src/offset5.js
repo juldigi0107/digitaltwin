@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v6', status: 'RECONSTRUCTED / FEEDER-VACUUM-TABLE DETAILED',
+  version: 'offset5-photo-v7', status: 'RECONSTRUCTED / PRINTING-UNIT-1 DETAILED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -197,6 +197,41 @@ export class OffsetMachineTemplate {
     }
     this.box(ink,[.26,.10,1.70],[.28,2.8,0],'graphite',.02);
     this.tube(ink,[[.24,2.62,-.70],[.42,2.5,-.79],[.34,2.37,-.94]],.018);
+    if(i===0)this.printingUnitOneInternals(g);
+  }
+  printingUnitOneInternals(g){
+    const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'];
+    const cylinders=this.group(g,'press-0-cylinder-train','PU1 · cylinder & sheet-transfer reference',[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
+    // Neutral sectional references stay inside the verified housing envelope.
+    const cylinderSpec=[
+      ['plate cylinder reference',.215,[.17,1.78,0],'steel'],
+      ['blanket cylinder reference',.245,[-.06,1.42,0],'rubber'],
+      ['impression cylinder reference',.255,[.13,1.02,0],'steel'],
+      ['transfer cylinder reference',.225,[-.10,.66,0],'graphite']
+    ];
+    for(const [name,r,pos,kind] of cylinderSpec){const roller=this.cylinder(cylinders,r,1.52,pos,kind);roller.name=name;}
+    for(const z of [-.79,.79]){
+      this.cylinder(cylinders,.285,.035,[.13,1.02,z],'graphite');
+      this.cylinder(cylinders,.255,.035,[-.10,.66,z],'graphite');
+    }
+    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'pu1-sheet-path','paper',[.02,1.16,0],[Math.PI/2,0,Math.PI/2]);
+    path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
+
+    const damp=this.group(g,'press-0-dampening','PU1 · dampening reference',[0,0,0],[0,.48,-.35],photos,'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
+    this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
+    this.cylinder(damp,.092,1.45,[-.12,2.16,0],'rubber');
+    this.cylinder(damp,.072,1.43,[.03,2.27,0],'steel');
+    for(const z of [-.72,.72])this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015);
+
+    const inking=this.group(g,'press-0-inking-train','PU1 · inking roller train reference',[0,0,0],[0,.68,.25],photos,'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
+    const rollers=[[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']];
+    for(const [x,y,r,kind] of rollers)this.cylinder(inking,r,1.44,[x,y,0],kind);
+    for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
+
+    const access=this.group(g,'press-0-service-access','PU1 · service access & guards',[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard menandai batas akses operator/drive. Interlock, latch dan titik pelumasan tetap reference-only.');
+    this.box(access,[.42,.55,.035],[.51,1.47,.73],'black',.018);
+    this.box(access,[.42,.55,.035],[.51,1.47,-.73],'black',.018);
+    for(const z of [-.75,.75])this.cylinder(access,.027,.24,[.52,1.48,z],'steel','y');
   }
   feeder(x){
     const g=this.group(this.root,'feeder','Feeder · rangka terbuka',[x,0,0],[-1.6,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);
