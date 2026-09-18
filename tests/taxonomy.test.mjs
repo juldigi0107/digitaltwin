@@ -13,6 +13,6 @@ test('eight printing units have repeatable block taxonomy without claiming inter
  const referenceOnly=OFFSET5_TAXONOMY.filter(n=>n.confidence==='REFERENCE_ONLY');assert.ok(referenceOnly.length>50);assert.ok(referenceOnly.some(n=>n.name.includes('Cylinder')));
 });
 test('source registry separates photo evidence from technical reference',()=>{
- const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,19);assert.equal(stats.unique,19);assert.equal(stats.active_geometry_reference,11);
+ const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,22);assert.equal(stats.unique,22);assert.equal(stats.active_geometry_reference,14);
  assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
 });

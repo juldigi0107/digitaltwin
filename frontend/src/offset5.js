@@ -8,10 +8,10 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v4', status: 'RECONSTRUCTED / OPERATOR-SIDE ALIGNED',
+  version: 'offset5-photo-v5', status: 'RECONSTRUCTED / DUAL-SIDE PHOTO-ALIGNED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg']
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
 };
 const V=(a)=>new THREE.Vector3(...a);
 
@@ -30,8 +30,9 @@ export class OffsetMachineTemplate {
   alignOperatorSide(){
     // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
     // Mirror lateral handedness only; +X feeder-to-delivery flow and PU order stay fixed.
-    for(const part of this.parts){part.scale.z=-1;part.userData.explode.z*=-1;}
+    for(const part of this.parts){part.position.z*=-1;part.scale.z=-1;part.userData.explode.z*=-1;}
     this.root.userData.sideAlignment='PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z';
+    this.root.userData.driveSideAlignment='PHOTO_VERIFIED_DRIVE_POSITIVE_Z';
   }
   group(parent,id,name,pos,dir,sources,note='Bentuk luar teramati; proporsi diperkirakan dari foto.'){
     const g=new THREE.Group();g.name=name;g.position.set(...pos);
@@ -125,6 +126,11 @@ export class OffsetMachineTemplate {
     for(let i=0;i<10;i++){const x=-6.5+i*1.4;this.tread(deck,[1.36,.12,.84],[x,.46,1.55]);this.box(deck,[.12,.33,.7],[x,.23,1.55],'black');}
     this.tread(deck,[.5,.16,.88],[7.48,.16,1.55]);this.tread(deck,[.46,.14,.88],[7.08,.31,1.55]);
     this.tread(deck,[.6,.14,.84],[-7.36,.20,1.55]);
+    // Narrow drive-side service walkway and pipe rail, verified in IMG_2389/2390/2395.
+    this.tread(deck,[14.6,.10,.58],[0,.43,-1.49]);
+    for(let i=0;i<9;i++)this.cylinder(deck,.025,.72,[-6.6+i*1.65,.83,-1.76],'steel','y');
+    this.cylinder(deck,.026,13.3,[0,1.15,-1.76],'steel','x');
+    this.cylinder(deck,.021,13.3,[0,.88,-1.76],'steel','x');
     for(let i=0;i<8;i++)this.pressUnit(i,-4.9+i*1.23,refUnits);
     this.feeder(-7.15);
     const board=this.group(this.root,'feed-board','Meja transfer feeder',[-5.86,0,0],[-.5,.25,0],['IMG_1626.jpeg']);
@@ -138,6 +144,9 @@ export class OffsetMachineTemplate {
     for(const z of [.72,.86,.99])this.tube(board,[[.50,.68,z],[.61,.54,z],[.53,.38,z-.05]],.014,'rubber');
     this.delivery(6.1);
     this.transfer(4.68);
+    const utility=this.group(this.root,'drive-utilities','Kabinet utilitas eksternal drive side',[1.9,0,-2.0],[0,.2,-.8],['IMG_2389(1).jpeg','IMG_2395.jpeg'],'Kabinet eksternal dan routing terlihat pada drive side; isi internal tidak dimodelkan.');
+    this.box(utility,[1.55,1.68,.40],[0,.86,0],'graphite',.035);
+    for(let i=0;i<4;i++)this.tube(utility,[[-.55+i*.22,.08,.18],[-.55+i*.22,.34,.28],[-.42+i*.20,.62,.22]],.018,'rubber');
   }
   pressUnit(i,x,sources){
     const g=this.group(this.root,'press-'+(i+1),'Modul cetak visual '+(i+1),[x,0,0],[(i-3.5)*.28,.15,0],sources,'Pengulangan delapan housing untuk rekonstruksi visual; jumlah dan penomoran unit terpasang belum diverifikasi.');
@@ -158,6 +167,13 @@ export class OffsetMachineTemplate {
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources);
     this.tread(stair,[.48,.10,.51],[.55,.82,1.43]);this.tread(stair,[.43,.10,.4],[.55,1.10,1.35]);
     this.box(stair,[.10,.33,.14],[.55,.62,1.34],'graphite');
+    const drive=this.group(g,'press-'+i+'-drive','Drive-side service cover & step',[0,0,0],[0,.1,-1.15],['IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],'Flat service cover, secondary step dan hose luar terverifikasi dari foto drive side.');
+    this.box(drive,[.86,1.54,.20],[0,1.35,-1.13],'graphite',.028);
+    this.box(drive,[.69,.08,.035],[.02,1.56,-1.245],'black',.008);
+    this.controls(drive,[.31,1.32,-1.245],'z',2);
+    this.tread(drive,[.42,.09,.34],[.48,.66,-1.38]);
+    this.box(drive,[.10,.31,.12],[.48,.48,-1.33],'graphite');
+    this.tube(drive,[[.34,.45,-1.24],[.48,.28,-1.33],[.41,.12,-1.45]],.025,'rubber');
     const ink=this.group(g,'press-'+i+'-ink','Bak tinta & roller atas terlihat',[0,0,0],[0,.9,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Bentuk bak dan roller yang terlihat pada foto. Warna tinta hanya ilustrasi, bukan status operasi.');
     this.box(ink,[.42,.08,1.69],[-.10,2.4,0],'steel',.025);
     this.cylinder(ink,.105,1.6,[-.08,2.51,0],i===0?'red':i===1?'blue':'rubber');
@@ -176,6 +192,7 @@ export class OffsetMachineTemplate {
     this.box(frame,[1.64,.38,2.32],[0,2.62,0],'graphite',.05);
     this.box(frame,[1.34,.055,1.85],[0,2.39,0],'steel');
     this.box(frame,[1.24,.02,.045],[0,2.35,.84],'light');
+    for(const x0 of [-.20,.20])this.cylinder(frame,.048,.018,[x0,2.63,-1.18],'glass','z');
     const feed=this.group(g,'feeder-head','Kepala feeder & selang terlihat',[0,0,0],[0,.8,0],['IMG_1625.jpeg']);
     this.cylinder(feed,.045,1.82,[.1,2.06,0],'steel');
     this.box(feed,[.4,.37,.62],[-.15,1.98,0],'light',.025);

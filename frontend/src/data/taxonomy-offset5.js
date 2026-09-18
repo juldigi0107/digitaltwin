@@ -7,7 +7,7 @@ add('O5',null,1,'Mesin','OFFSET 5 · Heidelberg Speedmaster CD 102-8+L',{zone:'M
 const mainUnits=[
  ['FEEDER','Feeder',['feeder','feed-board'],[-1,0,0]],['PRINT','Printing Units Group',['press-1','press-2','press-3','press-4','press-5','press-6','press-7','press-8'],[0,0,.7]],
  ['COATER','Coating Unit',[],[.7,.2,-.5]],['DELIVERY','Delivery',['transfer','delivery'],[1,0,0]],['INSPECTION','Inline Inspection',[],[.3,1,0]],
- ['PLATFORM','Platform & Walkway',['platform'],[0,-.4,1]],['CONSOLE','Console & External Support',['feeder-panel'],[-.3,.2,1]],['AUX','Auxiliary / Peripheral',[],[0,.7,-1]]
+ ['PLATFORM','Platform & Walkway',['platform'],[0,-.4,1]],['CONSOLE','Console & External Support',['feeder-panel'],[-.3,.2,1]],['AUX','Auxiliary / Peripheral',['drive-utilities'],[0,.7,-1]]
 ];
 for(const [key,name,meshRefs,vec] of mainUnits)add(`O5.${key}`,'O5',2,'Unit Utama',name,{meshRefs,explodeVector:vec,sourceRefs:key==='INSPECTION'?['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN']:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY});
 
@@ -18,7 +18,7 @@ const printingBlocks=[['FRAME','Side Frame'],['INK','Ink System'],['DAMP','Dampe
 const printingParts={FRAME:['Side Frame','Lower Base','Service Opening'],INK:['Ink Fountain','Ink Fountain Cover','Visible Roller Guard','Ink Ductor Reference'],DAMP:['Dampening Housing','Water Pan Reference','Dampening Roller Reference'],CYL:['Plate Cylinder Reference','Blanket Cylinder Reference','Impression Cylinder Reference','Transfer Cylinder Reference'],COVER:['Upper Cover','Operator-side Cover','Lower Access Door'],STEP:['Step Plate','Step Support','Handle']};
 for(let unit=1;unit<=8;unit++){
  const pu=`O5.PRINT.PU${unit}`;add(pu,'O5.PRINT',3,'Sub',`Printing Unit ${unit}`,{meshRefs:[`press-${unit}`],sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[(unit-4.5)*.22,.15,0]});
- for(const [key,name] of printingBlocks){const bid=`${pu}.${key}`;const meshRefs=key==='FRAME'?[`press-${unit-1}-frame`]:key==='INK'?[`press-${unit-1}-ink`]:key==='COVER'?[`press-${unit-1}-cover`]:key==='STEP'?[`press-${unit-1}-steps`]:[];add(bid,pu,4,'Block',name,{meshRefs,confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY,explodeVector:key==='INK'?[0,.65,0]:key==='COVER'?[0,.2,1]:key==='STEP'?[0,-.2,1]:[0,0,-.55]});
+ for(const [key,name] of printingBlocks){const bid=`${pu}.${key}`;const meshRefs=key==='FRAME'?[`press-${unit-1}-frame`]:key==='INK'?[`press-${unit-1}-ink`]:key==='COVER'?[`press-${unit-1}-cover`,`press-${unit-1}-drive`]:key==='STEP'?[`press-${unit-1}-steps`,`press-${unit-1}-drive`]:[];add(bid,pu,4,'Block',name,{meshRefs,confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY,explodeVector:key==='INK'?[0,.65,0]:key==='COVER'?[0,.2,1]:key==='STEP'?[0,-.2,1]:[0,0,-.55]});
   printingParts[key].forEach((part,index)=>{const pid=`${bid}.P${index+1}`;add(pid,bid,5,'Part',part,{sourceRefs:meshRefs.length?['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102']:['SRC-HEIDELBERG-CD102'],confidence:meshRefs.length?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,(index-1)*.15,key==='COVER'||key==='STEP'?.35:-.2]});
    if((key==='COVER'&&index<2)||(key==='STEP'&&index===2))add(`${pid}.S1`,pid,6,'Spesifik Part',key==='STEP'?'Handle / Grip':'Hinge / Latch Reference',{confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,.1,.22],maintenanceTag:'VISUAL_INSPECTION'});
   });
@@ -42,4 +42,3 @@ export const TAXONOMY_BY_ID=new Map(OFFSET5_TAXONOMY.map(n=>[n.id,n]));
 export const taxonomyChildren=id=>OFFSET5_TAXONOMY.filter(n=>n.parentId===id);
 export const taxonomyStats=()=>OFFSET5_TAXONOMY.reduce((s,n)=>{s.total++;s.byLevel[n.level]=(s.byLevel[n.level]||0)+1;s.byConfidence[n.confidence]=(s.byConfidence[n.confidence]||0)+1;return s;},{total:0,byLevel:{},byConfidence:{}});
 export function validateTaxonomy(){const ids=new Set;for(const n of OFFSET5_TAXONOMY){if(ids.has(n.id))throw new Error(`Duplicate taxonomy id: ${n.id}`);ids.add(n.id);if(n.level<1||n.level>6)throw new Error(`Invalid taxonomy level: ${n.id}`);if(n.parentId&&!TAXONOMY_BY_ID.has(n.parentId))throw new Error(`Missing parent: ${n.id}`);if(n.parentId&&TAXONOMY_BY_ID.get(n.parentId).level!==n.level-1)throw new Error(`Non-contiguous level: ${n.id}`);}return true;}
-

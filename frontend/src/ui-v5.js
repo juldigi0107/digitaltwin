@@ -17,7 +17,10 @@ const PHOTO_REGISTRY=[
   {id:'p16',file:'IMG_0947.jpeg',zone:'Roller / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
   {id:'p17',file:'IMG_2388(2).jpeg',zone:'Operator-side longitudinal overview',kind:'orientation_reference',confidence:'PHOTO_VERIFIED'},
   {id:'p18',file:'IMG_2391(1).jpeg',zone:'Operator walkway / inspection bridge',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p19',file:'IMG_2392.jpeg',zone:'Operator steps / covers / platform',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'}
+  {id:'p19',file:'IMG_2392.jpeg',zone:'Operator steps / covers / platform',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p20',file:'IMG_2389(1).jpeg',zone:'Drive-side longitudinal overview',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p21',file:'IMG_2390(1).jpeg',zone:'Drive railing / flat covers / steps',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p22',file:'IMG_2395.jpeg',zone:'Drive feeder / utilities / hoses',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'}
 ];
 const UNIQUE_PHOTOS=PHOTO_REGISTRY.length;
 const ACTIVE_GEOMETRY_PHOTOS=PHOTO_REGISTRY.filter(p=>p.kind==='active_geometry_reference').length;
@@ -62,7 +65,7 @@ function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v4';const status=$('#geometry-safety-status');if(status)status.textContent='OPERATOR-SIDE · V4';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v5';const status=$('#geometry-safety-status');if(status)status.textContent='DUAL-SIDE · V5';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{

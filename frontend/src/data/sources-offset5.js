@@ -31,7 +31,10 @@ export const PHOTO_REGISTRY=Object.freeze([
   ['p16','IMG_0947.jpeg','Service zone','roller detail','detail_reference',CONFIDENCE.MEDIUM],
   ['p17','IMG_2388(2).jpeg','Delivery to feeder overview','operator-side longitudinal overview','orientation_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p18','IMG_2391(1).jpeg','Delivery / coating / printing units','operator-side walkway and inspection bridge','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
-  ['p19','IMG_2392.jpeg','Coating to printing units','operator-side steps, covers and platform','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED]
+  ['p19','IMG_2392.jpeg','Coating to printing units','operator-side steps, covers and platform','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p20','IMG_2389(1).jpeg','Delivery to printing units','drive-side longitudinal overview and service aisle','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p21','IMG_2390(1).jpeg','Inspection / printing units','drive-side railing, flat covers and secondary steps','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p22','IMG_2395.jpeg','Feeder to printing units','drive-side pile portal, utility cabinet and hose routing','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED]
 ].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
 
 export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});
