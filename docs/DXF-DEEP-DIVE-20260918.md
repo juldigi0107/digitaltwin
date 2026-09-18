@@ -80,3 +80,15 @@ Six independently reconstructed arrowheads on the machine centerline point towar
 A reference-only family-scale cross-check uses Heidelberg Speedmaster CD 102 technical data: a CD 102-6+L sample with Preset Plus feeder/delivery and two delivery extension modules is documented at 15.85 m. This is used only as plausibility context; it is not proof of the installed OFU-1 configuration.
 
 The factory scene renders two dashed OFU-1 overlays: a conservative structural-body candidate and a lower-confidence service-inclusive analysis envelope. The detailed OFFSET 5 procedural model is centered/oriented to the candidate anchor but remains unscaled. This deliberately avoids stretching or changing the machine reconstruction to force a fit to CAD.
+
+
+## OFU-1 functional zoning — pass 3
+
+The source linework is divided conservatively into four inference zones without altering the detailed machine model:
+
+- **Delivery / extension candidate**: CAD Y 58556.4–64548.5. This low-Y end follows the repeated train in the verified negative-Y sheet-flow direction and has a distinct non-repeating topology.
+- **Repeated press-train candidate**: CAD Y 64548.5–74007.8. This contains the seven visible repeated external motifs with median pitch about 1378.05 mm. It is not treated as proof of an exact installed unit count.
+- **Feeder candidate**: CAD Y 74007.8–76891.0. This is the high-Y upstream end in the source arrow direction and has non-repeating end geometry.
+- **Drive-side service strip candidate**: CAD X 123842.0–124592.0 over much of the press length. Its positive-X external strip correlates with the service-heavy drive-side evidence from user photos; exact utilities/cabinet functions remain unverified.
+
+These zones are rendered as separate CAD inference overlays in factory view. They are not added to the OFFSET 5 six-level machine taxonomy and do not modify, scale, or distort the procedural Heidelberg reconstruction.
