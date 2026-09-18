@@ -1,15 +1,15 @@
 const PHOTO_REGISTRY=[
-  {id:'p01',file:'IMG_2312.jpeg',zone:'Feeder / machine end',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p01',file:'IMG_2312.jpeg',zone:'Delivery pile / machine end',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p02',file:'IMG_1970.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p03',file:'IMG_1971.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p04',file:'IMG_1656.jpeg',zone:'Delivery / panel view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p05',file:'IMG_1624.jpeg',zone:'Machine end / controls',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p06',file:'IMG_1625.jpeg',zone:'Pile / open frame detail',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p07',file:'IMG_1626.jpeg',zone:'Transfer / grille detail',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p05',file:'IMG_1624.jpeg',zone:'Feeder end / controls',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p06',file:'IMG_1625.jpeg',zone:'Feeder pile / suction head',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p07',file:'IMG_1626.jpeg',zone:'Feed board / PU1 interface',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
   {id:'p08',file:'IMG_1627.jpeg',zone:'Printing units / operator side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p09',file:'IMG_1628.jpeg',zone:'Printing units / upper side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p10',file:'IMG_1629.jpeg',zone:'Long platform / end housing',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p11',file:'IMG_1630.jpeg',zone:'Sloped hood / service area',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
+  {id:'p10',file:'IMG_1629.jpeg',zone:'Coating / delivery transition',kind:'supplementary_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p11',file:'IMG_1630.jpeg',zone:'Inspection hood / camera gantry',kind:'supplementary_reference',confidence:'PHOTO_VERIFIED'},
   {id:'p12',file:'IMG_1631.jpeg',zone:'Inspection gantry / camera pods',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p13',file:'IMG_1633.jpeg',zone:'Inspection gantry / top beam',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p14',file:'IMG_1634.jpeg',zone:'Control / machine-end overview',kind:'orientation_reference',confidence:'HIGH_CONFIDENCE'},
@@ -59,7 +59,7 @@ function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v2';const status=$('#geometry-safety-status');if(status)status.textContent='FROZEN · V2 BASELINE';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v3';const status=$('#geometry-safety-status');if(status)status.textContent='PHOTO-ALIGNED · V3';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{

@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v2', status: 'RECONSTRUCTED / APPROXIMATE',
+  version: 'offset5-photo-v3', status: 'RECONSTRUCTED / PHOTO-ALIGNED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg']
@@ -75,6 +75,16 @@ export class OffsetMachineTemplate {
     this.box(g,axis==='z'?[.19,.55,.03]:[.03,.55,.19],pos,'light',.012);
     for(let i=0;i<count;i++)this.cylinder(g,.023,.025,axis==='z'?[x,y+.17-i*.09,z+.026]:[x+.026,y+.17-i*.09,z],i===count-1?'red':'black',axis);
   }
+  chain(g,pos,height){
+    const key='chain-link';if(!this.geometries.has(key))this.geometries.set(key,new THREE.TorusGeometry(.035,.009,5,8));
+    const count=Math.floor(height/.095),m=new THREE.InstancedMesh(this.geometries.get(key),this.material('steel',g),count),dummy=new THREE.Object3D();
+    for(let i=0;i<count;i++){dummy.position.set(pos[0],pos[1]+i*height/(count-1),pos[2]);dummy.rotation.set(Math.PI/2,(i%2)*Math.PI/2,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);}
+    m.userData={assetId:'MACHINE-OFFSET5',ownerId:g.userData.nodeId,detail:true};m.castShadow=true;g.add(m);this.meshes.push(m);
+  }
+  gaugePanel(g,pos){
+    this.box(g,[.30,.34,.08],pos,'light',.018);
+    for(let i=0;i<3;i++){const y=pos[1]+.10-i*.10;this.cylinder(g,.039,.014,[pos[0],y,pos[2]+.049],'glass','z');this.box(g,[.006,.027,.006],[pos[0],y,pos[2]+.061],'red');}
+  }
   tread(g,size,pos){
     this.box(g,size,pos,'steel',.035);
     // Shared instanced geometry gives actual raised chequer tread without hundreds of draw calls.
@@ -115,6 +125,11 @@ export class OffsetMachineTemplate {
     this.box(board,[1.0,1.00,1.94],[0,.77,0],'graphite',.035);
     this.box(board,[1.0,.055,1.88],[0,1.30,0],'steel');
     for(const z of [-.56,0,.56])this.box(board,[.98,.018,.10],[0,1.337,z],'rubber');
+    this.grille(board,[.49,.79,-.48],.78,.67);
+    this.grille(board,[.49,.79,.48],.78,.67);
+    this.controls(board,[.51,.86,-.91],'x',5);
+    this.gaugePanel(board,[.51,.87,.88]);
+    for(const z of [.72,.86,.99])this.tube(board,[[.50,.68,z],[.61,.54,z],[.53,.38,z-.05]],.014,'rubber');
     this.delivery(6.1);
     this.transfer(4.68);
   }
@@ -151,13 +166,14 @@ export class OffsetMachineTemplate {
   feeder(x){
     const g=this.group(this.root,'feeder','Feeder · rangka terbuka',[x,0,0],[-1.6,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);
     const frame=this.group(g,'feeder-frame','Portal & rel pengangkat',[0,0,0],[-.4,0,-.4],['IMG_1624.jpeg','IMG_1625.jpeg']);
-    for(const a of [-.67,.67])for(const z of [-1.02,1.02]){this.box(frame,[.20,2.48,.23],[a,1.29,z],'graphite',.025);this.box(frame,[.29,.06,.32],[a,.065,z],'black');this.cylinder(frame,.018,2.10,[a+.08,1.14,z-.1],'steel','y');}
+    for(const a of [-.67,.67])for(const z of [-1.02,1.02]){this.box(frame,[.20,2.48,.23],[a,1.29,z],'graphite',.025);this.box(frame,[.29,.06,.32],[a,.065,z],'black');this.chain(frame,[a+.08,.18,z-.1],2.08);}
     this.box(frame,[1.64,.38,2.32],[0,2.62,0],'graphite',.05);
     this.box(frame,[1.34,.055,1.85],[0,2.39,0],'steel');
     this.box(frame,[1.24,.02,.045],[0,2.35,.84],'light');
     const feed=this.group(g,'feeder-head','Kepala feeder & selang terlihat',[0,0,0],[0,.8,0],['IMG_1625.jpeg']);
     this.cylinder(feed,.045,1.82,[.1,2.06,0],'steel');
     this.box(feed,[.4,.37,.62],[-.15,1.98,0],'light',.025);
+    for(const z of [-.58,-.29,0,.29,.58])this.box(feed,[.38,.055,.045],[.18,1.88,z],'steel',.012);
     for(const z of [-.42,.42]){
       this.tube(feed,[[-.24,2.16,z],[.03,2.02,z],[.03,1.66,z],[.26,1.62,z]],.032);
       this.cylinder(feed,.027,.19,[.24,1.60,z],'steel','y');this.cylinder(feed,.065,.025,[.24,1.5,z],'rubber','y');
@@ -171,13 +187,15 @@ export class OffsetMachineTemplate {
     for(let i=0;i<5;i++)this.cylinder(panel,.025,.028,[-.30+i*.12,1.047,1.23],i===0?'red':'black','y');
   }
   transfer(x){
-    const g=this.group(this.root,'transfer','Passage menuju delivery',[x,0,0],[.8,.25,0],['IMG_2312.jpeg'],'Bentuk passage dan gantry terlihat; fungsi dan spesifikasi sistem inspeksi belum diverifikasi.');
+    const g=this.group(this.root,'transfer','Coating / inspeksi menuju delivery',[x,0,0],[.8,.25,0],['IMG_1629.jpeg','IMG_1630.jpeg'],'Hood, platform dan gantry direkonstruksi dari foto; fungsi internal serta spesifikasi inspeksi tidak diverifikasi.');
     this.box(g,[1.62,1.0,2.08],[0,.78,0],'graphite',.04);
     this.box(g,[1.5,.075,1.78],[0,1.32,0],'black',.02);
     for(let i=0;i<5;i++)this.cylinder(g,.032,1.78,[-.6+i*.3,1.38,0]);
-    for(const z of [-.97,.97])this.box(g,[.12,1.16,.13],[-.12,1.99,z],'silver',.018);
-    this.box(g,[.18,.15,2.07],[-.12,2.6,0],'graphite',.025);
-    this.box(g,[.16,.17,.33],[-.12,2.45,0],'black',.01);
+    const hood=this.box(g,[1.48,.18,1.96],[.05,1.58,0],'light',.04);hood.rotation.z=-.22;
+    for(const z of [-.97,.97])this.box(g,[.12,1.16,.13],[-.12,1.99,z],'light',.018);
+    const beam=this.box(g,[.18,.15,2.07],[-.12,2.6,0],'light',.025);beam.rotation.x=-.08;
+    for(const z of [-.55,.55]){this.box(g,[.30,.22,.34],[-.12,2.43,z],'graphite',.045);this.cylinder(g,.052,.035,[-.22,2.39,z],'glass','x');}
+    this.box(g,[.52,.48,.42],[.52,1.88,.78],'black',.025);
   }
   delivery(x){
     const g=this.group(this.root,'delivery','Delivery · panel & pagar',[x,0,0],[1.8,0,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
@@ -191,6 +209,7 @@ export class OffsetMachineTemplate {
     this.box(hood,[.16,.80,2.3],[.84,2.03,0],'graphite',.025);
     for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.08,z],'light',.025);
     this.box(hood,[.045,.53,1.40],[.948,2.05,0],'glass',.012);
+    this.box(hood,[.035,.35,.82],[.971,2.08,0],'black',.01);
     this.box(hood,[.06,.18,2.28],[.95,2.52,0],'light',.018);
     for(const z of [-.97,.97])for(let i=0;i<4;i++)this.cylinder(hood,.025,.024,[1,2.35-i*.115,z],i===0?'red':'black','x');
     this.cylinder(hood,.035,2.2,[1,1.72,0],'steel');

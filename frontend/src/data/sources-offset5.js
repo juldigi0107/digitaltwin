@@ -13,17 +13,17 @@ export const TECHNICAL_SOURCES=Object.freeze([
 ]);
 
 export const PHOTO_REGISTRY=Object.freeze([
-  ['p01','IMG_2312.jpeg','Feeder end','end view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p01','IMG_2312.jpeg','Delivery pile/end','end view toward printing units','active_geometry_reference',CONFIDENCE.HIGH],
   ['p02','IMG_1970.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
   ['p03','IMG_1971.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
   ['p04','IMG_1656.jpeg','Delivery','panel view','active_geometry_reference',CONFIDENCE.HIGH],
-  ['p05','IMG_1624.jpeg','Delivery end','controls/end view','active_geometry_reference',CONFIDENCE.HIGH],
-  ['p06','IMG_1625.jpeg','Delivery pile','open frame','active_geometry_reference',CONFIDENCE.HIGH],
-  ['p07','IMG_1626.jpeg','Transfer zone','grille detail','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p05','IMG_1624.jpeg','Feeder end','controls/end view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p06','IMG_1625.jpeg','Feeder pile','open frame and suction head','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p07','IMG_1626.jpeg','Feed board / PU1 interface','board, grille and gauge detail','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p08','IMG_1627.jpeg','Printing units','operator side','active_geometry_reference',CONFIDENCE.HIGH],
   ['p09','IMG_1628.jpeg','Printing units','upper operator side','active_geometry_reference',CONFIDENCE.HIGH],
-  ['p10','IMG_1629.jpeg','Delivery/Coating','platform/end housing','supplementary_reference',CONFIDENCE.HIGH],
-  ['p11','IMG_1630.jpeg','Delivery/Coating','sloped hood/service','supplementary_reference',CONFIDENCE.HIGH],
+  ['p10','IMG_1629.jpeg','Coating / delivery transition','platform, raised hood and end housing','supplementary_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p11','IMG_1630.jpeg','Inline inspection','sloped hood, gantry and camera pods','supplementary_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p12','IMG_1631.jpeg','Inline inspection','gantry/camera pods','supplementary_reference',CONFIDENCE.HIGH],
   ['p13','IMG_1633.jpeg','Inline inspection','top beam','supplementary_reference',CONFIDENCE.HIGH],
   ['p14','IMG_1634.jpeg','Machine end','orientation overview','orientation_reference',CONFIDENCE.HIGH],
@@ -32,4 +32,3 @@ export const PHOTO_REGISTRY=Object.freeze([
 ].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
 
 export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});
-

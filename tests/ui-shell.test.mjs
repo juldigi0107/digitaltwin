@@ -14,8 +14,8 @@ test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
   for(const camera of ['iso','top','fit','reset']) assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
 
-test('UI rebuild does not advance frozen geometry baseline',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v2');
+test('UI reports the current photo-aligned geometry baseline',()=>{
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v3');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
@@ -50,5 +50,5 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/masterprompt-phase4-20260918/);
+  assert.match(sw,/photo-aligned-phase5-20260918/);
 });

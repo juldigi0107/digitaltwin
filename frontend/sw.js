@@ -1,4 +1,4 @@
-const VERSION='offset5-masterprompt-phase4-20260918';
+const VERSION='offset5-photo-aligned-phase5-20260918';
 const SHELL=['./','./index.html','./config.json','./assets/favicon.svg','./style.css','./ui-v5.css','./responsive-v5.css','./src/model.js','./src/engine.js','./src/offset5.js','./src/app.js','./src/ui-v5.js','./src/data/confidence.js','./src/data/sources-offset5.js','./src/data/taxonomy-offset5.js','./vendor/three/addons/utils/BufferGeometryUtils.js','./vendor/three/addons/geometries/RoundedBoxGeometry.js','./vendor/three/build/three.module.js','./vendor/three/build/three.core.js','./vendor/three/addons/controls/OrbitControls.js','./vendor/three/addons/controls/TransformControls.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('offset5-')&&k!==VERSION).map(k=>caches.delete(k)))),self.clients.claim()])));
