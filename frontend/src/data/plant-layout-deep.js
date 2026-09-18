@@ -5,10 +5,24 @@ const AREAS=[["CAD-AREA-509DB","R.OPERATOR",141286.1,94513.01,["509DB"]],["CAD-A
 const assetCandidates=ASSETS.map(([id,label,category,x,y,rotation,sourceHandles,contextLabels])=>({id,label,category,x,y,rotation,layer:'B_WWT',sourceHandles,confidence:'VERIFIED',placementStatus:'LABEL_POSITION_ONLY',footprintStatus:'UNKNOWN',...(contextLabels.length?{contextLabels}:{})}));
 const areaCandidates=AREAS.map(([id,label,x,y,sourceHandles])=>({id,label,x,y,layer:'B_WWT',sourceHandles,confidence:'SOURCE_REFERENCE',placementStatus:'LABEL_POSITION_ONLY',footprintStatus:'UNKNOWN'}));
 const identifiedLabels=[...assetCandidates.map(a=>({x:a.x,y:a.y,text:a.label,layer:a.layer,handle:a.sourceHandles[0],kind:'ASSET_LABEL'})),...areaCandidates.map(a=>({x:a.x,y:a.y,text:a.label,layer:a.layer,handle:a.sourceHandles[0],kind:'AREA_LABEL'}))];
+const OFU1_PLACEMENT={
+ assetCode:'OFU-1',assetName:'OFFSET 5',model:'CD 102-8+L',
+ confidence:'USER-CONFIRMED',evidenceType:'USER_ANNOTATED_CAD_SCREENSHOT',evidenceFile:'IMG_2405.jpeg',
+ cadCenterlineX:122003.6004,cadMinY:58037.4190,cadMaxY:77406.1316,
+ footprintBounds:{minX:120211.9073,maxX:124591.9929,minY:58037.4190,maxY:77406.1316},
+ footprintSizeMeters:{lateral:4.3801,longitudinal:19.3687},
+ feedDirectionCad:'NEGATIVE_Y',driveSideCad:'POSITIVE_X',
+ cadRotation:-90,
+ centerlineHandles:['867B3','8674D','8623F','862F3','86459','863A2','8651A','865E8','86696'],
+ flowArrowHandles:['86810','86811'],
+ note:'User explicitly identified this unlabeled eight-unit CAD footprint as OFU-1 / OFFSET 5. Centerline, longitudinal extent, flow arrows and drive-side service cabinet are derived from source CAD geometry; the identity-to-footprint association is user-confirmed.'
+};
 export function applyPlantLayoutDeepDive(layout){
  if(!layout)return layout;
- layout.extractionRevision=2;layout.assetCandidates=assetCandidates;layout.areaCandidates=areaCandidates;layout.identifiedLabels=identifiedLabels;
+ layout.extractionRevision=3;layout.assetCandidates=assetCandidates;layout.areaCandidates=areaCandidates;layout.identifiedLabels=identifiedLabels;
+ layout.userConfirmedAssets=[OFU1_PLACEMENT];
  Object.assign(layout.source,{layerCount:23,xrefCount:0,xrefNames:[],extractionMethod:'ezdxf direct parse of user-converted DXF; source labels deduplicated; explicit asset/area anchors retained without footprint inference.'});
- Object.assign(layout.audit,{identifiedAssetCandidateCount:22,identifiedAreaCandidateCount:16,offset5LabelFound:false,offset5Placement:'NOT APPLIED — no explicit OFFSET 5 / CD 102 label or verified footprint identified in source text.',sourceFinding:'DXF contains explicit source labels for CX104 and SX 52 printing presses plus other equipment, but none is relabelled or assumed to be OFFSET 5.',deepDiveUnsupportedTypes:['POLYLINE','HATCH','SPLINE','3DFACE','REGION','POINT','SOLID','TRACE','WIPEOUT']});
- layout.machineAnchor=null;layout.positionStatus='POSITION REVIEW REQUIRED';return layout;
+ Object.assign(layout.audit,{identifiedAssetCandidateCount:22,identifiedAreaCandidateCount:16,offset5LabelFound:false,offset5Placement:'USER-CONFIRMED — user identified the unlabeled eight-unit CAD footprint beside Room Electrical / AREA MESIN SHEETING as OFU-1 / OFFSET 5 in IMG_2405.jpeg. CAD centerline and flow orientation are source-derived.',sourceFinding:'DXF contains explicit source labels for CX104 and SX 52 plus an unlabeled eight-unit press footprint. The unlabeled footprint is associated with OFU-1 / OFFSET 5 only because the user explicitly confirmed it; no CAD text label is fabricated.',deepDiveUnsupportedTypes:['POLYLINE','HATCH','SPLINE','3DFACE','REGION','POINT','SOLID','TRACE','WIPEOUT']});
+ layout.machineAnchor={id:'OFU-1',x:OFU1_PLACEMENT.cadCenterlineX,y:(OFU1_PLACEMENT.cadMinY+OFU1_PLACEMENT.cadMaxY)/2,z:0,rotation:OFU1_PLACEMENT.cadRotation,confidence:'USER-CONFIRMED',evidenceFile:OFU1_PLACEMENT.evidenceFile,evidenceType:OFU1_PLACEMENT.evidenceType};
+ layout.machineFootprint=OFU1_PLACEMENT;layout.positionStatus='USER-CONFIRMED';return layout;
 }
