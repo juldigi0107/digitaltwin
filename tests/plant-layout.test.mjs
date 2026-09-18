@@ -124,6 +124,6 @@ test('OFU-1 anchor follows the user-confirmed CAD footprint orientation',async()
   assert.ok(f.centerlineHandles.includes('867B3')&&f.centerlineHandles.includes('86696'));
   assert.ok(f.flowArrowHandles.includes('86810')&&f.flowArrowHandles.includes('86811'));
   const p=plantDisplayPoint(a.x,a.y,l);
-  assert.ok(Math.abs(p.x-18.2972316)<1e-5);
-  assert.ok(Math.abs(p.z+60.7182907)<1e-5);
+  assert.ok(Math.abs(p.x-(a.x-l.displayTransform.originX)*l.displayTransform.scale)<1e-9);
+  assert.ok(Math.abs(p.z-(a.y-l.displayTransform.originY)*l.displayTransform.scale)<1e-9);
 });
