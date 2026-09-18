@@ -98,6 +98,16 @@ export class FactoryEngine {
         };
         addRect(f.serviceInclusiveBounds,0xb08352,.34,'OFU-1 service-inclusive analysis envelope','ANALYSIS_ENVELOPE');
         addRect(f.structuralBodyBounds,0xffb45f,.92,'OFU-1 structural body candidate','STRUCTURAL_BODY_CANDIDATE');
+        const zoneStyle={
+          DELIVERY_EXTENSION_CANDIDATE:[0xe3a65a,.82],
+          REPEATED_PRESS_TRAIN_CANDIDATE:[0x57b6d9,.88],
+          FEEDER_CANDIDATE:[0x77c895,.88],
+          DRIVE_SERVICE_STRIP_CANDIDATE:[0xb28cd8,.70]
+        };
+        for(const zone of f.functionalZones||[]){
+          const [color,opacity]=zoneStyle[zone.kind]||[0xc0c8cc,.65];
+          addRect(zone.bounds,color,opacity,'OFU-1 zone · '+zone.name,zone.kind);
+        }
         const a=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.minY,l),b=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.maxY,l);
         const center=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x,.07,a.z),new THREE.Vector3(b.x,.07,b.z)]),new THREE.LineDashedMaterial({color:0xffcf8a,transparent:true,opacity:.7,dashSize:.8,gapSize:.45}));center.computeLineDistances();
         center.name='OFU-1 CAD centerline';center.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',assetCode:f.assetCode,confidence:f.placementConfidence,semantic:'CENTERLINE_REFERENCE'};this.factory.add(center);this.layoutStats.rendered++;
