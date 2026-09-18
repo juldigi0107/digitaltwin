@@ -51,7 +51,7 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/dxf-deep-dive-phase12-20260918/);
+  assert.match(sw,/ofu1-geometric-match-phase13-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
 });
@@ -63,8 +63,8 @@ test('DXF loading does not hide the machine inspection scene on startup',()=>{
 });
 
 
-test('UI surfaces user-confirmed factory placement without changing machine geometry messaging',()=>{
+test('UI surfaces approximate OFU-1 candidate placement without changing machine geometry messaging',()=>{
   assert.match(app,/activeLayout\(\)\?\.positionStatus/);
-  assert.match(app,/OFU-1 \/ OFFSET 5 ditempatkan dari konfirmasi pengguna/);
+  assert.match(app,/OFU-1 \/ OFFSET 5 diplot pada kandidat footprint berkeyakinan tinggi/);
   assert.match(app,/Posisi pabrik tidak mengubah geometry mesin/);
 });

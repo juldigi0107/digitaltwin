@@ -23,10 +23,10 @@ test('metric scale is calibrated from source annotations while header conflict r
   assert.equal(l.transform.calibration.method,'SOURCE_ANNOTATION_CROSSCHECK');
   assert.equal(l.transform.calibration.headerConflict,true);
   assert.equal(l.displayTransform.status,'ENGINEERING_MM_CALIBRATED_WITH_HEADER_CONFLICT');
-  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
-  assert.equal(l.positionStatus,'USER-CONFIRMED');
+  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
+  assert.match(l.positionStatus,/APPROXIMATE/);
   assert.equal(l.audit.offset5LabelFound,false);
-  assert.match(l.audit.offset5Placement,/USER-CONFIRMED/);
+  assert.match(l.audit.offset5Placement,/APPROXIMATE/);
 });
 
 test('DXF extraction preserves searchable identified assets without inventing Offset 5',async()=>{
@@ -66,8 +66,9 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
   assert.ok(l.identifiedLabels.some(x=>x.text==='CX104'));
   assert.ok(l.identifiedLabels.some(x=>x.text==='Polar-115'));
   assert.ok(!l.identifiedLabels.some(x=>/OFFSET\s*5|CD\s*102/i.test(x.text)));
-  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
-  assert.equal(l.machineAnchor.evidenceFile,'IMG_2405.jpeg');
+  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
+  assert.equal(l.machineAnchor.evidenceFile,undefined);
+  assert.equal(l.machineAnchor.matchConfidence,'HIGH CONFIDENCE');
 });
 
 
@@ -83,8 +84,11 @@ test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identit
   assert.ok(!names.some(x=>/OFFSET\s*5|CD\s*102/i.test(x)));
   assert.equal(l.userConfirmedAssets.length,1);
   assert.equal(l.userConfirmedAssets[0].assetCode,'OFU-1');
-  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
-  assert.equal(l.positionStatus,'USER-CONFIRMED');
+  assert.equal(l.userConfirmedAssets[0].scope,'IDENTITY_ONLY');
+  assert.equal(l.placementCandidates.length,1);
+  assert.equal(l.placementCandidates[0].placementConfidence,'HIGH CONFIDENCE');
+  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
+  assert.match(l.positionStatus,/APPROXIMATE/);
 });
 
 test('printing press source labels keep context but never become inferred footprints',async()=>{
@@ -108,10 +112,14 @@ test('duplicate source area labels are consolidated without inventing area bound
 });
 
 
-test('OFU-1 anchor follows the user-confirmed CAD footprint orientation',async()=>{
+test('OFU-1 approximate anchor follows the high-confidence CAD geometric match orientation',async()=>{
   const l=await loadBundledPlantLayout();
   const f=l.machineFootprint,a=l.machineAnchor;
   assert.equal(f.assetCode,'OFU-1');
+  assert.equal(f.identityConfidence,'USER-CONFIRMED');
+  assert.equal(f.placementConfidence,'HIGH CONFIDENCE');
+  assert.equal(a.confidence,'APPROXIMATE');
+  assert.equal(a.scaleFitApplied,false);
   assert.equal(f.assetName,'OFFSET 5');
   assert.equal(f.model,'CD 102-8+L');
   assert.equal(f.feedDirectionCad,'NEGATIVE_Y');

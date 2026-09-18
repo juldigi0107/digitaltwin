@@ -38,13 +38,21 @@ For CX104, nearby source text includes Prinect Press Center XL3, DryStar, Coatin
 
 Source anchors are retained for WIP, AREA MESIN SHEETING, AREA MESIN POLAR, AREA FPS, AREA RAK, R.OPERATOR, R.GUDANG, R.PANEL, R.BLOWER and R.OVEN. A repeated R.OVEN label at the same coordinate is consolidated while preserving both source handles.
 
-## OFFSET 5 placement decision
+## OFFSET 5 / OFU-1 placement refinement
 
-No explicit `OFFSET 5`, `OFFSET-05`, `CD102` or `CD 102` source text was found. No source-labelled equipment is therefore relabelled as OFFSET 5.
+The user confirmed that the internal codename of OFFSET 5 is `OFU-1`. This confirms asset identity only; it does not by itself confirm CAD coordinates.
 
-`machineAnchor` remains `null` and status remains `POSITION REVIEW REQUIRED`.
+A second geometry pass found a unique unlabeled long multi-unit press footprint around source centerline X≈122003.6. Its source centerline runs from Y≈58037.4 to Y≈77406.1, and source arrowheads around Y≈62603 point toward negative CAD Y. The analysis envelope is about 19.37 m longitudinal × 4.38 m lateral using the calibrated mm→m transform.
 
-This prevents the detailed Heidelberg CD 102-8+L reconstruction from being moved to an unsupported CAD position.
+The topology is strongly consistent with a long sheetfed offset press: repeated press-unit geometry, feeder/delivery-end structures, long centerline, directional sheet-flow arrows, and side-service geometry. The DXF still contains no literal `OFU-1`, `OFFSET 5`, `OFFSET-05`, `CD102`, or `CD 102` text.
+
+Therefore:
+
+- `OFU-1 = OFFSET 5` is `USER-CONFIRMED` identity evidence.
+- The specific CAD footprint association is `HIGH CONFIDENCE` geometric inference.
+- `machineAnchor.confidence` is `APPROXIMATE`, not `USER-CONFIRMED` or `DWG-VERIFIED`.
+- No scale fit is applied to the detailed procedural machine. Only center/orientation placement is used, preserving its geometry.
+- The candidate feed direction is negative CAD Y.
 
 ## Render boundary
 
