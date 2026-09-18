@@ -8,10 +8,10 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v3', status: 'RECONSTRUCTED / PHOTO-ALIGNED',
+  version: 'offset5-photo-v4', status: 'RECONSTRUCTED / OPERATOR-SIDE ALIGNED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg']
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg']
 };
 const V=(a)=>new THREE.Vector3(...a);
 
@@ -21,11 +21,17 @@ export class OffsetMachineTemplate {
     this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v1'};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
-    this.build();this.batchMeshes();
+    this.build();this.alignOperatorSide();this.batchMeshes();
     this.taxonomy=OFFSET5_TAXONOMY;this.taxonomyById=TAXONOMY_BY_ID;
     this.original=this.parts.map(p=>p.position.clone());
     for(const n of this.nodes){n.userData.rest=n.position.clone();n.userData.restQuaternion=n.quaternion.clone();}
     this.root.updateMatrixWorld(true);
+  }
+  alignOperatorSide(){
+    // IMG_2388/2391/2392 establish walkway, controls, curved covers and steps on -Z.
+    // Mirror lateral handedness only; +X feeder-to-delivery flow and PU order stay fixed.
+    for(const part of this.parts){part.scale.z=-1;part.userData.explode.z*=-1;}
+    this.root.userData.sideAlignment='PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z';
   }
   group(parent,id,name,pos,dir,sources,note='Bentuk luar teramati; proporsi diperkirakan dari foto.'){
     const g=new THREE.Group();g.name=name;g.position.set(...pos);

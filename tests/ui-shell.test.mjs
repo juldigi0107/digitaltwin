@@ -15,17 +15,17 @@ test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
 });
 
 test('UI reports the current photo-aligned geometry baseline',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v3');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v4');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
 test('photo registry separates evidence registry from active geometry references',()=>{
   const entries=[...ui.matchAll(/id:'p\d+'/g)];
   const active=[...ui.matchAll(/kind:'active_geometry_reference'/g)];
-  assert.equal(entries.length,16);
-  assert.equal(active.length,9);
-  assert.match(html,/16 foto unik terdaftar/);
-  assert.match(html,/9 foto aktif pada geometry baseline stabil/);
+  assert.equal(entries.length,19);
+  assert.equal(active.length,11);
+  assert.match(html,/19 foto unik terdaftar/);
+  assert.match(html,/11 foto aktif pada geometry baseline/);
 });
 
 test('industrial shell has responsive workbench and dedicated cache assets',()=>{
@@ -50,5 +50,5 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/photo-aligned-phase5-20260918/);
+  assert.match(sw,/operator-side-phase6-20260918/);
 });

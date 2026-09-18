@@ -14,7 +14,10 @@ const PHOTO_REGISTRY=[
   {id:'p13',file:'IMG_1633.jpeg',zone:'Inspection gantry / top beam',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p14',file:'IMG_1634.jpeg',zone:'Control / machine-end overview',kind:'orientation_reference',confidence:'HIGH_CONFIDENCE'},
   {id:'p15',file:'IMG_1165.jpeg',zone:'Gauge / hose / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
-  {id:'p16',file:'IMG_0947.jpeg',zone:'Roller / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'}
+  {id:'p16',file:'IMG_0947.jpeg',zone:'Roller / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
+  {id:'p17',file:'IMG_2388(2).jpeg',zone:'Operator-side longitudinal overview',kind:'orientation_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p18',file:'IMG_2391(1).jpeg',zone:'Operator walkway / inspection bridge',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
+  {id:'p19',file:'IMG_2392.jpeg',zone:'Operator steps / covers / platform',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'}
 ];
 const UNIQUE_PHOTOS=PHOTO_REGISTRY.length;
 const ACTIVE_GEOMETRY_PHOTOS=PHOTO_REGISTRY.filter(p=>p.kind==='active_geometry_reference').length;
@@ -59,7 +62,7 @@ function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v3';const status=$('#geometry-safety-status');if(status)status.textContent='PHOTO-ALIGNED · V3';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v4';const status=$('#geometry-safety-status');if(status)status.textContent='OPERATOR-SIDE · V4';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{

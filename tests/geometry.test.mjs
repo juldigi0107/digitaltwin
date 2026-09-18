@@ -32,8 +32,12 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-v3');
+ assert.equal(t.root.userData.version,'offset5-photo-v4');
+ assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
+ const steps=t.findNode('press-1-steps'),cover=t.findNode('press-1-cover');
+ assert.ok(new THREE.Box3().setFromObject(steps).getCenter(new THREE.Vector3()).z<0);
+ assert.ok(new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z<0);
  assert.ok(size.x>=15.5&&size.x<=16.1);assert.ok(size.y>=2.8&&size.y<=3.0);assert.ok(size.z>=3.2&&size.z<=3.4);
  assert.ok(t.meshes.length<240,'mobile mesh budget exceeded');
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
