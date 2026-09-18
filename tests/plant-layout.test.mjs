@@ -23,10 +23,10 @@ test('metric scale is calibrated from source annotations while header conflict r
   assert.equal(l.transform.calibration.method,'SOURCE_ANNOTATION_CROSSCHECK');
   assert.equal(l.transform.calibration.headerConflict,true);
   assert.equal(l.displayTransform.status,'ENGINEERING_MM_CALIBRATED_WITH_HEADER_CONFLICT');
-  assert.equal(l.machineAnchor,null);
-  assert.equal(l.positionStatus,'POSITION REVIEW REQUIRED');
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.equal(l.positionStatus,'USER-CONFIRMED');
   assert.equal(l.audit.offset5LabelFound,false);
-  assert.match(l.audit.offset5Placement,/NOT APPLIED/);
+  assert.match(l.audit.offset5Placement,/USER-CONFIRMED/);
 });
 
 test('DXF extraction preserves searchable identified assets without inventing Offset 5',async()=>{
@@ -66,13 +66,14 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
   assert.ok(l.identifiedLabels.some(x=>x.text==='CX104'));
   assert.ok(l.identifiedLabels.some(x=>x.text==='Polar-115'));
   assert.ok(!l.identifiedLabels.some(x=>/OFFSET\s*5|CD\s*102/i.test(x.text)));
-  assert.equal(l.machineAnchor,null);
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.equal(l.machineAnchor.evidenceFile,'IMG_2405.jpeg');
 });
 
 
-test('DXF deep-dive overlay preserves source-labelled assets without assigning OFFSET 5',async()=>{
+test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identity stays user-confirmed',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.extractionRevision,2);
+  assert.equal(l.extractionRevision,3);
   assert.equal(l.source.layerCount,23);
   assert.equal(l.source.xrefCount,0);
   assert.equal(l.assetCandidates.length,22);
@@ -80,8 +81,10 @@ test('DXF deep-dive overlay preserves source-labelled assets without assigning O
   const names=l.assetCandidates.map(x=>x.label);
   for(const name of ['CX104','SX 52','Polar-115','AUTOPLATEN 02','AUTOPLATEN 05','AUTOPLATEN 06','AUTOPLATEN 07','AUTOPLATEN 08','AUTOPLATEN 09','FOLDER GLUER 01','FOLDER GLUER 02','FOLDER GLUER 03','CTP#1','CTP#2','Digital Printing']) assert.ok(names.includes(name),name+' missing');
   assert.ok(!names.some(x=>/OFFSET\s*5|CD\s*102/i.test(x)));
-  assert.equal(l.machineAnchor,null);
-  assert.equal(l.positionStatus,'POSITION REVIEW REQUIRED');
+  assert.equal(l.userConfirmedAssets.length,1);
+  assert.equal(l.userConfirmedAssets[0].assetCode,'OFU-1');
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.equal(l.positionStatus,'USER-CONFIRMED');
 });
 
 test('printing press source labels keep context but never become inferred footprints',async()=>{
@@ -102,4 +105,25 @@ test('duplicate source area labels are consolidated without inventing area bound
   const oven=l.areaCandidates.find(x=>x.label==='R.OVEN');
   assert.deepEqual(oven.sourceHandles,['5CD13','7D7CC']);
   assert.ok(l.areaCandidates.every(x=>x.placementStatus==='LABEL_POSITION_ONLY'&&x.footprintStatus==='UNKNOWN'));
+});
+
+
+test('OFU-1 anchor follows the user-confirmed CAD footprint orientation',async()=>{
+  const l=await loadBundledPlantLayout();
+  const f=l.machineFootprint,a=l.machineAnchor;
+  assert.equal(f.assetCode,'OFU-1');
+  assert.equal(f.assetName,'OFFSET 5');
+  assert.equal(f.model,'CD 102-8+L');
+  assert.equal(f.feedDirectionCad,'NEGATIVE_Y');
+  assert.equal(f.driveSideCad,'POSITIVE_X');
+  assert.equal(a.rotation,-90);
+  assert.ok(Math.abs(a.x-122003.6004)<1e-4);
+  assert.ok(Math.abs(a.y-67721.7753)<1e-3);
+  assert.ok(Math.abs(f.footprintSizeMeters.longitudinal-19.3687)<1e-4);
+  assert.ok(Math.abs(f.footprintSizeMeters.lateral-4.3801)<1e-4);
+  assert.ok(f.centerlineHandles.includes('867B3')&&f.centerlineHandles.includes('86696'));
+  assert.ok(f.flowArrowHandles.includes('86810')&&f.flowArrowHandles.includes('86811'));
+  const p=plantDisplayPoint(a.x,a.y,l);
+  assert.ok(Math.abs(p.x-18.2972316)<1e-5);
+  assert.ok(Math.abs(p.z+60.7182907)<1e-5);
 });
