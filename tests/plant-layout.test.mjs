@@ -14,12 +14,15 @@ test('bundled plant layout is traceable to supplied DWG and derived DXF',async()
   assert.equal(l.source.blockCount,54);
 });
 
-test('engineering scale and Offset 5 position remain explicitly unresolved',async()=>{
+test('metric scale is calibrated from source annotations while header conflict remains explicit',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.transform.sourceUnits,'UNKNOWN');
-  assert.equal(l.transform.scale,null);
+  assert.equal(l.transform.sourceUnits,'mm');
+  assert.equal(l.transform.scale,.001);
   assert.match(l.source.unitStatus,/CONFLICTING/);
-  assert.equal(l.displayTransform.status,'VISUAL_NORMALIZATION_ONLY');
+  assert.match(l.source.unitResolution,/315mm/);
+  assert.equal(l.transform.calibration.method,'SOURCE_ANNOTATION_CROSSCHECK');
+  assert.equal(l.transform.calibration.headerConflict,true);
+  assert.equal(l.displayTransform.status,'ENGINEERING_MM_CALIBRATED_WITH_HEADER_CONFLICT');
   assert.equal(l.machineAnchor,null);
   assert.equal(l.positionStatus,'POSITION REVIEW REQUIRED');
   assert.equal(l.audit.offset5LabelFound,false);
@@ -35,12 +38,14 @@ test('DXF extraction preserves searchable identified assets without inventing Of
   for(const b of l.referenceBatches) assert.ok(b.points.every(Number.isFinite));
 });
 
-test('visual normalization is reversible only as display space, not engineering scale',async()=>{
+test('factory display uses the same calibrated mm-to-m scale as engineering transform',async()=>{
   const l=await loadBundledPlantLayout();
   const p=plantDisplayPoint(l.bounds.minX,l.bounds.minY,l);
   const q=plantDisplayPoint(l.bounds.maxX,l.bounds.maxY,l);
   assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.z)&&Number.isFinite(q.x)&&Number.isFinite(q.z));
-  assert.notEqual(l.displayTransform.scale,l.transform.scale);
+  assert.equal(l.displayTransform.scale,l.transform.scale);
+  assert.ok(Math.abs(Math.abs(q.x-p.x)-(l.bounds.maxX-l.bounds.minX)*.001)<1e-9);
+  assert.ok(Math.abs(Math.abs(q.z-p.z)-(l.bounds.maxY-l.bounds.minY)*.001)<1e-9);
 });
 
 
