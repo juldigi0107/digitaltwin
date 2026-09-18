@@ -2,13 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#07121b">
 <meta name="description" content="BMJ Packaging Offset industrial 3D Factory Digital Twin workspace.">
 <title>OFFSET 5 · Factory Digital Twin</title>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./ui-v5.css">
+<link rel="stylesheet" href="./responsive-v5.css">
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body>
@@ -139,6 +140,8 @@
     <div class="panel-footer"><button id="focus-machine" class="primary">⌖ Fokus Mesin</button><button id="edit-position" class="secondary">Posisi</button></div>
   </aside>
 </main>
+
+<button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
 
 <footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DITERIMA · TRANSFORM REVIEW</span><span id="scale-status">SKALA: UNKNOWN</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
 

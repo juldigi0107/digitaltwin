@@ -6,6 +6,7 @@ import {PHOTO_RECONSTRUCTION} from '../frontend/src/offset5.js';
 const html=readFileSync(new URL('../frontend/index.html',import.meta.url),'utf8');
 const ui=readFileSync(new URL('../frontend/src/ui-v5.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../frontend/ui-v5.css',import.meta.url),'utf8');
+const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.meta.url),'utf8');
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 
 test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
@@ -32,5 +33,15 @@ test('industrial shell has responsive workbench and dedicated cache assets',()=>
   assert.match(css,/@media\(max-width:767px\)/);
   assert.match(html,/ASSET HIERARCHY · 6-STAGE TAXONOMY/);
   assert.match(sw,/ui-v5\.css/);
+  assert.match(sw,/responsive-v5\.css/);
   assert.match(sw,/src\/ui-v5\.js/);
+});
+
+test('compact layout includes safe-area drawers and dismissible backdrop',()=>{
+  assert.match(html,/interactive-widget=resizes-content/);
+  assert.match(html,/id="ui-backdrop"/);
+  assert.match(responsiveCss,/env\(safe-area-inset-top/);
+  assert.match(responsiveCss,/mobile-panel-open/);
+  assert.match(responsiveCss,/orientation:landscape/);
+  assert.match(ui,/orientationchange/);
 });
