@@ -61,3 +61,10 @@ test('DXF loading does not hide the machine inspection scene on startup',()=>{
   assert.match(app,/loadBundledPlantLayout\(\)[\s\S]*setView\('machine'\)/);
   assert.doesNotMatch(app,/loadBundledPlantLayout\(\)[\s\S]{0,220}setView\('factory'\)/);
 });
+
+
+test('UI surfaces user-confirmed factory placement without changing machine geometry messaging',()=>{
+  assert.match(app,/activeLayout\(\)\?\.positionStatus/);
+  assert.match(app,/OFU-1 \/ OFFSET 5 ditempatkan dari konfirmasi pengguna/);
+  assert.match(app,/Posisi pabrik tidak mengubah geometry mesin/);
+});
