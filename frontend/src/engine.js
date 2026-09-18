@@ -86,6 +86,22 @@ export class FactoryEngine {
           this.factory.add(marker);this.layoutStats.rendered++;
         }
       }
+      if(l.machineFootprint?.structuralBodyBounds){
+        const f=l.machineFootprint;
+        const addRect=(bounds,color,opacity,name,kind)=>{
+          const coords=[[bounds.minX,bounds.minY],[bounds.maxX,bounds.minY],[bounds.maxX,bounds.maxY],[bounds.minX,bounds.maxY],[bounds.minX,bounds.minY]];
+          const pts=coords.map(([x,y])=>{const p=plantDisplayPoint(x,y,l);return new THREE.Vector3(p.x,.065,p.z);});
+          const mat=new THREE.LineDashedMaterial({color,transparent:true,opacity,dashSize:.55,gapSize:.30});
+          const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat);line.computeLineDistances();
+          const group=new THREE.Group();group.name=name;group.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',sourceFile:l.source.file,assetCode:f.assetCode,confidence:f.placementConfidence,semantic:kind,renderStatus:'INFERRED_OVERLAY'};
+          group.add(line);this.factory.add(group);this.layoutStats.rendered++;
+        };
+        addRect(f.serviceInclusiveBounds,0xb08352,.34,'OFU-1 service-inclusive analysis envelope','ANALYSIS_ENVELOPE');
+        addRect(f.structuralBodyBounds,0xffb45f,.92,'OFU-1 structural body candidate','STRUCTURAL_BODY_CANDIDATE');
+        const a=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.minY,l),b=plantDisplayPoint(f.cadCenterlineX,f.centerlineSpan.maxY,l);
+        const center=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x,.07,a.z),new THREE.Vector3(b.x,.07,b.z)]),new THREE.LineDashedMaterial({color:0xffcf8a,transparent:true,opacity:.7,dashSize:.8,gapSize:.45}));center.computeLineDistances();
+        center.name='OFU-1 CAD centerline';center.userData={sourceType:'DXF_GEOMETRIC_INFERENCE',assetCode:f.assetCode,confidence:f.placementConfidence,semantic:'CENTERLINE_REFERENCE'};this.factory.add(center);this.layoutStats.rendered++;
+      }
       this.layoutStats.unimplemented=Math.max(0,this.layoutStats.total-this.layoutStats.rendered);
       return;
     }

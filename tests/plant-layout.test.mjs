@@ -74,7 +74,7 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
 
 test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identity stays user-confirmed',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.extractionRevision,3);
+  assert.equal(l.extractionRevision,4);
   assert.equal(l.source.layerCount,23);
   assert.equal(l.source.xrefCount,0);
   assert.equal(l.assetCandidates.length,22);
@@ -127,11 +127,41 @@ test('OFU-1 approximate anchor follows the high-confidence CAD geometric match o
   assert.equal(a.rotation,-90);
   assert.ok(Math.abs(a.x-122003.6004)<1e-4);
   assert.ok(Math.abs(a.y-67721.7753)<1e-3);
-  assert.ok(Math.abs(f.footprintSizeMeters.longitudinal-19.3687)<1e-4);
-  assert.ok(Math.abs(f.footprintSizeMeters.lateral-4.3801)<1e-4);
+  assert.ok(Math.abs(f.centerlineSpan.meters-19.3687)<1e-4);
+  assert.equal(f.centerlineSpan.status,'REFERENCE_SPAN_NOT_BODY_LENGTH');
+  assert.ok(Math.abs(f.structuralBodySizeMeters.longitudinal-18.3346)<1e-4);
+  assert.ok(Math.abs(f.structuralBodySizeMeters.lateral-3.5367)<1e-4);
+  assert.ok(Math.abs(f.serviceInclusiveSizeMeters.longitudinal-19.3687)<1e-4);
+  assert.ok(Math.abs(f.serviceInclusiveSizeMeters.lateral-4.3801)<1e-4);
   assert.ok(f.centerlineHandles.includes('867B3')&&f.centerlineHandles.includes('86696'));
   assert.ok(f.flowArrowHandles.includes('86810')&&f.flowArrowHandles.includes('86811'));
   const p=plantDisplayPoint(a.x,a.y,l);
   assert.ok(Math.abs(p.x-(a.x-l.displayTransform.originX)*l.displayTransform.scale)<1e-9);
   assert.ok(Math.abs(p.z-(a.y-l.displayTransform.originY)*l.displayTransform.scale)<1e-9);
+});
+
+
+test('OFU-1 repeated module pitch is source-derived and does not fabricate unit count',async()=>{
+  const l=await loadBundledPlantLayout(),f=l.machineFootprint;
+  assert.equal(f.repeatedModuleCentersCadY.length,7);
+  assert.equal(f.repeatedModulePitchMm.count,7);
+  assert.ok(Math.abs(f.repeatedModulePitchMm.median-1378.05)<.01);
+  assert.equal(f.repeatedModulePitchMm.status,'SEVEN_REPEATED_VISIBLE_MOTIFS');
+  assert.equal(f.flowArrowHeadsCadY.length,6);
+  assert.equal(f.feedDirectionCad,'NEGATIVE_Y');
+  assert.ok(f.feedEndCandidateCadY>f.deliveryEndCandidateCadY);
+  assert.equal(f.operatorSideCad,'NEGATIVE_X');
+  assert.equal(f.driveSideCad,'POSITIVE_X');
+  assert.equal(f.externalCrossCheck.status,'REFERENCE_ONLY');
+});
+
+test('factory engine draws OFU-1 inferred CAD overlay without modifying machine template source',async()=>{
+  const fs=await import('node:fs/promises');
+  const engine=await fs.readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+  const machine=await fs.readFile(new URL('../frontend/src/offset5.js',import.meta.url),'utf8');
+  assert.match(engine,/OFU-1 structural body candidate/);
+  assert.match(engine,/DXF_GEOMETRIC_INFERENCE/);
+  assert.match(engine,/serviceInclusiveBounds/);
+  assert.match(machine,/offset5-photo-v8/);
+  assert.doesNotMatch(machine,/OFU-1 structural body candidate|DXF_GEOMETRIC_INFERENCE/);
 });

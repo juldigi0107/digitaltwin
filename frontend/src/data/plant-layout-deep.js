@@ -8,21 +8,28 @@ const identifiedLabels=[...assetCandidates.map(a=>({x:a.x,y:a.y,text:a.label,lay
 const OFU1_PLACEMENT={
  assetCode:'OFU-1',assetName:'OFFSET 5',model:'CD 102-8+L',
  identityConfidence:'USER-CONFIRMED',placementConfidence:'HIGH CONFIDENCE',evidenceType:'USER_CONFIRMED_CODENAME_PLUS_CAD_GEOMETRIC_MATCH',
- cadCenterlineX:122003.6004,cadMinY:58037.4190,cadMaxY:77406.1316,
- footprintBounds:{minX:120211.9073,maxX:124591.9929,minY:58037.4190,maxY:77406.1316},
- footprintSizeMeters:{lateral:4.3801,longitudinal:19.3687},
- feedDirectionCad:'NEGATIVE_Y',driveSideCad:'POSITIVE_X',
- cadRotation:-90,
+ cadCenterlineX:122003.6004,
+ centerlineSpan:{minY:58037.4190,maxY:77406.1316,meters:19.3687,status:'REFERENCE_SPAN_NOT_BODY_LENGTH'},
+ structuralBodyBounds:{minX:120305.2958,maxX:123841.9929,minY:58556.4,maxY:76891.0},
+ structuralBodySizeMeters:{lateral:3.5367,longitudinal:18.3346},
+ serviceInclusiveBounds:{minX:120211.9073,maxX:124591.9929,minY:58037.4190,maxY:77406.1316},
+ serviceInclusiveSizeMeters:{lateral:4.3801,longitudinal:19.3687},
+ repeatedModuleCentersCadY:[65098.3,66477.4,67856.6,69232.2,70609.2,71982.75,73362.75],
+ repeatedModulePitchMm:{median:1378.05,mean:1377.41,count:7,status:'SEVEN_REPEATED_VISIBLE_MOTIFS'},
+ feedDirectionCad:'NEGATIVE_Y',feedEndCandidateCadY:76891.0,deliveryEndCandidateCadY:58556.4,
+ driveSideCad:'POSITIVE_X',operatorSideCad:'NEGATIVE_X',cadRotation:-90,
  centerlineHandles:['867B3','8674D','8623F','862F3','86459','863A2','8651A','865E8','86696'],
- flowArrowHandles:['86810','86811'],
- note:'User explicitly confirmed OFU-1 as the codename of OFFSET 5. This specific unlabeled long-press footprint is a high-confidence geometric match, not a user-confirmed coordinate. Centerline, longitudinal extent, flow arrows and service-side geometry are derived from source CAD geometry.'
+ flowArrowHandles:['86817','86818','86810','86811','867E7','867E8','86463','86464','8669B','8669C','86809','8680A'],
+ flowArrowHeadsCadY:[58166.2,62603.4,64893.8,69214.5,73342.3,76976.0],
+ externalCrossCheck:{status:'REFERENCE_ONLY',title:'Speedmaster CD 102 Technical Data',familyFinding:'CD 102-6+L sample with Preset Plus feeder/delivery and two delivery extension modules is documented at 15.85 m; used only as a family-scale plausibility check, not installed-machine proof.'},
+ note:'User explicitly confirmed OFU-1 as the codename of OFFSET 5. The unlabeled long-press geometry is a high-confidence CAD match, not a literal OFU-1 CAD label. The 19.37 m value is centerline/service analysis span; the conservative structural body span is about 18.33 m. Seven external module motifs repeat at about 1.378 m pitch; this must not be silently converted into an exact installed unit count.'
 };
 export function applyPlantLayoutDeepDive(layout){
  if(!layout)return layout;
- layout.extractionRevision=3;layout.assetCandidates=assetCandidates;layout.areaCandidates=areaCandidates;layout.identifiedLabels=identifiedLabels;
+ layout.extractionRevision=4;layout.assetCandidates=assetCandidates;layout.areaCandidates=areaCandidates;layout.identifiedLabels=identifiedLabels;
  layout.userConfirmedAssets=[{assetCode:'OFU-1',assetName:'OFFSET 5',model:'CD 102-8+L',confidence:'USER-CONFIRMED',scope:'IDENTITY_ONLY'}];layout.placementCandidates=[OFU1_PLACEMENT];
  Object.assign(layout.source,{layerCount:23,xrefCount:0,xrefNames:[],extractionMethod:'ezdxf direct parse of user-converted DXF; source labels deduplicated; explicit asset/area anchors retained without footprint inference.'});
- Object.assign(layout.audit,{identifiedAssetCandidateCount:22,identifiedAreaCandidateCount:16,offset5LabelFound:false,offset5Placement:'APPROXIMATE — OFU-1 is the user-confirmed codename for OFFSET 5. The unlabeled long-press footprint at CAD X≈122004 is a HIGH-CONFIDENCE geometric match based on press topology, source centerline and sheet-flow arrows; the exact CAD coordinate has not been user-confirmed.',sourceFinding:'DXF contains explicit labels for CX104 and SX 52 plus an unlabeled long multi-unit press footprint. Literal OFU-1, OFFSET 5 and CD 102 text are absent. OFU-1 identity is user-confirmed; association of the unlabeled footprint is an evidence-based geometric inference, not a fabricated CAD label.',deepDiveUnsupportedTypes:['POLYLINE','HATCH','SPLINE','3DFACE','REGION','POINT','SOLID','TRACE','WIPEOUT']});
- layout.machineAnchor={id:'OFU-1-CANDIDATE',x:OFU1_PLACEMENT.cadCenterlineX,y:(OFU1_PLACEMENT.cadMinY+OFU1_PLACEMENT.cadMaxY)/2,z:0,rotation:OFU1_PLACEMENT.cadRotation,confidence:'APPROXIMATE',evidenceType:OFU1_PLACEMENT.evidenceType,matchConfidence:'HIGH CONFIDENCE',scaleFitApplied:false};
+ Object.assign(layout.audit,{identifiedAssetCandidateCount:22,identifiedAreaCandidateCount:16,offset5LabelFound:false,offset5Placement:'APPROXIMATE — OFU-1 is the user-confirmed codename for OFFSET 5. The unlabeled long-press footprint at CAD X≈122004 is a HIGH-CONFIDENCE geometric match based on press topology, source centerline, repeated module pitch and six directional arrowheads; the exact CAD coordinate has not been user-confirmed.',sourceFinding:'DXF contains explicit labels for CX104 and SX 52 plus an unlabeled long multi-unit press footprint. Literal OFU-1, OFFSET 5 and CD 102 text are absent. OFU-1 identity is user-confirmed; association of the unlabeled footprint is an evidence-based geometric inference, not a fabricated CAD label.',deepDiveUnsupportedTypes:['POLYLINE','HATCH','SPLINE','3DFACE','REGION','POINT','SOLID','TRACE','WIPEOUT']});
+ layout.machineAnchor={id:'OFU-1-CANDIDATE',x:OFU1_PLACEMENT.cadCenterlineX,y:(OFU1_PLACEMENT.centerlineSpan.minY+OFU1_PLACEMENT.centerlineSpan.maxY)/2,z:0,rotation:OFU1_PLACEMENT.cadRotation,confidence:'APPROXIMATE',evidenceType:OFU1_PLACEMENT.evidenceType,matchConfidence:'HIGH CONFIDENCE',scaleFitApplied:false};
  layout.machineFootprint=OFU1_PLACEMENT;layout.positionStatus='APPROXIMATE · HIGH-CONFIDENCE OFU-1 GEOMETRIC MATCH';return layout;
 }
