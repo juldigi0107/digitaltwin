@@ -7,6 +7,28 @@ export async function loadBundledPlantLayout(){
   const stream=new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'));
   const text=await new Response(stream).text();
   cache=JSON.parse(text);
+  // The DXF header reports inches, but source annotations and dimension entities
+  // are internally consistent with millimetres. Keep the conflict visible while
+  // using the source-supported mm→m conversion for factory coordinates.
+  cache.source.unitStatus='CONFLICTING HEADER / CALIBRATED TO mm FROM SOURCE ANNOTATIONS';
+  cache.source.unitResolution='DXF $INSUNITS reports inch, while explicit 315mm/400mm labels, equipment size annotations and dimension values (400, 800, 1000, 1308, 2500) are internally consistent with millimetres. Factory rendering uses 0.001 m/source-unit and retains the header conflict.';
+  cache.source.unitEvidence=[
+    {kind:'TEXT',value:'315mm'},
+    {kind:'TEXT',value:'400mm'},
+    {kind:'TEXT',value:'(1600x700x1930)'},
+    {kind:'TEXT',value:'(1400x700x1930)'},
+    {kind:'DIMENSION',handle:'564B7',measurement:1000.000002},
+    {kind:'DIMENSION',handle:'7D750',measurement:400},
+    {kind:'DIMENSION',handle:'86C29',measurement:2500},
+    {kind:'DIMENSION',handle:'9105C',measurement:1308},
+    {kind:'DIMENSION',handle:'9105F',measurement:800}
+  ];
+  cache.transform={...cache.transform,sourceUnits:'mm',scale:.001,calibration:{
+    method:'SOURCE_ANNOTATION_CROSSCHECK',confidence:'HIGH CONFIDENCE',headerConflict:true,
+    sourceToMeter:.001,evidenceCount:cache.source.unitEvidence.length
+  }};
+  cache.displayTransform={...cache.displayTransform,scale:.001,status:'ENGINEERING_MM_CALIBRATED_WITH_HEADER_CONFLICT'};
+  cache.audit.unitFinding='Source geometry is rendered at mm→m based on explicit metric annotations and dimensions; DXF $INSUNITS=inch remains recorded as CONFLICTING.';
   return cache;
 }
 export function plantDisplayPoint(x,y,layout){
