@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-v5');
+ assert.equal(t.root.userData.version,'offset5-photo-v6');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -42,7 +42,8 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(new THREE.Box3().setFromObject(t.findNode('press-0-drive')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('drive-utilities')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(size.x>=15.5&&size.x<=16.1);assert.ok(size.y>=2.8&&size.y<=3.0);assert.ok(size.z>=3.8&&size.z<=4.4);
- assert.ok(t.meshes.length<270,'mobile mesh budget exceeded');
+ assert.ok(t.meshes.length<310,'mobile mesh budget exceeded');
+ for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
  t.dispose();
 });

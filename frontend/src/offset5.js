@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v5', status: 'RECONSTRUCTED / DUAL-SIDE PHOTO-ALIGNED',
+  version: 'offset5-photo-v6', status: 'RECONSTRUCTED / FEEDER-VACUUM-TABLE DETAILED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -142,6 +142,19 @@ export class OffsetMachineTemplate {
     this.controls(board,[.51,.86,-.91],'x',5);
     this.gaugePanel(board,[.51,.87,.88]);
     for(const z of [.72,.86,.99])this.tube(board,[[.50,.68,z],[.61,.54,z],[.53,.38,z-.05]],.014,'rubber');
+    const vacuum=this.group(board,'vacuum-table','Central suction tape / vacuum table',[0,0,0],[-.15,.3,0],['IMG_1626.jpeg'],'Permukaan dan jalur tengah teramati; pembagian chamber internal hanya referensi teknis.');
+    this.box(vacuum,[.88,.026,.40],[0,1.355,0],'black',.012);
+    this.box(vacuum,[.82,.010,.23],[0,1.373,0],'rubber',.006);
+    for(let i=0;i<11;i++)for(const z of [-.07,.07])this.cylinder(vacuum,.009,.006,[-.37+i*.074,1.381,z],'glass','y');
+    for(const x0 of [-.41,.41])this.cylinder(vacuum,.055,.34,[x0,1.35,0],'steel','z');
+    for(const x0 of [-.24,0,.24])this.box(vacuum,[.13,.018,.31],[x0,1.342,0],'graphite',.006);
+    const guides=this.group(board,'feedboard-guides','Feed-table guides & alignment references',[0,0,0],[0,.25,.65],['IMG_1626.jpeg'],'Guide luar terlihat; front lay dan side alignment ditandai sebagai reference-only pada taxonomy.');
+    for(const z of [-.72,.72]){this.box(guides,[.82,.035,.035],[0,1.405,z],'steel',.008);this.box(guides,[.08,.12,.08],[.34,1.44,z],'graphite',.012);}
+    this.cylinder(guides,.026,1.58,[.40,1.43,0],'steel','z');
+    const detection=this.group(board,'feedboard-detection','Sheet-arrival / multiple-sheet detector bridge',[0,0,0],[.2,.45,0],['IMG_1626.jpeg'],'Posisi luar diperkirakan; jenis sensor dan kalibrasi tidak diverifikasi pada mesin terpasang.');
+    for(const z of [-.82,.82])this.box(detection,[.07,.28,.07],[.34,1.54,z],'graphite',.012);
+    this.box(detection,[.10,.08,1.70],[.34,1.69,0],'steel',.015);
+    for(const z of [-.34,.34])this.box(detection,[.16,.10,.12],[.34,1.60,z],'black',.018);
     this.delivery(6.1);
     this.transfer(4.68);
     const utility=this.group(this.root,'drive-utilities','Kabinet utilitas eksternal drive side',[1.9,0,-2.0],[0,.2,-.8],['IMG_2389(1).jpeg','IMG_2395.jpeg'],'Kabinet eksternal dan routing terlihat pada drive side; isi internal tidak dimodelkan.');
@@ -201,6 +214,12 @@ export class OffsetMachineTemplate {
       this.tube(feed,[[-.24,2.16,z],[.03,2.02,z],[.03,1.66,z],[.26,1.62,z]],.032);
       this.cylinder(feed,.027,.19,[.24,1.60,z],'steel','y');this.cylinder(feed,.065,.025,[.24,1.5,z],'rubber','y');
     }
+    const separating=this.group(feed,'feeder-separation','Separating & forwarding suction assemblies',[0,0,0],[-.25,.45,0],['IMG_1625.jpeg'],'Sucker dan carrier luar mengikuti foto; timing, stroke dan setelan tidak dimodelkan.');
+    for(const z of [-.54,-.27,.27,.54]){this.cylinder(separating,.026,.18,[.18,1.72,z],'steel','y');this.cylinder(separating,.055,.025,[.18,1.61,z],'rubber','y');}
+    this.box(separating,[.58,.09,1.30],[-.18,1.88,0],'graphite',.018);
+    const air=this.group(feed,'feeder-air','Blast-air / sheet-separation bar',[0,0,0],[-.25,.4,-.55],['IMG_1625.jpeg'],'Bar dan hose visible; nozzle flow serta pressure merupakan data UNKNOWN.');
+    this.cylinder(air,.028,1.46,[-.42,1.48,0],'steel','z');
+    for(const z of [-.60,-.30,0,.30,.60]){this.tube(air,[[-.42,1.50,z],[-.54,1.38,z],[-.48,1.24,z]],.013);this.cylinder(air,.018,.10,[-.48,1.20,z],'steel','y');}
     const pile=this.group(g,'feeder-pile','Tumpukan lembar & alas',[0,0,0],[-.85,0,0],['IMG_1625.jpeg'],'Tumpukan lembar sebagai isi visual; tinggi bukan jumlah produksi.');
     this.box(pile,[1.15,.12,1.6],[0,.18,0],'steel');this.box(pile,[1.06,1.00,1.48],[0,.74,0],'paper',.008);
     for(let i=0;i<24;i++)this.box(pile,[1.064,.007,1.484],[0,.28+i*.041,0],'light');

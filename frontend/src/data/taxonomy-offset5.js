@@ -11,8 +11,26 @@ const mainUnits=[
 ];
 for(const [key,name,meshRefs,vec] of mainUnits)add(`O5.${key}`,'O5',2,'Unit Utama',name,{meshRefs,explodeVector:vec,sourceRefs:key==='INSPECTION'?['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN']:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY});
 
-const feederSubs=[['PILE','Pile Inlet',['feeder-pile']],['HEAD','Feeding Head',['feeder-head']],['BOARD','Feed Board',['feed-board']],['CONTROL','Feeder Controls',['feeder-panel']],['COVER','Covers & Frame',['feeder-frame']]];
-for(const [key,name,meshRefs] of feederSubs){const id=`O5.FEEDER.${key}`;add(id,'O5.FEEDER',3,'Sub',name,{meshRefs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[-.7,.25,key==='CONTROL'?1:0]});}
+const feederSourceRefs=['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102','SRC-HD-SUCTION-BELT-PATENT','SRC-HD-SHEET-ALIGN-PATENT','SRC-HD-PRESET-PLUS-MANUAL'];
+const feederSubs=[
+ ['PILE','Pile Inlet',['feeder-pile'],['Pile Table','Pile Lift & Guides']],
+ ['HEAD','Feeding Head',['feeder-head'],['Head Carrier','Height / Format Reference']],
+ ['SEPARATION','Sheet Separation',['feeder-separation'],['Separating Suckers','Forwarding Suckers']],
+ ['AIR','Blast-air Separation',['feeder-air'],['Blowing / Suction Nozzle','Blast-air Bar']],
+ ['BOARD','Feed Table',['feed-board'],['Table Surface','Transfer / Propelling Zone']],
+ ['VACUUM','Vacuum Table / Suction Tape',['vacuum-table'],['Suction Tape Module','Vacuum Transport Module']],
+ ['GUIDE','Sheet Guidance & Register',['feedboard-guides'],['Guide Plate','Side / Front Alignment Reference']],
+ ['DETECTION','Sheet Detection',['feedboard-detection'],['Sheet-arrival Sensor','Multiple-sheet Detector Reference']],
+ ['CONTROL','Feeder Controls',['feeder-panel'],['Local Control Panel','Air / Transport Adjustment']],
+ ['FRAME','Portal & Covers',['feeder-frame'],['Main Portal','Pile Lift Rails']]
+];
+for(const [key,name,meshRefs,blocks] of feederSubs){
+ const id=`O5.FEEDER.${key}`;add(id,'O5.FEEDER',3,'Sub',name,{meshRefs,sourceRefs:feederSourceRefs,confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY,explodeVector:[-.7,.25,key==='CONTROL'?-1:key==='GUIDE'?.6:0]});
+ blocks.forEach((blockName,bi)=>{const bid=`${id}.B${bi+1}`;add(bid,id,4,'Block',blockName,{meshRefs,sourceRefs:feederSourceRefs,confidence:meshRefs.length?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[-.2+bi*.4,.18,bi?.25:-.25]});
+  const partNames={PILE:['Pile Support','Lift-chain Reference'],HEAD:['Carrier Beam','Head Adjustment Reference'],SEPARATION:['Suction Carrier','Suction Cup'],AIR:['Air Manifold','Nozzle / Hose'],BOARD:['Feed Surface','Propelling Roller Reference'],VACUUM:['Perforated Suction Tape','Drive / Idler Roller'],GUIDE:['Guide Plate','Alignment Element'],DETECTION:['Sensor Head','Detector Mount'],CONTROL:['Control Face','Adjustment Element'],FRAME:['Portal Member','Vertical Rail']}[key];
+  partNames.forEach((partName,pi)=>{const pid=`${bid}.P${pi+1}`;add(pid,bid,5,'Part',partName,{meshRefs,sourceRefs:feederSourceRefs,confidence:meshRefs.length&&pi===0?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,.10,pi?.18:-.18]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${partName} · visual/reference item`,{sourceRefs:feederSourceRefs,confidence:meshRefs.length&&pi===0?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.08,.08,.12],maintenanceTag:'VISUAL_INSPECTION'});});
+ });
+}
 
 const printingBlocks=[['FRAME','Side Frame'],['INK','Ink System'],['DAMP','Dampening System'],['CYL','Cylinder Zone'],['COVER','Covers & Doors'],['STEP','Step & Access']];
 const printingParts={FRAME:['Side Frame','Lower Base','Service Opening'],INK:['Ink Fountain','Ink Fountain Cover','Visible Roller Guard','Ink Ductor Reference'],DAMP:['Dampening Housing','Water Pan Reference','Dampening Roller Reference'],CYL:['Plate Cylinder Reference','Blanket Cylinder Reference','Impression Cylinder Reference','Transfer Cylinder Reference'],COVER:['Upper Cover','Operator-side Cover','Lower Access Door'],STEP:['Step Plate','Step Support','Handle']};
