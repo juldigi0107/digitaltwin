@@ -1,0 +1,35 @@
+import {CONFIDENCE} from './confidence.js';
+
+export const ORIENTATION=Object.freeze({
+  coordinateSystem:{x:'+X · arah aliran material',y:'+Y · vertikal',z:'+Z · sisi operator'},
+  feedDirection:'FEEDER_TO_DELIVERY_POSITIVE_X',operatorSide:'POSITIVE_Z',driveSide:'UNVERIFIED',
+  feederEnd:'NEGATIVE_X',deliveryEnd:'POSITIVE_X',confidence:CONFIDENCE.HIGH
+});
+
+export const TECHNICAL_SOURCES=Object.freeze([
+  {id:'SRC-HEIDELBERG-CD102',title:'Speedmaster CD 102 · product brochure',publisher:'Heidelberger Druckmaschinen AG',url:'https://pdf.directindustry.com/pdf/heidelberger-druckmaschinen-ag/speedmaster-cd-102/124833-388839.html',type:'MANUFACTURER_BROCHURE_MIRROR',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['Preset Plus feeder','printing-unit platform terminology','coating-unit option','Preset Plus delivery','packaging press context']},
+  {id:'SRC-FOCUSIGHT-SWAN',title:'FS-SWAN Offset Printing Online Inspection System',publisher:'Focusight Technology Co., Ltd.',url:'https://en.focusight.net/en/Product/Printing/536.html',type:'MANUFACTURER_PRODUCT_PAGE',confidence:CONFIDENCE.REFERENCE_ONLY,supports:['inline sheet inspection','camera/imaging assembly','lighting','image processing','alarm and marking system']},
+  {id:'SRC-USER-PHOTOS',title:'Foto aktual OFFSET 5',publisher:'PT Bukit Muria Jaya',url:null,type:'USER_EVIDENCE',confidence:CONFIDENCE.PHOTO_VERIFIED,supports:['outer housing','visible feeder structure','operator platform','visible delivery structure','visible inline-inspection gantry']}
+]);
+
+export const PHOTO_REGISTRY=Object.freeze([
+  ['p01','IMG_2312.jpeg','Feeder end','end view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p02','IMG_1970.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p03','IMG_1971.jpeg','Printing units','upper ink/roller','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p04','IMG_1656.jpeg','Delivery','panel view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p05','IMG_1624.jpeg','Delivery end','controls/end view','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p06','IMG_1625.jpeg','Delivery pile','open frame','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p07','IMG_1626.jpeg','Transfer zone','grille detail','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p08','IMG_1627.jpeg','Printing units','operator side','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p09','IMG_1628.jpeg','Printing units','upper operator side','active_geometry_reference',CONFIDENCE.HIGH],
+  ['p10','IMG_1629.jpeg','Delivery/Coating','platform/end housing','supplementary_reference',CONFIDENCE.HIGH],
+  ['p11','IMG_1630.jpeg','Delivery/Coating','sloped hood/service','supplementary_reference',CONFIDENCE.HIGH],
+  ['p12','IMG_1631.jpeg','Inline inspection','gantry/camera pods','supplementary_reference',CONFIDENCE.HIGH],
+  ['p13','IMG_1633.jpeg','Inline inspection','top beam','supplementary_reference',CONFIDENCE.HIGH],
+  ['p14','IMG_1634.jpeg','Machine end','orientation overview','orientation_reference',CONFIDENCE.HIGH],
+  ['p15','IMG_1165.jpeg','Service zone','gauge/hose detail','detail_reference',CONFIDENCE.MEDIUM],
+  ['p16','IMG_0947.jpeg','Service zone','roller detail','detail_reference',CONFIDENCE.MEDIUM]
+].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
+
+export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});
+

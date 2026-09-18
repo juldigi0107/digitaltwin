@@ -45,3 +45,5 @@
   .ui-workbench-open .engineering-workbench{left:auto!important;width:min(620px,78vw);height:calc(100dvh - 74px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 }
 @media(pointer:coarse){button,summary,label{-webkit-tap-highlight-color:transparent}.tabs button{min-height:40px}.layer-item{min-height:28px}}
+.stage-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:9px 0}.stage-strip button{min-height:30px;border:1px solid #294452;background:#0b1d29;color:#829aa6;border-radius:4px;font-size:8px}.stage-strip button.active{background:#1679bd;color:#fff;border-color:#2ea8ff}.source-photo{padding:8px!important}.source-photo h4{margin-bottom:4px!important}.panel-content a{color:#63bdf0}.view-switch{max-width:calc(100vw - 150px);overflow-x:auto;scrollbar-width:none}.view-switch::-webkit-scrollbar{display:none}
+@media(max-width:767px){.view-switch{max-width:calc(100vw - 18px);justify-content:flex-start!important}.view-switch button{flex:0 0 44px}.stage-strip button{min-height:44px;font-size:10px}.geometry-tree button{min-height:40px}}
