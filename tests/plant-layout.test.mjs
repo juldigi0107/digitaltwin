@@ -127,8 +127,12 @@ test('OFU-1 approximate anchor follows the high-confidence CAD geometric match o
   assert.equal(a.rotation,-90);
   assert.ok(Math.abs(a.x-122003.6004)<1e-4);
   assert.ok(Math.abs(a.y-67721.7753)<1e-3);
-  assert.ok(Math.abs(f.footprintSizeMeters.longitudinal-19.3687)<1e-4);
-  assert.ok(Math.abs(f.footprintSizeMeters.lateral-4.3801)<1e-4);
+  assert.ok(Math.abs(f.centerlineSpan.meters-19.3687)<1e-4);
+  assert.equal(f.centerlineSpan.status,'REFERENCE_SPAN_NOT_BODY_LENGTH');
+  assert.ok(Math.abs(f.structuralBodySizeMeters.longitudinal-18.3346)<1e-4);
+  assert.ok(Math.abs(f.structuralBodySizeMeters.lateral-3.5367)<1e-4);
+  assert.ok(Math.abs(f.serviceInclusiveSizeMeters.longitudinal-19.3687)<1e-4);
+  assert.ok(Math.abs(f.serviceInclusiveSizeMeters.lateral-4.3801)<1e-4);
   assert.ok(f.centerlineHandles.includes('867B3')&&f.centerlineHandles.includes('86696'));
   assert.ok(f.flowArrowHandles.includes('86810')&&f.flowArrowHandles.includes('86811'));
   const p=plantDisplayPoint(a.x,a.y,l);
