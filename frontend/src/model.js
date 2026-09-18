@@ -2,7 +2,7 @@ export const CONFIDENCES = ['VERIFIED','HIGH CONFIDENCE','MEDIUM CONFIDENCE','ES
 export const initialState = {
   revision: 0,
   asset: {
-    asset_id:'MACHINE-OFFSET5',asset_code:'OFFSET-05',model:'CD 102-8+L',
+    asset_id:'MACHINE-OFFSET5',asset_code:'OFFSET-05',codename:'OFU-1',model:'CD 102-8+L',
     description:'OFFSET 5',source_description:'OFFSET UV INK - 5 MACHINE + INLINE INS',
     category:'PRODUCTION_MACHINE',subcategory:'OFFSET_PRINTING',manufacturer:'Heidelberg',
     specification:'Heidelberg Speedmaster offset printing machine', location:null,
@@ -13,7 +13,7 @@ export const initialState = {
       file:'NewPrompt-MASTER_PROMPT_3D_FACTORY_DIGITAL_TWIN_OFFSET5_HEIDELBERG_SPEEDMASTER_CD102-8L.txt',
       section:'Bagian 2 dan 15',type:'USER_PROVIDED',confidence:'HIGH CONFIDENCE',verification:'USER_ASSERTED',
       supports:['asset_id','asset_code','model','description','source_description','manufacturer','specification'],
-      note:'Identitas dinyatakan di prompt. Foto, manual, DWG, dimensi, dan konfigurasi terpasang belum tersedia.'}]
+      note:'Identitas dinyatakan di prompt. Foto, manual, DWG, dimensi, dan konfigurasi terpasang belum tersedia.'},{id:'SOURCE-USER-CODENAME-01',title:'Kode nama aset dari pengguna',type:'USER_PROVIDED',confidence:'HIGH CONFIDENCE',verification:'USER_ASSERTED',supports:['codename','description'],note:'Pengguna mengonfirmasi bahwa kode nama OFFSET 5 adalah OFU-1. Pernyataan ini tidak menetapkan koordinat CAD.'}]
   },
   layout:null
 };
