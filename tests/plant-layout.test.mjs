@@ -74,7 +74,7 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
 
 test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identity stays user-confirmed',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.extractionRevision,4);
+  assert.equal(l.extractionRevision,5);
   assert.equal(l.source.layerCount,23);
   assert.equal(l.source.xrefCount,0);
   assert.equal(l.assetCandidates.length,22);
@@ -164,4 +164,19 @@ test('factory engine draws OFU-1 inferred CAD overlay without modifying machine 
   assert.match(engine,/serviceInclusiveBounds/);
   assert.match(machine,/offset5-photo-v8/);
   assert.doesNotMatch(machine,/OFU-1 structural body candidate|DXF_GEOMETRIC_INFERENCE/);
+});
+
+
+test('OFU-1 functional zones remain inference-only and preserve source directionality',async()=>{
+  const l=await loadBundledPlantLayout(),f=l.machineFootprint;
+  assert.equal(l.functionalZones.length,4);
+  const byKind=Object.fromEntries(l.functionalZones.map(z=>[z.kind,z]));
+  for(const kind of ['DELIVERY_EXTENSION_CANDIDATE','REPEATED_PRESS_TRAIN_CANDIDATE','FEEDER_CANDIDATE','DRIVE_SERVICE_STRIP_CANDIDATE']) assert.ok(byKind[kind],kind+' missing');
+  assert.equal(byKind.FEEDER_CANDIDATE.confidence,'HIGH CONFIDENCE');
+  assert.equal(byKind.REPEATED_PRESS_TRAIN_CANDIDATE.confidence,'HIGH CONFIDENCE');
+  assert.equal(byKind.DRIVE_SERVICE_STRIP_CANDIDATE.confidence,'MEDIUM CONFIDENCE');
+  assert.ok(byKind.FEEDER_CANDIDATE.bounds.minY>byKind.REPEATED_PRESS_TRAIN_CANDIDATE.bounds.minY);
+  assert.ok(byKind.DELIVERY_EXTENSION_CANDIDATE.bounds.maxY<=byKind.REPEATED_PRESS_TRAIN_CANDIDATE.bounds.minY);
+  assert.equal(f.feedDirectionCad,'NEGATIVE_Y');
+  assert.match(byKind.REPEATED_PRESS_TRAIN_CANDIDATE.note,/not converted into an exact installed printing-unit count/i);
 });
