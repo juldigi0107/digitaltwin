@@ -15,8 +15,10 @@ export function plantDisplayPoint(x,y,layout){
 }
 export function drawPlantPlan(canvas,layout){
   if(!canvas||!layout)return;
-  const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.max(1,Math.round(rect.width*dpr)),h=Math.max(1,Math.round(rect.height*dpr));
+  const ctx=canvas.getContext?.('2d');if(!ctx)return;
+  const rect=canvas.getBoundingClientRect(),dpr=Math.min(globalThis.devicePixelRatio||1,2),w=Math.max(1,Math.round(rect.width*dpr)),h=Math.max(1,Math.round(rect.height*dpr));
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+  ctx.setTransform?.(dpr,0,0,dpr,0,0);ctx.clearRect?.(0,0,rect.width,rect.height);
   const b=layout.bounds,pad=8,sx=(rect.width-pad*2)/(b.maxX-b.minX),sy=(rect.height-pad*2)/(b.maxY-b.minY),s=Math.min(sx,sy),ox=pad+(rect.width-pad*2-(b.maxX-b.minX)*s)/2,oy=pad+(rect.height-pad*2-(b.maxY-b.minY)*s)/2;
   const pt=(x,y)=>[ox+(x-b.minX)*s,rect.height-(oy+(y-b.minY)*s)];
   const colors={CAD_REFERENCE:'#315363',WALL:'#91aab5',COLUMN:'#5f8fa5',WINDOW:'#5aa6c8',SECURITY:'#a58d58'};
