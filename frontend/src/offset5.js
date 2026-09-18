@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v7', status: 'RECONSTRUCTED / PRINTING-UNIT-1 DETAILED',
+  version: 'offset5-photo-v8', status: 'RECONSTRUCTED / PU2 + PU1-PU2 GRIPPER DETAILED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -132,6 +132,7 @@ export class OffsetMachineTemplate {
     this.cylinder(deck,.026,13.3,[0,1.15,-1.76],'steel','x');
     this.cylinder(deck,.021,13.3,[0,.88,-1.76],'steel','x');
     for(let i=0;i<8;i++)this.pressUnit(i,-4.9+i*1.23,refUnits);
+    this.interUnitTransfer(-4.285);
     this.feeder(-7.15);
     const board=this.group(this.root,'feed-board','Meja transfer feeder',[-5.86,0,0],[-.5,.25,0],['IMG_1626.jpeg']);
     this.box(board,[1.0,1.00,1.94],[0,.77,0],'graphite',.035);
@@ -197,11 +198,12 @@ export class OffsetMachineTemplate {
     }
     this.box(ink,[.26,.10,1.70],[.28,2.8,0],'graphite',.02);
     this.tube(ink,[[.24,2.62,-.70],[.42,2.5,-.79],[.34,2.37,-.94]],.018);
-    if(i===0)this.printingUnitOneInternals(g);
+    if(i<=1)this.printingUnitInternals(g,i);
   }
-  printingUnitOneInternals(g){
+  printingUnitInternals(g,i){
+    const id=`press-${i}`,label=`PU${i+1}`;
     const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'];
-    const cylinders=this.group(g,'press-0-cylinder-train','PU1 · cylinder & sheet-transfer reference',[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
+    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · cylinder & sheet-transfer reference`,[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
     // Neutral sectional references stay inside the verified housing envelope.
     const cylinderSpec=[
       ['plate cylinder reference',.215,[.17,1.78,0],'steel'],
@@ -214,24 +216,44 @@ export class OffsetMachineTemplate {
       this.cylinder(cylinders,.285,.035,[.13,1.02,z],'graphite');
       this.cylinder(cylinders,.255,.035,[-.10,.66,z],'graphite');
     }
-    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'pu1-sheet-path','paper',[.02,1.16,0],[Math.PI/2,0,Math.PI/2]);
+    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,1.16,0],[Math.PI/2,0,Math.PI/2]);
     path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
 
-    const damp=this.group(g,'press-0-dampening','PU1 · dampening reference',[0,0,0],[0,.48,-.35],photos,'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
+    const damp=this.group(g,`${id}-dampening`,`${label} · dampening reference`,[0,0,0],[0,.48,-.35],photos,'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
     this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
     this.cylinder(damp,.092,1.45,[-.12,2.16,0],'rubber');
     this.cylinder(damp,.072,1.43,[.03,2.27,0],'steel');
     for(const z of [-.72,.72])this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015);
 
-    const inking=this.group(g,'press-0-inking-train','PU1 · inking roller train reference',[0,0,0],[0,.68,.25],photos,'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
+    const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train reference`,[0,0,0],[0,.68,.25],photos,'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
     const rollers=[[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']];
     for(const [x,y,r,kind] of rollers)this.cylinder(inking,r,1.44,[x,y,0],kind);
     for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
 
-    const access=this.group(g,'press-0-service-access','PU1 · service access & guards',[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard menandai batas akses operator/drive. Interlock, latch dan titik pelumasan tetap reference-only.');
+    const access=this.group(g,`${id}-service-access`,`${label} · service access & guards`,[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard menandai batas akses operator/drive. Interlock, latch dan titik pelumasan tetap reference-only.');
     this.box(access,[.42,.55,.035],[.51,1.47,.73],'black',.018);
     this.box(access,[.42,.55,.035],[.51,1.47,-.73],'black',.018);
     for(const z of [-.75,.75])this.cylinder(access,.027,.24,[.52,1.48,z],'steel','y');
+  }
+  interUnitTransfer(x){
+    const photos=['IMG_1165.jpeg','IMG_0947.jpeg','IMG_1627.jpeg','IMG_1628.jpeg'];
+    const transfer=this.group(this.root,'transfer-pu1-pu2','PU1 → PU2 · inter-unit sheet transfer',[x,0,0],[0,.25,-.65],photos,'Lokasi transfer mengikuti celah antar-housing. Diameter drum, cam profile, gripper timing dan preload tidak boleh dipakai sebagai data penyetelan.');
+    this.cylinder(transfer,.235,1.48,[0,.70,0],'graphite');
+    for(const z of [-.76,.76])this.cylinder(transfer,.258,.035,[0,.70,z],'steel');
+    for(const a of [-.16,.16]){
+      const bar=this.group(transfer,`transfer-pu1-pu2-gripper-${a<0?'a':'b'}`,`Gripper bar ${a<0?'A':'B'} · visual reference`,[0,0,0],[a<0?-.35:.35,.18,0],photos,'Gripper bar dan fingers adalah representasi inspeksi. Pitch, jumlah aktual, spring force dan phasing belum diverifikasi.');
+      this.box(bar,[.055,.055,1.38],[a,.91,0],'steel',.012);
+      for(let n=0;n<7;n++){
+        const z=-.60+n*.20;
+        this.box(bar,[.11,.035,.055],[a+.045,.935,z],'graphite',.010);
+        this.box(bar,[.065,.018,.075],[a+.085,.955,z],'steel',.008);
+      }
+    }
+    const guide=this.group(transfer,'transfer-pu1-pu2-guide','PU1 → PU2 · sheet guide reference',[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
+    const arc=new THREE.CatmullRomCurve3([[-.42,.78,-.66],[-.18,.96,-.66],[.18,.96,-.66],[.42,.78,-.66]].map(V));
+    this.mesh(guide,()=>new THREE.TubeGeometry(arc,20,.018,6,false),'pu1-pu2-guide-arc','steel',[0,0,0]);
+    const arc2=arc.clone();arc2.points=arc.points.map(p=>new THREE.Vector3(p.x,p.y,.66));
+    this.mesh(guide,()=>new THREE.TubeGeometry(arc2,20,.018,6,false),'pu1-pu2-guide-arc-2','steel',[0,0,0]);
   }
   feeder(x){
     const g=this.group(this.root,'feeder','Feeder · rangka terbuka',[x,0,0],[-1.6,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);
@@ -302,7 +324,7 @@ export class OffsetMachineTemplate {
     const amount=THREE.MathUtils.clamp(Number(t)||0,0,1);for(const n of this.nodes)n.position.copy(n.userData.rest);
     const children=selected?.children.filter(c=>c.userData.selectable);
     const targets=selected?(children.length?children:[selected]):this.parts;
-    for(const n of targets)n.position.addScaledVector(n.userData.explode,amount);
+    if(amount!==0)for(const n of targets)n.position.addScaledVector(n.userData.explode,amount);
     this.root.updateMatrixWorld(true);
   }
   highlight(part){
