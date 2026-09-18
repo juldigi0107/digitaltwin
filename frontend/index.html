@@ -83,8 +83,8 @@
       <div class="wb-tabs" aria-label="Workbench mobile tabs"><button data-workbench="dwg" class="active">DWG</button><button data-workbench="layers">Layers</button><button data-workbench="hierarchy">Hierarchy</button><button data-workbench="quick">Quick Info</button><button id="ui-close-workbench">Tutup</button></div>
 
       <article class="wb-card" data-workbench-card="dwg">
-        <header><span>DWG 2D PLAN · SOURCE</span><small>TRANSFORM REVIEW REQUIRED</small></header>
-        <div class="wb-body"><div class="dwg-stage"><canvas id="dwg-canvas" aria-label="Denah 2D aktual hasil ekstraksi DXF dari DWG pengguna"></canvas><div id="dwg-warning" class="dwg-warning">DXF aktual · engineering scale UNKNOWN · OFFSET 5 position review required</div></div></div>
+        <header><span>DWG 2D PLAN · SOURCE</span><small>MM→M CALIBRATED · HEADER CONFLICT</small></header>
+        <div class="wb-body"><div class="dwg-stage"><canvas id="dwg-canvas" aria-label="Denah 2D aktual hasil ekstraksi DXF dari DWG pengguna"></canvas><div id="dwg-warning" class="dwg-warning">DXF aktual · 0.001 m/unit · HEADER CONFLICT · OFFSET 5 position review required</div></div></div>
       </article>
 
       <article class="wb-card" data-workbench-card="layers">
@@ -143,7 +143,7 @@
 
 <button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
 
-<footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DXF-DERIVED · TRANSFORM REVIEW</span><span id="scale-status">SKALA: UNKNOWN</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
+<footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DXF-DERIVED · TRANSFORM REVIEW</span><span id="scale-status">SKALA: 0.001 m/unit · HEADER CONFLICT</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
 
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
