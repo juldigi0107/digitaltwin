@@ -37,7 +37,7 @@
     <button disabled title="Belum tersedia pada backend saat ini"><span>△</span><small>Alerts</small></button>
     <div class="source-health" aria-label="Status sumber data">
       <h4>SOURCE STATUS</h4>
-      <div class="source-health-row"><span>DWG Layout</span><b class="confidence-medium">DITERIMA</b></div>
+      <div class="source-health-row"><span>DWG Layout</span><b class="confidence-high">DXF-DERIVED</b></div>
       <div class="source-health-row"><span>Machine Data</span><b class="confidence-high">HIGH</b></div>
       <div class="source-health-row"><span>Dimensions</span><b class="confidence-unknown">UNKNOWN</b></div>
       <div class="source-health-row"><span>3D Model</span><b class="confidence-approx">APPROX.</b></div>
@@ -84,7 +84,7 @@
 
       <article class="wb-card" data-workbench-card="dwg">
         <header><span>DWG 2D PLAN · SOURCE</span><small>TRANSFORM REVIEW REQUIRED</small></header>
-        <div class="wb-body"><div class="dwg-stage"><div class="dwg-machine">OFFSET 5</div><div class="dwg-warning">DWG diterima · koordinat CAD→world belum divalidasi</div></div></div>
+        <div class="wb-body"><div class="dwg-stage"><canvas id="dwg-canvas" aria-label="Denah 2D aktual hasil ekstraksi DXF dari DWG pengguna"></canvas><div id="dwg-warning" class="dwg-warning">DXF aktual · engineering scale UNKNOWN · OFFSET 5 position review required</div></div></div>
       </article>
 
       <article class="wb-card" data-workbench-card="layers">
@@ -98,7 +98,7 @@
           <label class="layer-item"><input type="checkbox" disabled> Machines Future</label>
           <label class="layer-item"><input type="checkbox" disabled> Pathways / Safety</label>
           <label class="layer-item"><input type="checkbox" disabled> Electrical / Utilities</label>
-        </div><div class="layer-note">Layer toggle akan diaktifkan setelah parser DWG dan mapping CAD→world tervalidasi.</div></div>
+        </div><div class="layer-note">Layer berikut adalah referensi sumber. Toggle fisik/3D tetap nonaktif sampai semantik dan engineering scale tervalidasi.</div></div>
       </article>
 
       <article class="wb-card" data-workbench-card="hierarchy">
@@ -143,7 +143,7 @@
 
 <button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
 
-<footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DITERIMA · TRANSFORM REVIEW</span><span id="scale-status">SKALA: UNKNOWN</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
+<footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DXF-DERIVED · TRANSFORM REVIEW</span><span id="scale-status">SKALA: UNKNOWN</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
 
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
