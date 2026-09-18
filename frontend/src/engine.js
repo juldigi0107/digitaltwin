@@ -72,6 +72,20 @@ export class FactoryEngine {
         group.userData={sourceType:'DXF_DERIVED_FROM_DWG',sourceFile:l.source.file,derivedFile:l.source.derivedFile,sourceLayer:batch.layer,confidence:batch.confidence||'UNVERIFIED',semantic:batch.semantic||'CAD_REFERENCE',renderStatus:'2D_REFERENCE',engineeringScale:'UNKNOWN'};
         group.add(line);this.factory.add(group);this.layoutStats.rendered++;
       }
+      if(Array.isArray(l.identifiedLabels)){
+        const assetPattern=/(CX\s*104|SX\s*52|Polar-115|MACHINE\s+IPM|MESIN\s+UV|CTP#\d+)/i;
+        for(const label of l.identifiedLabels){
+          const p=plantDisplayPoint(label.x,label.y,l),asset=assetPattern.test(label.text||'');
+          const marker=new THREE.Group();marker.name='CAD label · '+label.text;
+          marker.position.set(p.x,.08,p.z);marker.userData={sourceType:'DXF_DERIVED_FROM_DWG',sourceFile:l.source.file,derivedFile:l.source.derivedFile,sourceLayer:label.layer,sourceEntityId:label.handle||null,semantic:asset?'ASSET_POSITION_PLACEHOLDER':'CAD_LABEL',confidence:'SOURCE_REFERENCE',engineeringScale:'UNKNOWN',label:label.text,sourceX:label.x,sourceY:label.y};
+          const dot=new THREE.Mesh(new THREE.CircleGeometry(asset?.38:.20,16),new THREE.MeshBasicMaterial({color:asset?0x36a9e1:0x6f8793,transparent:true,opacity:asset?.95:.7,side:THREE.DoubleSide}));dot.rotation.x=-Math.PI/2;marker.add(dot);
+          if(typeof document!=='undefined'){
+            const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+            if(ctx){canvas.width=256;canvas.height=48;ctx.font='600 18px system-ui';ctx.fillStyle=asset?'#bce9ff':'#9cb3be';ctx.fillText(String(label.text).slice(0,26),6,28);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));sprite.scale.set(7.2,1.35,1);sprite.position.set(3.7,.85,0);marker.add(sprite);}
+          }
+          this.factory.add(marker);this.layoutStats.rendered++;
+        }
+      }
       this.layoutStats.unimplemented=Math.max(0,this.layoutStats.total-this.layoutStats.rendered);
       return;
     }
@@ -91,7 +105,7 @@ export class FactoryEngine {
       this.layoutStats.rendered++;
     }
   }
-  clearFactory(){this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material?.dispose();});this.factory.clear();}
+  clearFactory(){this.factory.traverse(o=>{o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>{m.map?.dispose();m.dispose();});else{o.material?.map?.dispose();o.material?.dispose();}});this.factory.clear();}
   edit(on){if(on&&this.view==='factory'&&this.layout){this.machine.visible=true;this.gizmo.attach(this.machine);}else this.gizmo.detach();}
   setLow(on){this.low=on;this.renderer.setPixelRatio(on?1:Math.min(devicePixelRatio,1.7));this.renderer.shadowMap.enabled=!on;this.template.setLow(on);this.resize();}
   dispose(){cancelAnimationFrame(this.frame);this.resizeObserver.disconnect();this.controls.dispose();this.gizmo.dispose();this.template.dispose();this.clearFactory();this.studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.renderer.dispose();}
