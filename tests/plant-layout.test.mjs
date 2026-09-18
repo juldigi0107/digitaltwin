@@ -42,3 +42,24 @@ test('visual normalization is reversible only as display space, not engineering 
   assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.z)&&Number.isFinite(q.x)&&Number.isFinite(q.z));
   assert.notEqual(l.displayTransform.scale,l.transform.scale);
 });
+
+
+test('2D plant canvas renderer uses a real context and draws source labels',async()=>{
+  const {drawPlantPlan}=await import('../frontend/src/data/plant-layout-data.js');
+  const l=await loadBundledPlantLayout();let strokes=0,labels=0;
+  const ctx={beginPath(){},moveTo(){},lineTo(){},stroke(){strokes++},fillText(){labels++},clearRect(){},setTransform(){},set strokeStyle(v){},set lineWidth(v){},set globalAlpha(v){},set font(v){},set fillStyle(v){}};
+  const canvas={width:0,height:0,getBoundingClientRect(){return {width:420,height:260}},getContext(type){assert.equal(type,'2d');return ctx;}};
+  globalThis.devicePixelRatio=2;
+  assert.doesNotThrow(()=>drawPlantPlan(canvas,l));
+  assert.ok(strokes>0,'CAD batches should be drawn');
+  assert.ok(labels>0,'identified source labels should be drawn');
+  assert.equal(canvas.width,840);assert.equal(canvas.height,520);
+});
+
+test('identified CAD labels never promote OFFSET 5 without source evidence',async()=>{
+  const l=await loadBundledPlantLayout();
+  assert.ok(l.identifiedLabels.some(x=>x.text==='CX104'));
+  assert.ok(l.identifiedLabels.some(x=>x.text==='Polar-115'));
+  assert.ok(!l.identifiedLabels.some(x=>/OFFSET\s*5|CD\s*102/i.test(x.text)));
+  assert.equal(l.machineAnchor,null);
+});
