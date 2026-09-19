@@ -44,3 +44,10 @@ test('source registry separates photo evidence from technical reference',()=>{
  const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,23);assert.equal(stats.unique,23);assert.equal(stats.active_geometry_reference,15);
  assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
 });
+test('OEM PDFs resolve feeder drives and the complete PU1 roller taxonomy',()=>{
+ for(const id of ['SRC-CD102-SERVICE-MANUAL','SRC-CD102-ROLLER-PROCEDURE'])assert.ok(TECHNICAL_SOURCES.some(s=>s.id===id),`missing ${id}`);
+ for(const id of ['OEM_PILE_CENTER','OEM_HEAD_HEIGHT','OEM_HEAD_FORMAT','OEM_FRONT_LAY_DS','OEM_FRONT_LAY_OS','OEM_COVER_GUIDE'])assert.ok(TAXONOMY_BY_ID.has(`O5.FEEDER.${id.startsWith('OEM_FRONT')||id==='OEM_COVER_GUIDE'?'GUIDE':id.includes('HEAD')?'HEAD':'PILE'}.${id}`));
+ for(let i=1;i<=15;i++)assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.INK.R${i}`),`missing ink roller ${i}`);
+ for(const id of ['A','B','C','D'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.INK.DIST_${id}`));
+ for(const id of ['16','17','18','19','FR'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.DAMP.R${id}`));
+});
