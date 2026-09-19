@@ -86,8 +86,8 @@ test('layout UI exposes OFU-1 functional zones as inference without scaling mach
 
 
 test('every static button is actionable and no command-center button is permanently disabled',()=>{
- const buttons=[...html.matchAll(/<button\\b([^>]*)>([\\s\\S]*?)<\\/button>/g)].map(m=>({attrs:m[1],label:m[2].replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim()}));
- assert.equal(buttons.filter(b=>/\\bdisabled\\b/.test(b.attrs)).length,0,'static disabled buttons remain in the page');
+ const buttons=[...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].map(m=>({attrs:m[1],label:m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}));
+ assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'static disabled buttons remain in the page');
  for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(html,new RegExp(`id="${id}"`));
  for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(ui,new RegExp(id));
 });
