@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v13');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v14');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -72,5 +72,34 @@ test('PU1 primary cylinders are ordered and have no volumetric overlap',()=>{
   assert.ok(distance>=a.radius+b.radius,`${a.name} overlaps ${b.name}`);
   assert.ok(distance-(a.radius+b.radius)<.035,`${a.name} to ${b.name} is not a plausible near-nip arrangement`);
  }
+ t.dispose();
+});
+
+
+test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
+ const t=new OffsetMachineTemplate(),layout=t.root.userData.pu1ExteriorLayout;
+ assert.equal(layout.dimensionUnit,'VISUAL_ONLY');
+ assert.ok(layout.accessBay>=.34,'PU1-PU2 access bay is still too narrow visually');
+ const frame1=new THREE.Box3().setFromObject(t.findNode('press-0-frame'));
+ const frame2=new THREE.Box3().setFromObject(t.findNode('press-1-frame'));
+ const steps=new THREE.Box3().setFromObject(t.findNode('press-0-steps'));
+ const cover=new THREE.Box3().setFromObject(t.findNode('press-0-cover'));
+ const drive=new THREE.Box3().setFromObject(t.findNode('press-0-drive'));
+ assert.ok(frame2.min.x-frame1.max.x>=.30,'PU1-PU2 exterior frame gap is insufficient');
+ assert.equal(steps.intersectsBox(cover),false,'operator steps overlap PU1 cover');
+ assert.ok(steps.min.x>frame1.max.x,'operator steps must start outside PU1 frame');
+ assert.ok(steps.max.x<frame2.min.x,'operator steps must end before PU2 frame');
+ assert.ok(drive.max.x<frame2.min.x,'drive-side PU1 step/cover intrudes into PU2 frame');
+ t.dispose();
+});
+
+test('PU1 top guard remains below the photo-aligned ink-fountain bridge',()=>{
+ const t=new OffsetMachineTemplate();
+ const top=new THREE.Box3().setFromObject(t.findNode('press-0-top-deck'));
+ const ink=new THREE.Box3().setFromObject(t.findNode('press-0-ink'));
+ const bridge=new THREE.Box3().setFromObject(t.findNode('press-0-fountain-support'));
+ assert.ok(top.max.y<ink.max.y,'PU1 top guard should not dominate the visible ink-fountain assembly');
+ assert.ok(top.min.y<bridge.max.y,'PU1 top deck/bridge relation is invalid');
+ assert.ok(bridge.max.y<2.9,'PU1 bridge is vertically exaggerated');
  t.dispose();
 });
