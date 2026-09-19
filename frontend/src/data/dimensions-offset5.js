@@ -43,10 +43,10 @@ export const OFFSET5_DIMENSIONS=Object.freeze({
     inspectionCenterX:6.74,
     deliveryCenterX:8.22,
     deliveryBodyLength:1.90,
-    operatorWalkwayCenterZ:1.68,
-    operatorWalkwayWidth:.94,
-    driveWalkwayCenterZ:-1.63,
-    driveWalkwayWidth:.70,
+    operatorWalkwayCenterZ:1.75,
+    operatorWalkwayWidth:.82,
+    driveWalkwayCenterZ:-1.62,
+    driveWalkwayWidth:.64,
     utilityCenterZ:-2.04,
     platformLength:19.22
   })
