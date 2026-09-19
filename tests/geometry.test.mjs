@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v15');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v16');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -48,7 +48,7 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  for(const id of ['press-0-cylinder-train','press-0-dampening','press-0-inking-train','press-0-service-access'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-0-dampening-form','press-0-plate-clamp','press-0-inking-distribution'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-0-impression-gripper','press-0-gripper-control','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-cam'])assert.ok(t.findNode(id),`missing ${id}`);
- for(const id of ['press-0-top-deck','press-0-fountain-support','press-0-side-service-grille'])assert.ok(t.findNode(id),`missing ${id}`);
+ for(const id of ['press-0-top-deck','press-0-fountain-support'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-1-cylinder-train','press-1-dampening','press-1-inking-train','press-1-service-access','transfer-pu1-pu2','transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-guide'])assert.ok(t.findNode(id),`missing ${id}`);
  assert.equal(t.findNode('press-2-cylinder-train'),null,'PU3 internals must remain unchanged');
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
@@ -105,16 +105,14 @@ test('PU1 top guard remains below the photo-aligned ink-fountain bridge',()=>{
 });
 
 
-test('PU1 approved-target exterior keeps bridge, deck and service grille separated',()=>{
+test('PU1 top exterior follows actual-photo scope and does not depend on generated target',()=>{
  const t=new OffsetMachineTemplate();
  const top=new THREE.Box3().setFromObject(t.findNode('press-0-top-deck'));
  const bridge=new THREE.Box3().setFromObject(t.findNode('press-0-fountain-support'));
- const grille=new THREE.Box3().setFromObject(t.findNode('press-0-side-service-grille'));
- const steps=new THREE.Box3().setFromObject(t.findNode('press-0-steps'));
- assert.ok(top.max.y<bridge.max.y,'raised bridge must remain visually above the low vent deck');
- assert.ok(bridge.min.y>2.15,'bridge collapsed into PU1 housing');
- assert.equal(grille.intersectsBox(steps),false,'service grille must not overlap operator steps');
- assert.ok(grille.min.z>-1.40&&grille.max.z<-.95,'service grille left the verified operator-side −Z envelope');
- assert.equal(t.root.userData.pu1ExteriorLayout.visualTarget,'USER_APPROVED_RENDER_DERIVED_FROM_PHOTOS');
+ const cover=new THREE.Box3().setFromObject(t.findNode('press-0-cover'));
+ assert.ok(top.max.y<bridge.max.y,'ink-fountain support must remain above the low photo-derived top housing');
+ assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
+ assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
+ assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL');
  t.dispose();
 });

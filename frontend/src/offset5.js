@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v15', status: 'PU1 PHOTO-ALIGNED EXTERIOR / USER-APPROVED VISUAL TARGET',
+  version: 'offset5-photo-pdf-v16', status: 'PU1 PHOTO EXTERIOR / OEM-PDF INTERNAL TOPOLOGY · GENERATED TARGET REMOVED',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -140,7 +140,7 @@ export class OffsetMachineTemplate {
       pu1FrameWidth:.92,pu2FrameWidth:1.08,
       accessBay:pu2X-pu1X-(.92+1.08)/2,
       operatorStepCenterX:.65,
-      source:'IMG_1627.jpeg + IMG_1628(2).jpeg',visualTarget:'USER_APPROVED_RENDER_DERIVED_FROM_PHOTOS'
+      source:'IMG_1627.jpeg + IMG_1628(2).jpeg',geometryBasis:'USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL'
     });
     this.feeder(-7.15);
     const board=this.group(this.root,'feed-board','Meja transfer feeder',[-5.86,0,0],[-.5,.25,0],['IMG_1626.jpeg']);
@@ -200,43 +200,24 @@ export class OffsetMachineTemplate {
     this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025);
     for(const z of [-.62,.62])this.box(body,[.025,.10,.4],[glassX,.98,z],'glass');
     const cover=this.group(g,'press-'+i+'-cover','Cover samping melengkung',[0,0,0],[0,.12,1.1],sources);
+    // The real photos show a broad silver shoulder cover on PU1; do not replace it with
+    // a generated-render style narrow shell. PDF sources do not define this exterior surface.
+    this.shell(cover,[0,.48,1.14],i===0?.78:.86,1.92,.36,1);
+    this.controls(cover,[i===0?.28:.32,1.43,1.355]);
+    this.box(cover,[i===0?.40:.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
+    this.box(cover,[i===0?.30:.34,.026,.018],[-.11,1.72,1.36],'black',.005);
     if(i===0){
-      // PU1 uses a narrower silver shoulder plus a dedicated dark service-grille field,
-      // matching the user-approved visual target derived from the actual feeder-view photos.
-      this.shell(cover,[-.26,.48,1.14],.40,1.92,.36,1);
-      this.box(cover,[.30,.045,.018],[-.28,1.76,1.36],'graphite',.007);
-      this.box(cover,[.24,.022,.018],[-.28,1.68,1.36],'black',.004);
-      const serviceGrille=this.group(g,'press-0-side-service-grille','PU1 · operator-side service grille & access panel',[0,0,0],[.12,.12,1.10],['IMG_1628(2).jpeg','IMG_1627.jpeg'],'Large dark service grille and panel seams follow the visible PU1 side field in the user-approved visual target. Vent pitch and latch geometry are visual-only.');
-      this.grille(serviceGrille,[.12,1.42,1.235],.62,.82,'z');
-      this.box(serviceGrille,[.18,.16,.028],[-.16,.88,1.255],'graphite',.008);
-      this.box(serviceGrille,[.025,.42,.028],[.40,1.30,1.255],'steel',.004);
-    }else{
-      this.shell(cover,[0,.48,1.14],.86,1.92,.36,1);
-      this.controls(cover,[.32,1.43,1.355]);
-      this.box(cover,[.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
-      this.box(cover,[.34,.026,.018],[-.11,1.72,1.36],'black',.005);
-    }
-    if(i===0){
-      const top=this.group(g,'press-0-top-deck','PU1 · low top vent deck & shoulder caps',[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg'],'Top deck is rebuilt from the feeder-view photo and the approved target: low dark deck, long vent field, narrow shoulder caps and clear separation from the raised ink-fountain bridge.');
-      this.box(top,[.62,.045,1.24],[-.10,2.30,0],'graphite',.018);
-      this.box(top,[.52,.014,1.10],[-.10,2.326,0],'black',.006);
-      for(let n=0;n<11;n++)this.box(top,[.44,.010,.022],[-.10,2.342,-.46+n*.092],'steel',.003);
-      this.box(top,[.13,.030,1.14],[.18,2.352,0],'blue',.010);
-      for(const z of [-.84,.84]){
-        this.box(top,[.38,.070,.22],[-.18,2.285,z],'silver',.022);
-        this.box(top,[.22,.024,.060],[.06,2.334,z],'graphite',.005);
-      }
-      const bridge=this.group(g,'press-0-fountain-support','PU1 · raised ink-fountain bridge, pivot arms & utility routing',[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg'],'Raised bridge is visually separated from the deck. Twin articulated supports, pivots and utility routing follow the approved render derived from the real photos; service angles and locking details remain unmeasured.');
-      this.box(bridge,[.22,.14,1.68],[-.10,2.66,0],'graphite',.018);
-      this.box(bridge,[.18,.026,1.58],[-.10,2.742,0],'steel',.010);
-      this.box(bridge,[.08,.024,.44],[-.205,2.615,-.18],'red',.006);
-      for(const z of [-.75,.75]){
-        const lower=this.box(bridge,[.090,.44,.070],[.18,2.40,z],'graphite',.014);lower.rotation.z=-.20;
-        const upper=this.box(bridge,[.080,.30,.065],[.04,2.58,z],'graphite',.014);upper.rotation.z=.42;
-        this.cylinder(bridge,.050,.080,[.22,2.22,z],'steel','z');
-        this.cylinder(bridge,.036,.072,[-.04,2.60,z],'steel','z');
-        this.box(bridge,[.15,.055,.10],[-.02,2.73,z],'black',.009);
-        this.tube(bridge,[[.03,2.68,z],[.18,2.55,z],[.24,2.36,z],[.12,2.30,z*.92]],.014,'rubber');
+      const top=this.group(g,'press-0-top-deck','PU1 · photo-derived top housing & vent deck',[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg'],'Exterior geometry follows the actual top-view photographs only. The OEM PDFs define roller and service topology, not the outer top-cover shape.');
+      this.box(top,[.68,.065,1.58],[-.05,2.27,0],'graphite',.022);
+      this.box(top,[.58,.018,1.34],[-.05,2.314,0],'black',.006);
+      for(let n=0;n<12;n++)this.box(top,[.50,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
+      const bridge=this.group(g,'press-0-fountain-support','PU1 · ink-fountain support bridge from actual photos',[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Two end supports, pivots and the transverse fountain member follow the real photos. The PDF roller diagram is used only for the internal roller topology below this exterior.');
+      this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
+      this.box(bridge,[.12,.055,1.46],[-.04,2.68,0],'red',.012);
+      for(const z of [-.73,.73]){
+        const arm=this.box(bridge,[.095,.44,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
+        this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
+        this.box(bridge,[.14,.055,.10],[.10,2.66,z],'black',.009);
       }
     }
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources,i===0?'PU1 step diposisikan di access bay antara PU1–PU2; tidak menembus cover atau frame. Dimensi tetap visual-only.':'Pijakan mengikuti pola exterior foto; ukuran bukan data engineering.');
@@ -260,11 +241,7 @@ export class OffsetMachineTemplate {
       this.box(ink,[.38,.070,1.58],[-.12,2.38,0],'steel',.022);
       this.cylinder(ink,.095,1.52,[-.10,2.49,0],'red');
       const lip=this.box(ink,[.20,.032,1.52],[-.31,2.52,0],'light');lip.rotation.z=-.30;
-      for(const side of [-1,1]){
-        this.box(ink,[.07,.34,.065],[.20,2.50,side*.78],'graphite',.016);
-        this.cylinder(ink,.056,.07,[.20,2.44,side*.80],'steel');
-      }
-      this.tube(ink,[[.18,2.57,-.67],[.34,2.47,-.76],[.29,2.35,-.90]],.016);
+      for(const side of [-1,1])this.cylinder(ink,.050,.07,[.18,2.44,side*.79],'steel','z');
     }else{
       this.box(ink,[.42,.08,1.69],[-.10,2.4,0],'steel',.025);
       this.cylinder(ink,.105,1.6,[-.08,2.51,0],i===1?'blue':'rubber');
