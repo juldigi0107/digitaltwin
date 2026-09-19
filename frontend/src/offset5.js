@@ -11,7 +11,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v24',
+  version: 'offset5-photo-pdf-v25',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
   dimensionUnit: 'DXF_CALIBRATED_OUTER_ENVELOPE',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
@@ -25,7 +25,7 @@ const V=(a)=>new THREE.Vector3(...a);
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v5',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v6',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
@@ -62,6 +62,12 @@ export class OffsetMachineTemplate {
   }
   cylinder(g,r,length,pos,kind='steel',axis='z'){
     return this.mesh(g,()=>new THREE.CylinderGeometry(r,r,length,16),'cyl:'+r+':'+length,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
+  }
+  frustum(g,r1,r2,length,pos,kind='rubber',axis='y'){
+    return this.mesh(g,()=>new THREE.CylinderGeometry(r1,r2,length,16),'frustum:'+r1+':'+r2+':'+length,kind,pos,axis==='z'?[Math.PI/2,0,0]:axis==='x'?[0,0,Math.PI/2]:[0,0,0]);
+  }
+  ring(g,major,minor,pos,kind='steel',axis='z'){
+    return this.mesh(g,()=>new THREE.TorusGeometry(major,minor,8,20),'ring:'+major+':'+minor,kind,pos,axis==='z'?[0,0,0]:axis==='x'?[0,Math.PI/2,0]:[Math.PI/2,0,0]);
   }
   tube(g,pts,r=.024,kind='rubber'){
     const curve=new THREE.CatmullRomCurve3(pts.map(V));
@@ -141,7 +147,7 @@ export class OffsetMachineTemplate {
     }
   }
   tagAdaptiveDetails(){
-    const deep=/(-operator-details|-drive-details|-ink-fountain-controls|-sheet-guides|-dampening-pan|-lubrication|feeder-air-controls|feeder-pallet-lift|coater-supply|dryer-ventilation|inspection-cabling|delivery-chain-path|delivery-powder-jogger-air)$/;
+    const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-lubrication|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|gripper-spring|coater-supply|coater-chamber-locks|dryer-ventilation|dryer-air-plenum|inspection-cabling|inspection-calibration|delivery-chain-path|delivery-drive-sprockets|delivery-pile-lift|delivery-powder-jogger-air)$/;
     for(const node of this.nodes)if(deep.test(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
   }
   build(){
@@ -203,6 +209,10 @@ export class OffsetMachineTemplate {
     for(const z of [-.42,.42]){this.box(frontLays,[.06,.10,.09],[.45,1.43,z],'steel',.008);this.box(frontLays,[.10,.07,.07],[.38,1.36,z],'graphite',.008);}
     const pullLays=this.group(register,'feedboard-pull-lays','Pull-lay / side-lay control reference',[0,0,0],[.20,.16,-.50],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Pull-lay sensing/control terkonfirmasi oleh manual; detail mekanik dan sisi aktif mesin terpasang belum diverifikasi.');
     for(const z of [-.70,.70]){this.box(pullLays,[.13,.05,.08],[.30,1.39,z],'graphite',.008);this.cylinder(pullLays,.023,.05,[.37,1.43,z],'steel','z');}
+    const layMechanism=this.group(register,'feedboard-lay-mechanism','Front-lay shaft, stops & side-lay carriage',[0,0,0],[.20,.16,.42],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The shaft and stops clarify the alignment mechanism. Cam profile, lay timing and active pull-lay side remain reference-only.');
+    this.cylinder(layMechanism,.022,1.42,[.38,1.34,0],'steel','z');
+    for(let n=0;n<8;n++){const z=-.61+n*.175;this.box(layMechanism,[.055,.12,.040],[.40,1.40,z],'graphite',.006);this.frustum(layMechanism,.018,.010,.055,[.43,1.48,z],'steel','y');}
+    for(const z of [-.73,.73]){this.box(layMechanism,[.24,.07,.12],[.22,1.35,z],'graphite',.010);this.cylinder(layMechanism,.038,.05,[.32,1.42,z],'steel','z');}
     const coverGuide=this.group(register,'feedboard-cover-guide-drive','PU1 operator-side cover-guide drive 1M4',[0,0,0],[.30,.20,-.62],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Manual menyatakan servo 1M4 berada di operator side PU1 dan mengatur gripper opening transfer gripper 0.1–1.9 mm. Nilai ini metadata servis, bukan skala model.');
     this.box(coverGuide,[.15,.18,.10],[.42,1.20,.82],'graphite',.018);this.cylinder(coverGuide,.035,.12,[.46,1.22,.75],'steel','z');
     const infeed=this.group(board,'feedboard-infeed-gripper','Infeed gripper bar reference',[0,0,0],[.32,.22,-.45],['IMG_1626.jpeg'],'Gripper bar menunjukkan serah-terima lembar menuju impression zone PU1; jumlah finger, cam dan phasing tidak diverifikasi.');
@@ -327,8 +337,15 @@ export class OffsetMachineTemplate {
       const body=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-body`,`${label} · ${cylinderIds[idx]} cylinder body`,[0,0,0],[0,.06,-.12],photos);
       const roller=this.cylinder(body,r,1.52,pos,kind);roller.name=name;roller.userData.detail=true;
       const journals=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-journals`,`${label} · ${cylinderIds[idx]} journals / bearers reference`,[0,0,0],[0,.05,-.18],photos,'Journal/bearer geometry is an inspection reference only.');
-      for(const z of [-.79,.79]){const jr=this.cylinder(journals,Math.max(.045,r*.26),.07,[pos[0],pos[1],z],'steel','z');jr.userData.detail=true;}
+      for(const z of [-.79,.79]){const jr=this.cylinder(journals,Math.max(.045,r*.26),.07,[pos[0],pos[1],z],'steel','z');jr.userData.detail=true;this.ring(journals,r*.91,.018,[pos[0],pos[1],z>0?.755:-.755],'steel','z').userData.detail=true;}
     });
+    const driveGears=this.group(g,`${id}-drive-gears`,`${label} · cylinder drive gears, hubs & guard reference`,[0,0,0],[.16,.16,-.62],photos,'Meshing sequence follows the cylinder train only as a visual kinematic reference. Tooth count, module, backlash, material and lubrication specification are not engineering data.');
+    cylinderSpec.forEach(([,r,[x,y]])=>{
+      this.cylinder(driveGears,r*.82,.035,[x,y,.89],'graphite','z').userData.detail=true;
+      this.ring(driveGears,r*.70,.018,[x,y,.915],'steel','z').userData.detail=true;
+      this.cylinder(driveGears,Math.max(.032,r*.19),.065,[x,y,.92],'steel','z').userData.detail=true;
+    });
+    this.box(driveGears,[.66,1.42,.025],[.02,1.20,.955],'glass',.018).userData.detail=true;
     const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),`printing-unit-sheet-path-${i}`,'paper',[.02,1.10,0],[Math.PI/2,0,Math.PI/2]);
     path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.22;path.material.side=THREE.DoubleSide;path.userData.detail=true;
     const guides=this.group(g,`${id}-sheet-guides`,`${label} · sheet guide, air bar & anti-marking reference`,[0,0,0],[0,.12,.40],photos,'Guide surfaces follow the functional sheet path. Air pressure, nozzle pattern, coating and anti-marking specification remain unverified.');
@@ -446,10 +463,12 @@ export class OffsetMachineTemplate {
       }
       for(const z of [-.69,.69])this.box(bar,[.11,.13,.05],[a,.90,z],'graphite',.01);
     }
-    const shaft=this.group(transfer,`${base}-gripper-shaft`,'PU1 → PU2 · gripper shaft, supports & return-spring reference',[0,0,0],[0,.22,-.52],photos,'Shaft and spring reference completes the visible gripper kinematic chain; torsion, preload, bearing and material specification remain unverified.');
+    const shaft=this.group(transfer,`${base}-gripper-shaft`,`PU${from} → PU${to} · gripper shaft, supports & return-spring reference`,[0,0,0],[0,.22,-.52],photos,'Shaft and spring reference completes the visible gripper kinematic chain; torsion, preload, bearing and material specification remain unverified.');
     this.cylinder(shaft,.030,1.42,[0,.895,0],'steel','z');
     for(const z of [-.72,.72]){this.cylinder(shaft,.066,.055,[0,.895,z],'graphite','z');this.cylinder(shaft,.025,.085,[.08,.87,z],'steel','z');}
-    const cam=this.group(transfer,`${base}-gripper-cam`,'PU1 → PU2 · opening cam, follower & lever reference',[0,0,0],[.28,.20,-.72],photos,'Cam-control geometry is explanatory only. Opening/closing angle, dwell and synchronization with PU1/PU2 are not measured.');
+    const spring=this.group(transfer,`${base}-gripper-spring`,`PU${from} → PU${to} · gripper return spring & pivot reference`,[0,0,0],[.20,.18,-.62],photos,'The spring and pivot close the explanatory gripper linkage. Coil count, spring rate, preload and timing are not engineering values.');
+    for(const z of [-.70,.70]){for(let n=0;n<5;n++)this.ring(spring,.038,.006,[.02+n*.012,.93,z],'steel','z');this.cylinder(spring,.018,.07,[.09,.93,z],'steel','z');}
+    const cam=this.group(transfer,`${base}-gripper-cam`,`PU${from} → PU${to} · opening cam, follower & lever reference`,[0,0,0],[.28,.20,-.72],photos,`Cam-control geometry is explanatory only. Opening/closing angle, dwell and synchronization with PU${from}/PU${to} are not measured.`);
     this.cylinder(cam,.125,.025,[0,.70,.815],'graphite','z');
     this.cylinder(cam,.036,.04,[.16,.80,.82],'steel','z');
     const camLever=this.box(cam,[.22,.040,.050],[.10,.84,.82],'steel',.008);camLever.rotation.z=.62;
@@ -478,6 +497,12 @@ export class OffsetMachineTemplate {
     const separating=this.group(feed,'feeder-separation','Separating & forwarding suction assemblies',[0,0,0],[-.25,.45,0],['IMG_1625.jpeg'],'Sucker dan carrier luar mengikuti foto; timing, stroke dan setelan tidak dimodelkan.');
     for(const z of [-.54,-.27,.27,.54]){this.cylinder(separating,.026,.18,[.18,1.72,z],'steel','y');this.cylinder(separating,.055,.025,[.18,1.61,z],'rubber','y');}
     this.box(separating,[.58,.09,1.30],[-.18,1.88,0],'graphite',.018);
+    const suctionCups=this.group(feed,'feeder-suction-cups','Separating / forwarding sucker cups & height collars',[0,0,0],[-.18,.32,.20],['IMG_1625.jpeg'],'Cup locations distinguish separating and forwarding functions; installed cup material, bore and stroke are not asserted.');
+    for(const [x0,z] of [[.16,-.55],[.16,-.22],[.16,.22],[.16,.55],[-.04,-.42],[-.04,.42]]){
+      this.cylinder(suctionCups,.018,.12,[x0,1.69,z],'steel','y');
+      this.frustum(suctionCups,.052,.024,.045,[x0,1.605,z],'rubber','y');
+      this.ring(suctionCups,.030,.007,[x0,1.645,z],'steel','y');
+    }
     const air=this.group(feed,'feeder-air','Blast-air / sheet-separation bar',[0,0,0],[-.25,.4,-.55],['IMG_1625.jpeg'],'Bar dan hose visible; nozzle flow serta pressure merupakan data UNKNOWN.');
     this.cylinder(air,.028,1.46,[-.42,1.48,0],'steel','z');
     for(const z of [-.60,-.30,0,.30,.60]){this.tube(air,[[-.42,1.50,z],[-.54,1.38,z],[-.48,1.24,z]],.013);this.cylinder(air,.018,.10,[-.48,1.20,z],'steel','y');}
@@ -536,6 +561,9 @@ export class OffsetMachineTemplate {
     this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');
     this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');
     const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
+    const locks=this.group(g,'coater-chamber-locks','Chamber end locks, bearing collars & blade clamps',[0,0,0],[.14,.40,-.58],photos,'End hardware is an inspection-oriented functional reference; clamp force, blade angle and bearing specification are not asserted.');
+    for(const z of [-.77,.77]){this.cylinder(locks,.075,.055,[-.02,1.80,z],'graphite','z');this.ring(locks,.060,.010,[-.02,1.80,z],'steel','z');this.handle(locks,[-.19,1.94,z],'z',.11);}
+    for(const z of [-.62,-.20,.20,.62])this.box(locks,[.08,.055,.055],[-.22,1.94,z],'steel',.009);
     const coatingSupply=this.group(g,'coater-supply','Coating circulation, tray & chamber connections',[0,0,0],[.12,.30,-.52],photos,'Hoses, drip tray and chamber connectors are shown as functional service references; pump type, viscosity and pressure are not asserted.');
     this.box(coatingSupply,[.72,.10,1.58],[-.02,.78,0],'steel',.022);
     for(const z of [-.66,.66]){this.cylinder(coatingSupply,.035,.08,[-.18,1.86,z],'steel','z');this.tube(coatingSupply,[[-.18,1.86,z],[-.38,1.52,z],[-.34,1.05,z]],.018,z<0?'blue':'rubber');}
@@ -560,6 +588,9 @@ export class OffsetMachineTemplate {
     const ventilation=this.group(g,'dryer-ventilation','Dryer extraction ducts, fans & access latches',[0,0,0],[.10,.42,-.45],photos,'External extraction and access details are visual references. Airflow rate, temperature and installed lamp technology are intentionally unspecified.');
     for(const x0 of [-.42,.05,.48]){this.cylinder(ventilation,.13,.12,[x0,1.93,-.72],'graphite','z');this.cylinder(ventilation,.07,.14,[x0,1.93,-.79],'steel','z');}
     for(const x0 of [-.52,0,.52]){this.box(ventilation,[.28,.30,.035],[x0,1.66,-.98],'graphite',.018);this.handle(ventilation,[x0,1.66,-1.02],'z',.12);}
+    const plenum=this.group(g,'dryer-air-plenum','Dryer supply / extraction plenum & fan grilles',[0,0,0],[.10,.38,.42],photos,'The plenum and grille pattern explain the external airflow path only; flow direction, volume, pressure and heat source remain unspecified.');
+    this.box(plenum,[1.18,.16,1.46],[.02,1.72,0],'graphite',.022);
+    for(const z of [-.48,0,.48]){this.ring(plenum,.115,.012,[.02,1.72,z],'steel','x');for(let a=0;a<6;a++){const spoke=this.box(plenum,[.012,.18,.018],[.105,1.72,z],'steel',.004);spoke.rotation.x=a*Math.PI/3;}}
     const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
     for(const x0 of [-.60,-.36,-.12,.12,.36,.60])this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');
   }
@@ -585,6 +616,10 @@ export class OffsetMachineTemplate {
     const cabling=this.group(g,'inspection-cabling','Inspection camera cable chain & protected routing',[0,0,0],[.12,.24,-.50],photos,'Visible protected routing is represented for orientation. Cable type, signal topology and optical calibration remain outside the verified data set.');
     for(const z of [-.56,.56])this.tube(cabling,[[.02,2.82,z],[.30,2.62,z],[.38,2.08,z],[.42,1.96,z]],.014,'rubber');
     this.box(cabling,[.16,.10,1.34],[.34,2.58,0],'graphite',.018);
+    const calibration=this.group(g,'inspection-calibration','Inspection calibration target & illuminator mounts',[0,0,0],[-.18,.42,.52],photos,'A removable reference target and adjustable light mounts are shown to communicate calibration access. Target pattern, optical scale and calibration procedure are not verified.');
+    this.box(calibration,[.025,.30,.42],[-.20,2.42,0],'light',.006);
+    for(const y of [2.34,2.42,2.50])for(const z of [-.14,0,.14])this.box(calibration,[.004,.055,.055],[-.216,y,z],(Math.round(y*100)+Math.round(z*100))%2?'black':'graphite',.002);
+    for(const z of [-.52,.52]){this.cylinder(calibration,.025,.12,[-.08,2.55,z],'steel','z');this.box(calibration,[.14,.035,.06],[-.02,2.55,z],'graphite',.006);}
   }
   delivery(x){
     const photos=['IMG_2312.jpeg','IMG_1656.jpeg','IMG_2388(2).jpeg','IMG_2389(1).jpeg'];
@@ -609,11 +644,15 @@ export class OffsetMachineTemplate {
     for(const z of [-.54,0,.54]){this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
     const chainPath=this.group(g,'delivery-chain-path','Delivery gripper-chain rails & sheet receiving path',[0,0,0],[.35,.24,-.30],photos,'Chain rails and receiving path explain the sheet route into the pile. Chain pitch, gripper count and timing remain reference-only.');
     for(const z of [-.78,.78]){this.box(chainPath,[1.46,.06,.06],[-.06,1.61,z],'steel',.010);for(let n=0;n<12;n++)this.cylinder(chainPath,.022,.035,[-.70+n*.125,1.61,z],'graphite','z');}
+    const sprockets=this.group(g,'delivery-drive-sprockets','Delivery gripper-chain drive / return sprocket references',[0,0,0],[.30,.22,-.44],photos,'Sprocket locations complete the visible chain route; tooth count, pitch, tension and drive ratio are not asserted.');
+    for(const x0 of [-.68,.68])for(const z of [-.78,.78]){this.cylinder(sprockets,.12,.045,[x0,1.61,z],'graphite','z');this.ring(sprockets,.092,.012,[x0,1.61,z],'steel','z');}
     const powder=this.group(g,'delivery-powder-jogger-air','Powder / air bar and pile-edge conditioning reference',[0,0,0],[.28,.22,.36],photos,'Upper air/powder bar is a functional reference only; installed powder device, dosage and nozzle settings are not asserted.');
     this.cylinder(powder,.028,1.52,[-.38,1.72,0],'steel','z');
     for(const z of [-.60,-.30,0,.30,.60])this.cylinder(powder,.010,.07,[-.38,1.65,z],'glass','y');
     const joggers=this.group(g,'delivery-joggers','Delivery joggers D.S. / O.S.',[0,0,0],[.35,.18,.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'12M6 / 12M7 jogger function is represented at the pile sides; exact stroke is not inferred.');
     for(const z of [-.86,.86]){this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);this.box(joggers,[.34,.05,.10],[.18,.84,z],'steel',.008);}
+    const pileLift=this.group(g,'delivery-pile-lift','Delivery pile lift shaft, lead-screw & shoes',[0,0,0],[.26,.12,-.50],photos,'The paired lift elements explain table guidance and elevation. Screw lead, load rating, motor ratio and travel limits must come from the installed-machine documentation.');
+    for(const z of [-.88,.88]){this.cylinder(pileLift,.035,1.28,[.72,.78,z],'steel','y');for(const y of [.26,.54,.82,1.10,1.34])this.ring(pileLift,.046,.006,[.72,y,z],'graphite','y');this.box(pileLift,[.18,.12,.18],[.66,.22,z],'graphite',.014);}
 
     const hood=this.group(g,'delivery-hood','Delivery upper hood & side enclosure',[0,0,0],[0,.7,0],photos);
     this.box(hood,[1.64,.72,.22],[0,1.95,-1.07],'graphite',.06);

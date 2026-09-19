@@ -27,7 +27,7 @@ const feederSubs=[
  ['PILE','Pile & Lift System',['feeder-pile','feeder-pile-guides','feeder-pile-limit-sensors','feeder-pallet-lift'],['Pile Table','Pile Guides','Pile Height / Limit Sensors','Pallet Forks / Lift Shoes']],
  ['CENTER','Pile Centering',['feeder-pile-centering','feeder-drive-11m9'],['11B10 Pile-edge Sensor','11M9 Pile-centering Drive','Pile Support Plate']],
  ['HEAD','Feeding Head',['feeder-head','feeder-head-linkage','feeder-drive-11m5','feeder-drive-11m6'],['Head Carrier','Suction Head Height','Suction Head / Format Adjustment']],
- ['SEP','Sheet Separation',['feeder-separation','feeder-rear-edge'],['Separating Suckers','Forwarding Suckers','Rear-edge Separator']],
+ ['SEP','Sheet Separation',['feeder-separation','feeder-suction-cups','feeder-rear-edge'],['Separating Suckers / Cups','Forwarding Suckers / Height Collars','Rear-edge Separator']],
  ['AIR','Blast / Suction Air',['feeder-air','feeder-air-controls','feeder-drive-1m9'],['Air Manifold','Blast Nozzles','Air Regulation','Valve / Gauge Panel']],
  ['NONSTOP','Non-stop / Auxiliary Pile',['feeder-nonstop','feeder-drive-11m8'],['Auxiliary Support / Rake Reference','11M8 Pile-support Drive']],
  ['DRIVE','Preset Drives',['feeder-adjustment-drives'],['11M11 D.S. Pile Stop','11M12 O.S. Pile Stop','11M4 Format Wheel Drive']],
@@ -45,7 +45,7 @@ for(const [key,name,refs,parts] of [
  ['BOARD','Feed Table Surface',['feed-board'],['Table Surface','Propelling / Transport Zone']],
  ['VACUUM','Suction Tape / Vacuum Transport',['vacuum-table','feedboard-transport'],['Perforated Suction Tape','Drive / Idler Roller','Pressure Roller Reference']],
  ['GUIDE','Sheet Guidance',['feedboard-guides'],['Guide Rails','Sheet Guide Plate']],
- ['ALIGN','Front & Pull Lay Alignment',['feedboard-register','feedboard-front-lays','feedboard-pull-lays'],['Front Lays 1M2 / 1M3','Pull-lay Control 1B9 / 1B10','Register Interface']],
+ ['ALIGN','Front & Pull Lay Alignment',['feedboard-register','feedboard-front-lays','feedboard-pull-lays','feedboard-lay-mechanism'],['Front Lays 1M2 / 1M3','Pull-lay Control 1B9 / 1B10','Register Shaft / Stops / Carriage']],
  ['MONITOR','Sheet Arrival / Double Sheet Monitoring',['feedboard-detection','feeder-sheet-monitoring'],['Sheet-arrival Sensors','Double-sheet Detector Heads','Detector Bridge']],
  ['INFEED','Infeed to PU1',['feedboard-infeed-gripper','feedboard-cover-guide-drive'],['Infeed Gripper Bar','Transfer-gripper Cover Guide 1M4','Sheet Handover Zone']]
 ]){
@@ -106,6 +106,7 @@ for(let unit=1;unit<=8;unit++){
   const pid=`${pu}.CYL.${key}`;add(pid,`${pu}.CYL`,5,'Part',name,{meshRefs:[ref],sourceRefs:manual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.15,.14,-.25]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · inspection reference`,{meshRefs:[ref],sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
  }
  const guide=`${pu}.CYL.GUIDE`;add(guide,`${pu}.CYL`,5,'Part','Sheet Guide & Air Bar',{meshRefs:[`press-${i}-sheet-guides`],sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.10,.12,.20]});add(`${guide}.S1`,guide,6,'Spesifik Part','Guide rail / air-nozzle reference',{meshRefs:[`press-${i}-sheet-guides`],sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
+ const gears=`${pu}.CYL.GEARS`;add(gears,`${pu}.CYL`,5,'Part','Cylinder Drive Gears & Guard',{meshRefs:[`press-${i}-drive-gears`],sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.12,.12,-.28]});add(`${gears}.S1`,gears,6,'Spesifik Part','Gear train / hub / transparent guard reference',{meshRefs:[`press-${i}-drive-gears`],sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,-.08],maintenanceTag:'VISUAL_INSPECTION'});
  for(const [key,name] of [['DIAGONAL','Diagonal Register Drive'],['LATERAL','Lateral Register Drive'],['CIRC','Circumferential Register Drive']]){
   const ref=`press-${i}-register-${key==='DIAGONAL'?'diagonal':key==='LATERAL'?'lateral':'circumferential'}`,pid=`${pu}.REGISTER.${key}`;
   add(pid,`${pu}.REGISTER`,5,'Part',name,{meshRefs:[ref],sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.12,.10,.20]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · operator-side functional reference`,{meshRefs:[ref],sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.05,.05,.08],maintenanceTag:'OEM_MANUAL_REFERENCE'});
@@ -129,7 +130,7 @@ for(let unit=1;unit<=8;unit++){
 for(let n=1;n<=7;n++){
  const id=`O5.PRINT.TRANSFER${n}${n+1}`,base=`transfer-pu${n}-pu${n+1}`;
  add(id,'O5.PRINT',3,'Sub',`PU${n} → PU${n+1} Sheet Transfer`,{meshRefs:[base],sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,explodeVector:[0,.24,-.55]});
- for(const [key,name,refs] of [['DRUM','Transfer Drum',[base]],['GRIPPER','Gripper System',[`${base}-gripper-a`,`${base}-gripper-b`,`${base}-gripper-shaft`,`${base}-gripper-cam`]],['GUIDE','Sheet Guide',[`${base}-guide`]]]){
+ for(const [key,name,refs] of [['DRUM','Transfer Drum',[base]],['GRIPPER','Gripper System',[`${base}-gripper-a`,`${base}-gripper-b`,`${base}-gripper-shaft`,`${base}-gripper-spring`,`${base}-gripper-cam`]],['GUIDE','Sheet Guide',[`${base}-guide`]]]){
   const bid=`${id}.${key}`;add(bid,id,4,'Block',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.MEDIUM,explodeVector:[0,.16,key==='GRIPPER'?.45:-.30]});
   const pid=`${bid}.P1`;add(pid,bid,5,'Part',name,{meshRefs:refs,sourceRefs:manual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.08,.08,.14]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · timing / clearance reference`,{sourceRefs:manual,confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
  }
@@ -138,7 +139,7 @@ for(let n=1;n<=7;n++){
 /* COATING */
 for(const [key,name,refs,parts] of [
  ['FRAME','Coating Unit Housing',['coater-frame','coater-operator-cover'],['Side Frames','Operator-side Cover']],
- ['CHAMBER','Chamber Blade System',['coater-chamber'],['Chamber Blade Reference','Coating Roller','Impression / Sheet-support Roller']],
+ ['CHAMBER','Chamber Blade System',['coater-chamber','coater-chamber-locks'],['Chamber Blade Reference','Coating Roller','End Locks / Bearing Collars / Blade Clamps']],
  ['SUPPLY','Coating Circulation & Tray',['coater-supply'],['Drip / Catch Tray','Chamber Connections','Circulation Hose / Gauge Reference']],
  ['SERVICE','Coater Service Side',['coater-service'],['Drive-side Service Panel','Vent / Hose Reference']]
 ]){
@@ -149,7 +150,7 @@ for(const [key,name,refs,parts] of [
 /* DRYER / EXTENSION */
 for(const [key,name,refs,parts] of [
  ['HOOD','Sloped Extension Hood',['dryer-hood'],['Upper Sloped Panel','Vent / Access Panel']],
- ['MODULE','Dryer Modules',['dryer-modules','dryer-ventilation'],['Dryer / Airflow Module Reference','Lamp / Air Outlet Reference','Extraction Fan / Access Latch']],
+ ['MODULE','Dryer Modules',['dryer-modules','dryer-ventilation','dryer-air-plenum'],['Dryer / Airflow Module Reference','Lamp / Air Outlet Reference','Extraction Plenum / Fan Grilles']],
  ['PATH','Sheet Transport',['dryer-sheet-path'],['Transport Roller / Sheet Path']]
 ]){
  const sid=`O5.DRYER.${key}`;add(sid,'O5.DRYER',3,'Sub',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.35,.25,0]});
@@ -161,7 +162,7 @@ for(const [key,name,refs,parts] of [
  ['BRIDGE','FA-Swan Bridge Frame',['inspection-bridge'],['Left / Right Upright','Crossbeam']],
  ['CAMERA','Camera Pods',['inspection-camera-a','inspection-camera-b'],['Camera Pod A','Camera Pod B','Lens Reference']],
  ['LIGHT','Inspection Lighting',['inspection-lighting'],['Lighting Bar A','Lighting Bar B']],
- ['CONTROL','Inspection Support / Control',['inspection-control','inspection-cabling'],['Control Enclosure','Protected Camera Cable Routing']]
+ ['CONTROL','Inspection Support / Calibration',['inspection-control','inspection-cabling','inspection-calibration'],['Control Enclosure','Protected Camera Cable Routing','Calibration Target / Illuminator Mounts']]
 ]){
  const sid=`O5.INSPECTION.${key}`;add(sid,'O5.INSPECTION',3,'Sub',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN'],confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.25,.55,0]});
  const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN'],confidence:CONFIDENCE.MEDIUM,explodeVector:[.12,.22,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN'],confidence:CONFIDENCE.MEDIUM,explodeVector:[.06,.10,(i-1)*.10]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · inspection reference`,{sourceRefs:['SRC-FOCUSIGHT-SWAN'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.05,.05,.08]});});
@@ -170,9 +171,9 @@ for(const [key,name,refs,parts] of [
 /* DELIVERY */
 for(const [key,name,refs,parts] of [
  ['FRAME','Delivery End Frame',['delivery-frame'],['Main Columns','Upper Control Face','Inspection Window']],
- ['PILE','Main Delivery Pile',['delivery-pile'],['Pile Table','Sheet Stack','Pile Lift Chains']],
+ ['PILE','Main Delivery Pile',['delivery-pile','delivery-pile-lift'],['Pile Table','Sheet Stack','Pile Lift Shaft / Lead-screw / Shoes']],
  ['BRAKE','Sheet Brake / Slowdown',['delivery-sheet-brake'],['Sheet Brake Elements','Slowdown Zone']],
- ['CHAIN','Gripper-chain / Receiving Path',['delivery-chain-path'],['Chain Guide Rails','Gripper-chain Reference','Receiving Path']],
+ ['CHAIN','Gripper-chain / Receiving Path',['delivery-chain-path','delivery-drive-sprockets'],['Chain Guide Rails','Drive / Return Sprockets','Receiving Path']],
  ['AIR','Powder / Air Conditioning',['delivery-powder-jogger-air'],['Upper Air / Powder Bar','Nozzle References']],
  ['JOG','Sheet Joggers',['delivery-joggers'],['D.S. Jogger 12M6','O.S. Jogger 12M7']],
  ['SENSOR','Pile Sensors',['delivery-pile-sensors'],['12B65 Fast/Slow','12B69 Pile Height','12B129 Upper Edge','12S34 Bottom Limit']],
