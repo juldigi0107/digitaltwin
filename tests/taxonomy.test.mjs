@@ -4,50 +4,56 @@ import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID,taxonomyChildren,taxonomyStats,validateT
 import {PHOTO_REGISTRY,TECHNICAL_SOURCES,photoStats,ORIENTATION} from '../frontend/src/data/sources-offset5.js';
 
 test('taxonomy is contiguous, unique and covers all six stages',()=>{
- assert.equal(validateTaxonomy(),true);const stats=taxonomyStats();
- assert.ok(stats.total>200);for(let level=1;level<=6;level++)assert.ok(stats.byLevel[level]>0,`missing level ${level}`);
- assert.equal(TAXONOMY_BY_ID.get('O5').level,1);assert.equal(taxonomyChildren('O5').length,8);
+ assert.equal(validateTaxonomy(),true);
+ const stats=taxonomyStats();
+ assert.ok(stats.total>800,`taxonomy unexpectedly small: ${stats.total}`);
+ for(let level=1;level<=6;level++)assert.ok(stats.byLevel[level]>0,`missing level ${level}`);
+ assert.equal(TAXONOMY_BY_ID.get('O5').level,1);
+ for(const id of ['O5.FEEDER','O5.REGISTER','O5.PRINT','O5.COATER','O5.DRYER','O5.INSPECTION','O5.DELIVERY','O5.PLATFORM','O5.AUX'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
 });
-test('eight printing units have repeatable block taxonomy without claiming internal geometry',()=>{
- for(let unit=1;unit<=8;unit++){const pu=TAXONOMY_BY_ID.get(`O5.PRINT.PU${unit}`);assert.ok(pu);assert.equal(pu.meshRefs[0],`press-${unit}`);assert.equal(taxonomyChildren(pu.id).length,6);}
- const referenceOnly=OFFSET5_TAXONOMY.filter(n=>n.confidence==='REFERENCE_ONLY');assert.ok(referenceOnly.length>50);assert.ok(referenceOnly.some(n=>n.name.includes('Cylinder')));
-});
-test('feeder through PU1 taxonomy resolves the new functional geometry',()=>{
- const expectedFeeder={
-  'O5.FEEDER.PILE':['feeder-pile-guides'],
-  'O5.FEEDER.HEAD':['feeder-head-linkage'],
-  'O5.FEEDER.SEPARATION':['feeder-rear-edge'],
-  'O5.FEEDER.VACUUM':['feedboard-transport'],
-  'O5.FEEDER.GUIDE':['feedboard-register'],
-  'O5.FEEDER.INFEED':['feedboard-infeed-gripper']
- };
- for(const [id,refs] of Object.entries(expectedFeeder))for(const ref of refs)assert.ok(TAXONOMY_BY_ID.get(id).meshRefs.includes(ref),`${id} missing ${ref}`);
- assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.INK').meshRefs.includes('press-0-inking-distribution'));
- assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.DAMP').meshRefs.includes('press-0-dampening-form'));
- assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-plate-clamp'));
- assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-impression-gripper'));
- assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-gripper-control'));
- assert.ok(!TAXONOMY_BY_ID.get('O5.PRINT.PU2.CYL').meshRefs.includes('press-0-plate-clamp'));
-});
-test('PU1 and transfer gripper taxonomy separates gripping and actuation components',()=>{
- for(const id of ['O5.PRINT.PU1.CYL.GRIPBAR','O5.PRINT.PU1.CYL.FINGER','O5.PRINT.PU1.CYL.ACTUATION'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
- const transfer=TAXONOMY_BY_ID.get('O5.PRINT.TRANSFER12.GRIPPER');
- for(const ref of ['transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-cam'])assert.ok(transfer.meshRefs.includes(ref),`missing ${ref}`);
- assert.equal(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL.ACTUATION').confidence,'REFERENCE_ONLY');
-});
-test('PU1 cylinder taxonomy separates four assemblies and nip path',()=>{
- for(const id of ['PLATESET','BLANKETSET','IMPRESSIONSET','TRANSFERSET','NIPPATH']){
-  const node=TAXONOMY_BY_ID.get(`O5.PRINT.PU1.CYL.${id}`);assert.ok(node);assert.equal(node.confidence,'REFERENCE_ONLY');
+
+test('all eight printing units expose complete functional block taxonomy',()=>{
+ for(let unit=1;unit<=8;unit++){
+  const pu=TAXONOMY_BY_ID.get(`O5.PRINT.PU${unit}`);
+  assert.ok(pu);assert.equal(pu.meshRefs[0],`press-${unit}`);
+  const blocks=taxonomyChildren(pu.id).map(n=>n.id.split('.').at(-1));
+  for(const key of ['FRAME','INK','DAMP','CYL','REGISTER','WASH','COVER','STEP'])assert.ok(blocks.includes(key),`PU${unit} missing ${key}`);
  }
 });
-test('source registry separates photo evidence from technical reference',()=>{
- const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,23);assert.equal(stats.unique,23);assert.equal(stats.active_geometry_reference,15);
- assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
+
+test('feeder and register taxonomy maps to the photo/manual geometry',()=>{
+ for(const id of ['O5.FEEDER.PILE','O5.FEEDER.CENTER','O5.FEEDER.HEAD','O5.FEEDER.SEP','O5.FEEDER.AIR','O5.FEEDER.NONSTOP','O5.FEEDER.DRIVE','O5.FEEDER.CONTROL','O5.FEEDER.FRAME'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
+ for(const id of ['O5.REGISTER.BOARD','O5.REGISTER.VACUUM','O5.REGISTER.GUIDE','O5.REGISTER.ALIGN','O5.REGISTER.MONITOR','O5.REGISTER.INFEED'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
+ assert.ok(TAXONOMY_BY_ID.get('O5.FEEDER.CENTER').meshRefs.includes('feeder-pile-centering'));
+ assert.ok(TAXONOMY_BY_ID.get('O5.REGISTER.MONITOR').meshRefs.includes('feeder-sheet-monitoring'));
 });
-test('OEM PDFs resolve feeder drives and the complete PU1 roller taxonomy',()=>{
+
+test('OEM roller taxonomy repeats correctly for all eight printing units',()=>{
+ for(let unit=1;unit<=8;unit++){
+  for(let n=1;n<=15;n++)assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.INK.R${n}`),`PU${unit} missing ink roller ${n}`);
+  for(const code of ['A','B','C','D'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.INK.DIST_${code}`),`PU${unit} missing distributor ${code}`);
+  for(const code of ['16','17','18','19','FR'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.DAMP.R${code}`),`PU${unit} missing dampening roller ${code}`);
+  for(const key of ['PLATE','BLANKET','IMPRESSION','TRANSFER','GRIPPER','ACTUATION','PLATECLAMP'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.CYL.${key}`),`PU${unit} missing cylinder part ${key}`);
+  for(const key of ['DIAGONAL','LATERAL','CIRC'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.REGISTER.${key}`),`PU${unit} missing register drive ${key}`);
+  for(const key of ['BLANKET','INKING','IMPRESSION'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU${unit}.WASH.${key}`),`PU${unit} missing washup ${key}`);
+ }
+});
+
+test('all seven inter-unit sheet transfers have drum gripper and guide blocks',()=>{
+ for(let n=1;n<=7;n++){
+  const id=`O5.PRINT.TRANSFER${n}${n+1}`;
+  assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
+  for(const key of ['DRUM','GRIPPER','GUIDE'])assert.ok(TAXONOMY_BY_ID.has(`${id}.${key}`),`missing ${id}.${key}`);
+ }
+});
+
+test('coater dryer inspection and delivery are decomposed beyond generic placeholders',()=>{
+ for(const id of ['O5.COATER.FRAME','O5.COATER.CHAMBER','O5.COATER.SERVICE','O5.DRYER.HOOD','O5.DRYER.MODULE','O5.DRYER.PATH','O5.INSPECTION.BRIDGE','O5.INSPECTION.CAMERA','O5.INSPECTION.LIGHT','O5.INSPECTION.CONTROL','O5.DELIVERY.FRAME','O5.DELIVERY.PILE','O5.DELIVERY.BRAKE','O5.DELIVERY.JOG','O5.DELIVERY.SENSOR','O5.DELIVERY.HOOD','O5.DELIVERY.GATE','O5.DELIVERY.STEP'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
+});
+
+test('source registry preserves user photos and uses official Heidelberg product information',()=>{
+ const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,23);assert.equal(stats.unique,23);
+ const hd=TECHNICAL_SOURCES.find(s=>s.id==='SRC-HEIDELBERG-CD102');assert.ok(hd);assert.equal(hd.type,'MANUFACTURER_PRODUCT_INFORMATION');assert.match(hd.url,/heidelberg\.com/);
  for(const id of ['SRC-CD102-SERVICE-MANUAL','SRC-CD102-ROLLER-PROCEDURE'])assert.ok(TECHNICAL_SOURCES.some(s=>s.id===id),`missing ${id}`);
- for(const id of ['OEM_PILE_CENTER','OEM_HEAD_HEIGHT','OEM_HEAD_FORMAT','OEM_FRONT_LAY_DS','OEM_FRONT_LAY_OS','OEM_COVER_GUIDE'])assert.ok(TAXONOMY_BY_ID.has(`O5.FEEDER.${id.startsWith('OEM_FRONT')||id==='OEM_COVER_GUIDE'?'GUIDE':id.includes('HEAD')?'HEAD':'PILE'}.${id}`));
- for(let i=1;i<=15;i++)assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.INK.R${i}`),`missing ink roller ${i}`);
- for(const id of ['A','B','C','D'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.INK.DIST_${id}`));
- for(const id of ['16','17','18','19','FR'])assert.ok(TAXONOMY_BY_ID.has(`O5.PRINT.PU1.DAMP.R${id}`));
+ assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
 });
