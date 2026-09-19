@@ -162,7 +162,7 @@ test('factory engine draws OFU-1 inferred CAD overlay without modifying machine 
   assert.match(engine,/OFU-1 structural body candidate/);
   assert.match(engine,/DXF_GEOMETRIC_INFERENCE/);
   assert.match(engine,/serviceInclusiveBounds/);
-  assert.match(machine,/offset5-photo-pdf-v28/);
+  assert.match(machine,/offset5-photo-pdf-v29/);
   assert.doesNotMatch(machine,/OFU-1 structural body candidate|DXF_GEOMETRIC_INFERENCE/);
 });
 
