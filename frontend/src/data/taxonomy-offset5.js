@@ -59,6 +59,10 @@ for(let unit=1;unit<=8;unit++){
   });
  }
 }
+const pu1CoverVent='O5.PRINT.PU1.COVER.SERVICE_GRILLE';
+add(pu1CoverVent,'O5.PRINT.PU1.COVER',5,'Part','PU1 Cover Vent / Access Reference',{meshRefs:['press-0-cover'],sourceRefs:['SRC-USER-PHOTOS'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.10,.10,.35],description:'Broad silver shoulder cover and adjacent dark ventilation field are taken from the real PU1 photos. No separate generated-target grille geometry is asserted.'});
+add(`${pu1CoverVent}.S1`,pu1CoverVent,6,'Spesifik Part','Vent / Panel Seam Reference',{meshRefs:['press-0-cover'],sourceRefs:['SRC-USER-PHOTOS'],confidence:CONFIDENCE.MEDIUM,explodeVector:[.05,.06,.16],maintenanceTag:'VISUAL_INSPECTION'});
+
 for(const [key,name,refs,specific] of [
  ['GRIPBAR','Impression-cylinder Gripper Bar',['press-0-impression-gripper'],['Gripper Shaft','Bar Body','End Support']],
  ['FINGER','Gripper Finger & Pad',['press-0-impression-gripper'],['Finger Lever','Gripper Tip / Pad','Pivot Pin']],
