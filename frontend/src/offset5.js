@@ -427,16 +427,61 @@ export class OffsetMachineTemplate {
     const desk=this.box(panel,[1.3,.075,.45],[.1,.99,1.17],'light',.035);desk.rotation.x=.12;
     for(let i=0;i<5;i++)this.cylinder(panel,.025,.028,[-.30+i*.12,1.047,1.23],i===0?'red':'black','y');
   }
-  transfer(x){
-    const g=this.group(this.root,'transfer','Coating / inspeksi menuju delivery',[x,0,0],[.8,.25,0],['IMG_1629.jpeg','IMG_1630.jpeg'],'Hood, platform dan gantry direkonstruksi dari foto; fungsi internal serta spesifikasi inspeksi tidak diverifikasi.');
-    this.box(g,[1.62,1.0,2.08],[0,.78,0],'graphite',.04);
-    this.box(g,[1.5,.075,1.78],[0,1.32,0],'black',.02);
-    for(let i=0;i<5;i++)this.cylinder(g,.032,1.78,[-.6+i*.3,1.38,0]);
-    const hood=this.box(g,[1.48,.18,1.96],[.05,1.58,0],'light',.04);hood.rotation.z=-.22;
-    for(const z of [-.97,.97])this.box(g,[.12,1.16,.13],[-.12,1.99,z],'light',.018);
-    const beam=this.box(g,[.18,.15,2.07],[-.12,2.6,0],'light',.025);beam.rotation.x=-.08;
-    for(const z of [-.55,.55]){this.box(g,[.30,.22,.34],[-.12,2.43,z],'graphite',.045);this.cylinder(g,.052,.035,[-.22,2.39,z],'glass','x');}
-    this.box(g,[.52,.48,.42],[.52,1.88,.78],'black',.025);
+  coatingUnit(x){
+    const photos=['IMG_1629.jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg'];
+    const g=this.group(this.root,'coater','Coating unit · housing & chamber reference',[x,0,0],[.8,.25,0],photos,'Exterior follows the photographed transition after PU8. Chamber-blade/coating-cylinder functions follow Heidelberg CD102 product information; exact installed roller diameters and coating settings are not inferred.');
+    const frame=this.group(g,'coater-frame','Coating unit side frames',[0,0,0],[.25,.15,-.55],photos);
+    this.box(frame,[1.15,.42,2.02],[0,.49,0],'black',.035);
+    for(const z of [-1.03,1.03])this.box(frame,[.98,1.55,.24],[0,1.42,z],'graphite',.035);
+    this.box(frame,[.98,.20,1.92],[0,2.22,0],'graphite',.04);
+    const op=this.group(g,'coater-operator-cover','Coater operator-side silver cover',[0,0,0],[.15,.20,1.0],photos);
+    this.shell(op,[.02,.48,1.13],.82,1.88,.35,1);
+    this.tread(op,[.42,.09,.46],[.53,.77,1.42]);
+    this.tread(op,[.37,.09,.37],[.53,1.03,1.34]);
+    const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
+    this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
+    this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');
+    this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');
+    this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');
+    const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
+    const service=this.group(g,'coater-service','Coater drive-side service panel',[0,0,0],[.10,.15,-1.1],['IMG_2389(1).jpeg','IMG_2390(1).jpeg']);
+    this.box(service,[.88,1.48,.20],[0,1.35,-1.12],'graphite',.028);
+    this.grille(service,[.02,1.54,-1.235],.64,.34,'z');
+    this.tube(service,[[.25,.65,-1.23],[.39,.42,-1.32],[.31,.18,-1.43]],.022,'rubber');
+  }
+  dryerExtension(x){
+    const photos=['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'];
+    const g=this.group(this.root,'dryer-extension','Dryer / extension deck',[x,0,0],[.8,.25,0],photos,'The sloped hood and long checker-plate deck are taken from the actual machine photos. Dryer internals are represented only as functional zones; lamp type and installed configuration are not asserted.');
+    this.box(g,[1.18,.92,2.02],[0,.72,0],'graphite',.035);
+    this.tread(g,[1.28,.09,1.94],[0,1.23,0]);
+    const hood=this.group(g,'dryer-hood','Sloped dryer / extension hood',[0,0,0],[.35,.55,0],photos);
+    const h1=this.box(hood,[1.02,.18,1.92],[-.08,1.64,0],'graphite',.028);h1.rotation.z=-.36;
+    const h2=this.box(hood,[.62,.16,1.92],[.36,1.86,0],'graphite',.025);h2.rotation.z=-.12;
+    for(const z of [-.78,0,.78])this.box(hood,[.32,.035,.22],[.08,1.84,z],'black',.008);
+    const lamps=this.group(g,'dryer-modules','Dryer module / airflow references',[0,0,0],[0,.58,-.25],photos,'Short-distance dryer function is supported by Heidelberg product information; visible hood only is photo-confirmed.');
+    for(const x0 of [-.32,0,.32]){this.box(lamps,[.24,.08,1.40],[x0,1.48,0],'light',.012);this.box(lamps,[.18,.025,1.30],[x0,1.42,0],'red',.006);}
+    const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
+    for(const x0 of [-.45,-.15,.15,.45])this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');
+  }
+  inspectionBridge(x){
+    const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
+    const g=this.group(this.root,'inspection-bridge','FA-Swan inline inspection bridge',[x,0,0],[.25,.85,0],photos,'Bridge proportions and camera pods follow the actual Focusight/AVT installation visible on Offset 5. Optical specifications and calibration are not inferred.');
+    for(const z of [-.86,.86]){
+      this.box(g,[.16,1.48,.18],[0,1.98,z],'light',.025);
+      this.box(g,[.23,.12,.28],[0,1.25,z],'graphite',.018);
+    }
+    this.box(g,[.18,.16,1.90],[0,2.72,0],'graphite',.024);
+    this.box(g,[.12,.05,1.70],[.01,2.64,0],'light',.014);
+    for(const z of [-.50,.50]){
+      const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
+      const box=this.box(pod,[.32,.24,.34],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
+      this.cylinder(pod,.065,.04,[-.08,2.80,z],'glass','x');
+      this.box(pod,[.20,.035,.24],[.10,2.98,z],'steel',.008);
+    }
+    const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
+    for(const z of [-.42,.42])this.box(lights,[.36,.045,.28],[-.02,2.55,z],'light',.008);
+    const control=this.group(g,'inspection-control','Inspection support / control enclosure',[0,0,0],[.20,.18,.55],photos);
+    this.box(control,[.44,.48,.34],[.42,1.78,.78],'graphite',.025);
   }
   delivery(x){
     const g=this.group(this.root,'delivery','Delivery · panel & pagar',[x,0,0],[1.8,0,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
