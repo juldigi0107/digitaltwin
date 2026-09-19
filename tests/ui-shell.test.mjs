@@ -16,7 +16,7 @@ test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
 });
 
 test('UI reports the current photo-aligned geometry baseline',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v15');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v16');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
@@ -55,7 +55,7 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/--app-height,100dvh/);
   assert.match(responsiveCss,/orientation:landscape/);
   assert.match(ui,/visualViewport\?\.height/);
-  assert.match(sw,/pu1-visual-target-phase25-20260919/);
+  assert.match(sw,/pu1-pdf-photo-phase26-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
 });
@@ -82,4 +82,18 @@ test('UI surfaces user-confirmed OFU-1 placement without changing machine geomet
 test('layout UI exposes OFU-1 functional zones as inference without scaling machine geometry',()=>{
   assert.match(app,/Zona fungsi OFU-1/);
   assert.match(app,/Tinggi dinding 3,2 m dan kolom 4,5 m adalah asumsi visual/);
+});
+
+
+test('every static button is actionable and no command-center button is permanently disabled',()=>{
+ const buttons=[...html.matchAll(/<button\\b([^>]*)>([\\s\\S]*?)<\\/button>/g)].map(m=>({attrs:m[1],label:m[2].replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim()}));
+ assert.equal(buttons.filter(b=>/\\bdisabled\\b/.test(b.attrs)).length,0,'static disabled buttons remain in the page');
+ for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(html,new RegExp(`id="${id}"`));
+ for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(ui,new RegExp(id));
+});
+
+test('conditional action buttons provide feedback instead of silently doing nothing',()=>{
+ assert.match(app,/Editor posisi memerlukan sesi Administrator/);
+ assert.match(app,/Layer & kalibrasi memerlukan sesi Administrator/);
+ assert.match(app,/Pilih komponen 3D terlebih dahulu sebelum Isolasi/);
 });
