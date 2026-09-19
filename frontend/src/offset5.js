@@ -201,13 +201,13 @@ export class OffsetMachineTemplate {
   pressUnit(i,x,sources){
     const g=this.group(this.root,'press-'+(i+1),'Printing Unit '+(i+1),[x,0,0],[(i-3.5)*.28,.15,0],sources,'Delapan printing unit mengikuti konfigurasi CD 102-8+L yang dikonfirmasi pengguna; pitch antarunit mengikuti fingerprint berulang dari footprint OFU-1 pada DXF.');
     const body=this.group(g,'press-'+i+'-frame','Rangka luar & kisi pelindung',[0,0,0],[0,.12,-.65],['IMG_1626.jpeg','IMG_1628.jpeg']);
-    const isPU1=i===0,frameWidth=isPU1?OFFSET5_DIMENSIONS.layout.pu1FrameWidth:OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth,sidePanelWidth=isPU1?.80:.84,topBeamWidth=isPU1?.78:.84,faceX=isPU1?.40:.44,guardX=isPU1?.43:.46,glassX=isPU1?.46:.49;
+    const isPU1=i===0,frameWidth=isPU1?OFFSET5_DIMENSIONS.layout.pu1FrameWidth:OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth,sidePanelWidth=isPU1?.80:.84,topBeamWidth=isPU1?.78:.84,faceX=isPU1?.40:.44,guardX=isPU1?.42:.43,glassX=isPU1?.46:.48;
     this.box(body,[frameWidth,.4,2.04],[0,.48,0],'black',.035);
     for(const side of [-1,1])this.box(body,[sidePanelWidth,1.85,.25],[0,1.4,side*1.03],'graphite',.04);
     this.box(body,[topBeamWidth,.2,1.92],[0,2.27,0],'graphite',.06);
     this.grille(body,[faceX,1.78,0],1.75,.72);
     this.grille(body,[-faceX,1.78,0],1.75,.72);
-    this.cylinder(body,.065,1.78,[guardX,1.23,0],'rubber');
+    this.cylinder(body,.050,1.78,[guardX,1.23,0],'rubber');
     this.box(body,[.07,.22,1.8],[guardX,.96,0],'graphite',.025);
     for(const z of [-.62,.62])this.box(body,[.025,.10,.4],[glassX,.98,z],'glass');
     const cover=this.group(g,'press-'+i+'-cover','Cover samping melengkung',[0,0,0],[0,.12,1.1],sources);
