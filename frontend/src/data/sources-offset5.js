@@ -40,7 +40,8 @@ export const PHOTO_REGISTRY=Object.freeze([
   ['p20','IMG_2389(1).jpeg','Delivery to printing units','drive-side longitudinal overview and service aisle','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p21','IMG_2390(1).jpeg','Inspection / printing units','drive-side railing, flat covers and secondary steps','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
   ['p22','IMG_2395.jpeg','Feeder to printing units','drive-side pile portal, utility cabinet and hose routing','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
-  ['p23','IMG_1628(2).jpeg','Printing Unit 1 to downstream units','top view from feeder toward delivery','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED]
+  ['p23','IMG_1628(2).jpeg','Printing Unit 1 to downstream units','top view from feeder toward delivery','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED],
+  ['p24','IMG_1662.jpeg','Inter-unit operator access bay','operator side looking through PU gap','active_geometry_reference',CONFIDENCE.PHOTO_VERIFIED]
 ].map(([id,filename,machineZone,viewDirection,category,confidence])=>Object.freeze({id,filename,machineZone,viewDirection,category,confidence,duplicateOf:null})));
 
 export const photoStats=()=>PHOTO_REGISTRY.reduce((s,p)=>{s.uploaded++;if(!p.duplicateOf)s.unique++;s[p.category]=(s[p.category]||0)+1;return s;},{uploaded:0,unique:0,duplicate:0,active_geometry_reference:0,supplementary_reference:0,orientation_reference:0,detail_reference:0});

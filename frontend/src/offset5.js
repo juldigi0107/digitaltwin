@@ -11,21 +11,21 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v26',
+  version: 'offset5-photo-pdf-v27',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
-  dimensionUnit: 'DXF_CALIBRATED_OUTER_ENVELOPE',
+  dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
   installedConfiguration: 'PHOTO_CONFIRMED_CD102_8_PLUS_L',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],
-  sourcePolicy: 'DXF_OUTER_ENVELOPE + USER_PHOTOS_EXTERIOR + OEM_PDF_FUNCTIONAL_INTERNALS'
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg','IMG_1662.jpeg'],
+  sourcePolicy: 'DXF_PLACEMENT_REFERENCE + USER_PHOTOS_EXTERIOR_AND_ACCESS + OEM_PDF_FUNCTIONAL_INTERNALS'
 };
 const V=(a)=>new THREE.Vector3(...a);
 
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v7',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v8',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
@@ -151,28 +151,28 @@ export class OffsetMachineTemplate {
     for(const node of this.nodes)if(deep.test(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
   }
   build(){
-    const refUnits=['IMG_1627.jpeg','IMG_1628.jpeg'];
+    const refUnits=['IMG_1627.jpeg','IMG_1628.jpeg','IMG_1662.jpeg'];
     const D=OFFSET5_DIMENSIONS.layout,unitXs=OFFSET5_UNIT_CENTERS,pu1X=unitXs[0],pu2X=unitXs[1];
     const deck=this.group(this.root,'platform','Platform, walkway & tangga operator',[0,0,0],[0,-.35,1.2],refUnits,'Platform dibentangkan mengikuti service-inclusive envelope DXF dan foto aktual; detail tread tetap rekonstruksi visual.');
-    this.box(deck,[D.platformLength,.18,2.56],[0,.19,0],'black',.035);
+    this.box(deck,[D.platformLength,.18,2.56],[D.platformCenterX,.19,0],'black',.035);
     // Continuous operator-side checker-plate gallery seen in the actual press photos.
-    this.tread(deck,[14.72,.12,D.operatorWalkwayWidth],[.65,.46,D.operatorWalkwayCenterZ]);
+    this.tread(deck,[D.operatorGalleryLength,.12,D.operatorWalkwayWidth],[D.operatorGalleryCenterX,.46,D.operatorWalkwayCenterZ]);
     // Local access pads at feeder and delivery keep the long gallery from looking like one generic slab.
     this.tread(deck,[1.18,.12,.78],[-8.10,.38,1.73]);
     this.tread(deck,[1.54,.12,.80],[7.78,.38,1.73]);
     // Drive-side service strip follows the CAD/service correlation and the supplied drive-side photos.
-    this.tread(deck,[15.95,.10,D.driveWalkwayWidth],[.25,.43,D.driveWalkwayCenterZ]);
-    for(let i=0;i<10;i++)this.cylinder(deck,.025,.72,[-7.2+i*1.62,.83,-1.91],'steel','y');
-    this.cylinder(deck,.026,15.0,[.15,1.15,-1.91],'steel','x');
-    this.cylinder(deck,.021,15.0,[.15,.88,-1.91],'steel','x');
+    this.tread(deck,[D.driveGalleryLength,.10,D.driveWalkwayWidth],[D.driveGalleryCenterX,.43,D.driveWalkwayCenterZ]);
+    for(let i=0;i<11;i++)this.cylinder(deck,.025,.72,[-7.35+i*1.62,.83,-1.91],'steel','y');
+    this.cylinder(deck,.026,D.driveGalleryLength-.75,[D.driveGalleryCenterX,1.15,-1.91],'steel','x');
+    this.cylinder(deck,.021,D.driveGalleryLength-.75,[D.driveGalleryCenterX,.88,-1.91],'steel','x');
     unitXs.forEach((x,i)=>this.pressUnit(i,x,refUnits));
     for(let i=0;i<unitXs.length-1;i++)this.interUnitTransfer((unitXs[i]+unitXs[i+1])/2,i);
     this.root.userData.pu1ExteriorLayout=Object.freeze({
-      dimensionUnit:'DXF_CALIBRATED_OUTER_ENVELOPE',pu1CenterX:pu1X,pu2CenterX:pu2X,
+      dimensionUnit:'PHOTO_CORRECTED_INTERUNIT_ACCESS',pu1CenterX:pu1X,pu2CenterX:pu2X,
       pu1FrameWidth:D.pu1FrameWidth,pu2FrameWidth:D.printingUnitFrameWidth,
       unitPitch:D.printingUnitPitch,
       accessBay:pu2X-pu1X-(D.pu1FrameWidth+D.printingUnitFrameWidth)/2,
-      source:'USER PHOTOS + OFU-1 DXF REPEATED MOTIF PITCH',geometryBasis:'DXF_ENVELOPE + USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL'
+      source:'IMG_1662 + USER PHOTOS + OFU-1 DXF PLACEMENT',geometryBasis:'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL'
     });
     this.feeder(D.feederCenterX);
     const board=this.group(this.root,'feed-board','Register / feed table',[D.feedBoardCenterX,0,0],[-.5,.25,0],['IMG_1626.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Length is matched to the calibrated OFU-1 envelope; surface/controls follow the actual feeder-to-PU1 photographs and manual functions.');
@@ -262,18 +262,21 @@ export class OffsetMachineTemplate {
       this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
       this.box(bridge,[.14,.055,.10],[.10,2.65,z],'black',.009);
     }
-    const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources,i===0?'PU1 step diposisikan di access bay antara PU1–PU2; tidak menembus cover atau frame. Dimensi tetap visual-only.':'Pijakan mengikuti pola exterior foto; ukuran bukan data engineering.');
+    const stair=this.group(g,'press-'+i+'-steps',i<7?`PU${i+1} → PU${i+2} · operator access stair & landing`:'PU8 · coater-side access steps',[0,0,0],[0,.12,1.35],[...sources,'IMG_1662.jpeg'],i<7?'Tiga tingkat akses, landing diamond-plate dan guard rail mengikuti IMG_1662. Lebar ditahan di dalam clear bay antar-PU; ukuran tetap photo-derived, bukan dimensi OEM.':'Pijakan sisi PU8 mempertahankan akses menuju coater.');
     const nextGap=OFFSET5_DIMENSIONS.layout.printingUnitPitch-frameWidth/2-OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth/2;
     // Center access treads in the clear structural bay; do not clamp them back into the cover.
     const stepCenter=frameWidth/2+nextGap/2;
-    if(i===0){
-      this.tread(stair,[.30,.10,.50],[stepCenter,.78,1.42]);
-      this.tread(stair,[.26,.10,.40],[stepCenter,1.05,1.34]);
-      this.box(stair,[.085,.31,.12],[stepCenter,.59,1.34],'graphite');
-    }else if(i<7){
-      this.tread(stair,[.34,.10,.50],[stepCenter,.82,1.43]);
-      this.tread(stair,[.30,.10,.40],[stepCenter,1.10,1.35]);
-      this.box(stair,[.09,.33,.13],[stepCenter,.62,1.34],'graphite');
+    if(i<7){
+      const clearWidth=Math.max(.48,nextGap-.08);
+      this.tread(stair,[clearWidth,.10,.38],[stepCenter,.52,1.82]);
+      this.box(stair,[clearWidth-.04,.23,.30],[stepCenter,.365,1.82],'graphite',.018);
+      this.tread(stair,[clearWidth,.10,.42],[stepCenter,.76,1.55]);
+      this.box(stair,[clearWidth-.04,.23,.34],[stepCenter,.605,1.55],'graphite',.018);
+      this.tread(stair,[clearWidth,.11,.76],[stepCenter,1.00,1.14]);
+      this.box(stair,[clearWidth-.04,.43,.70],[stepCenter,.73,1.14],'graphite',.020);
+      for(const dx of [-clearWidth*.42,clearWidth*.42])this.cylinder(stair,.018,.70,[stepCenter+dx,1.18,.72],'steel','y');
+      this.cylinder(stair,.020,clearWidth*.84,[stepCenter,1.47,.72],'steel','x');
+      this.cylinder(stair,.017,clearWidth*.84,[stepCenter,1.22,.72],'steel','x');
     }else{
       this.tread(stair,[.38,.10,.50],[.54,.82,1.43]);
       this.tread(stair,[.32,.10,.40],[.54,1.10,1.35]);
