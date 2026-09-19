@@ -286,11 +286,14 @@ export class OffsetMachineTemplate {
     if(!this.root.userData.printingUnitCylinderLayout)this.root.userData.printingUnitCylinderLayout={};
     this.root.userData.printingUnitCylinderLayout[`PU${i+1}`]=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
     if(i===0)this.root.userData.pu1CylinderLayout=this.root.userData.printingUnitCylinderLayout.PU1;
-    for(const [name,r,pos,kind] of cylinderSpec){const roller=this.cylinder(cylinders,r,1.52,pos,kind);roller.name=name;}
-    for(const z of [-.79,.79]){
-      this.cylinder(cylinders,.285,.035,[.16,.95,z],'graphite');
-      this.cylinder(cylinders,.255,.035,[-.12,.55,z],'graphite');
-    }
+    const cylinderIds=['plate','blanket','impression','transfer'];
+    cylinderSpec.forEach(([name,r,pos,kind],idx)=>{
+      const cg=this.group(cylinders,`${id}-cylinder-${cylinderIds[idx]}`,`${label} · ${name}`,[0,0,0],[0,.10,-.24],photos,'Cylinder body location is functional/photo-fitted; exact bearer/journal engineering dimensions are not asserted.');
+      const body=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-body`,`${label} · ${cylinderIds[idx]} cylinder body`,[0,0,0],[0,.06,-.12],photos);
+      const roller=this.cylinder(body,r,1.52,pos,kind);roller.name=name;roller.userData.detail=true;
+      const journals=this.group(cg,`${id}-cylinder-${cylinderIds[idx]}-journals`,`${label} · ${cylinderIds[idx]} journals / bearers reference`,[0,0,0],[0,.05,-.18],photos,'Journal/bearer geometry is an inspection reference only.');
+      for(const z of [-.79,.79]){const jr=this.cylinder(journals,Math.max(.045,r*.26),.07,[pos[0],pos[1],z],'steel','z');jr.userData.detail=true;}
+    });
     const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),`printing-unit-sheet-path-${i}`,'paper',[.02,1.10,0],[Math.PI/2,0,Math.PI/2]);
     path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.22;path.material.side=THREE.DoubleSide;path.userData.detail=true;
 
@@ -321,8 +324,11 @@ export class OffsetMachineTemplate {
       ['FR','Dampening distributor FR',85,[-.33,1.70,0],'steel']
     ];
     for(const [code,name,diameter,pos,kind] of dampRollers){
-      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; coordinates are visual-only.`);
-      markDetail(this.cylinder(roller,diameter*.00085,1.38,pos,kind));
+      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; coordinates are sectional visual references.`);
+      const body=this.group(roller,`${id}-damp-roller-${code}-body`,`${label} · ${code} roller body`,[0,0,0],[0,.08,-.10],['SMCD102_roller_remove_procedure.pdf']);
+      markDetail(this.cylinder(body,diameter*.00085,1.30,pos,kind));
+      const journals=this.group(roller,`${id}-damp-roller-${code}-journals`,`${label} · ${code} journals / locks`,[0,0,0],[0,.06,-.14],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock locations support inspection hierarchy; exact bearing dimensions are not inferred.');
+      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameter*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
 
     const plateClamp=this.group(g,`${id}-plate-clamp`,`${label} · plate-cylinder clamp / AutoPlate reference`,[0,0,0],[.12,.18,.42],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Plate-clamping function is supported by the supplied CD102 manual. Clamp geometry and register setting are not reconstructed as service dimensions.');
@@ -336,15 +342,21 @@ export class OffsetMachineTemplate {
       ['3','Ink transfer roller',56,[-.11,2.12,0],'steel'],['4','Ink transfer roller',80,[-.23,2.24,0],'rubber'],['5','Ink transfer roller',68,[-.10,2.34,0],'steel'],['6','Ink transfer roller',72,[.04,2.24,0],'rubber'],['7','Ink transfer roller',56,[-.23,2.42,0],'steel'],['8','Ink transfer roller',60,[-.04,2.48,0],'rubber'],['9','Ink transfer roller',66,[.30,2.42,0],'rubber'],['10','Ink transfer roller',56,[.18,2.32,0],'steel'],['11','Ink transfer roller',80,[.33,2.26,0],'rubber'],['12','Ink transfer roller',68,[.43,2.13,0],'steel'],['15','Ink vibrator / ductor',59,[-.30,2.55,0],'rubber']
     ];
     for(const [code,name,diameter,pos,kind] of rollerMap){
-      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows Fig. 11 topology.`);
-      markDetail(this.cylinder(roller,diameter*.00085,1.40,pos,kind));
+      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows the supplied roller topology.`);
+      const body=this.group(roller,`${id}-ink-roller-${code}-body`,`${label} · roller ${code} body`,[0,0,0],[0,.08,.10],['SMCD102_roller_remove_procedure.pdf']);
+      markDetail(this.cylinder(body,diameter*.00085,1.30,pos,kind));
+      const journals=this.group(roller,`${id}-ink-roller-${code}-journals`,`${label} · roller ${code} journals / locks`,[0,0,0],[0,.06,-.12],['SMCD102_roller_remove_procedure.pdf'],'Journal/lock location is provided for six-stage inspection; bearing dimensions remain unverified.');
+      for(const z of [-.69,.69])markDetail(this.cylinder(journals,Math.max(.018,diameter*.00026),.10,[pos[0],pos[1],z],'steel','z'));
     }
     for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
 
     const distribution=this.group(g,`${id}-inking-distribution`,`${label} · distributor rollers A–D`,[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'A–D are 85 mm nominal distributor rollers in the supplied procedure. Oscillation stroke and bearing details are not inferred.');
     for(const [code,pos] of [['A',[-.16,2.60,0]],['B',[.02,2.64,0]],['C',[.20,2.60,0]],['D',[.42,2.58,0]]]){
       const roller=this.group(distribution,`${id}-ink-distributor-${code}`,`${label} · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm.');
-      markDetail(this.cylinder(roller,.072,1.40,pos,'steel'));
+      const body=this.group(roller,`${id}-ink-distributor-${code}-body`,`${label} · distributor ${code} body`,[0,0,0],[0,.08,.10],['SMCD102_roller_remove_procedure.pdf']);
+      markDetail(this.cylinder(body,.072,1.30,pos,'steel'));
+      const journals=this.group(roller,`${id}-ink-distributor-${code}-journals`,`${label} · distributor ${code} journals`,[0,0,0],[0,.06,-.12],['SMCD102_roller_remove_procedure.pdf']);
+      for(const z of [-.69,.69])markDetail(this.cylinder(journals,.026,.10,[pos[0],pos[1],z],'steel','z'));
     }
     for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
 
