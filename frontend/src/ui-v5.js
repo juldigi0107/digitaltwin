@@ -115,11 +115,23 @@ function patchFriendlyCounts(){
 }
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
+  let wasMobile=null;
   const sync=()=>{
     const mobile=query.matches;
     document.documentElement.dataset.viewport=mobile?'compact':'wide';
     document.documentElement.style.setProperty('--app-height',`${window.visualViewport?.height||window.innerHeight}px`);
-    if(!mobile)document.body.classList.remove('nav-open','mobile-panel-open');
+    if(mobile&&wasMobile!==true){
+      setFloatVisible('.floating-filter',false);
+      setFloatVisible('.keyplan-mini',false);
+      setFloatVisible('#scene-notice',false);
+      hideDetail();
+    }
+    if(!mobile&&wasMobile===true){
+      document.body.classList.remove('nav-open','mobile-panel-open');
+      setFloatVisible('.floating-filter',true);
+      setFloatVisible('.keyplan-mini',true);
+    }
+    wasMobile=mobile;
     requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
   };
   query.addEventListener?.('change',sync);
