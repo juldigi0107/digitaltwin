@@ -48,6 +48,13 @@ for(const [key,name,refs,specific] of [
  ['FINGER','Gripper Finger & Pad',['press-0-impression-gripper'],['Finger Lever','Gripper Tip / Pad','Pivot Pin']],
  ['ACTUATION','Gripper Actuation',['press-0-gripper-control'],['Opening Cam Reference','Cam Follower','Operating Lever','Return / Torsion Spring Reference']]
 ]){const pid=`O5.PRINT.PU1.CYL.${key}`;add(pid,'O5.PRINT.PU1.CYL',5,'Part',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.18,.18,-.30],description:'Functional gripper reference; quantity, pitch, cam profile, opening angle, preload and timing are unverified.'});specific.forEach((part,index)=>add(`${pid}.S${index+1}`,pid,6,'Spesifik Part',part,{meshRefs:index===0?refs:[],sourceRefs:['SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.08,.08,(index-1)*.12],maintenanceTag:'VISUAL_INSPECTION'}));}
+for(const [key,name,specific] of [
+ ['PLATESET','Plate Cylinder Assembly',['Cylinder Body','Plate Clamp Channel','Journal / Bearing Reference','Bearer Ring Reference']],
+ ['BLANKETSET','Blanket Cylinder Assembly',['Cylinder Body','Blanket Gap Reference','Journal / Bearing Reference','Bearer Ring Reference']],
+ ['IMPRESSIONSET','Impression Cylinder Assembly',['Cylinder Body','Gripper Channel Reference','Journal / Bearing Reference','Bearer Ring Reference']],
+ ['TRANSFERSET','Transfer Cylinder Assembly',['Cylinder Body','Sheet-support Surface','Journal / Bearing Reference','Bearer Ring Reference']],
+ ['NIPPATH','Cylinder Nip & Sheet Path',['Plate–Blanket Nip','Blanket–Impression Nip','Impression–Transfer Handover','Leading-edge Sheet Path']]
+]){const pid=`O5.PRINT.PU1.CYL.${key}`;add(pid,'O5.PRINT.PU1.CYL',5,'Part',name,{meshRefs:['press-0-cylinder-train'],sourceRefs:['SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,.16,-.26],description:'PU1 cylinder topology is non-overlapping and functionally ordered; installed diameters, bearer setting and nip pressure are unverified.'});specific.forEach((part,index)=>add(`${pid}.S${index+1}`,pid,6,'Spesifik Part',part,{meshRefs:index===0?['press-0-cylinder-train']:[],sourceRefs:['SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.06,.07,(index-1.5)*.10],maintenanceTag:'VISUAL_INSPECTION'}));}
 
 const transfer12='O5.PRINT.TRANSFER12';
 add(transfer12,'O5.PRINT',3,'Sub','PU1–PU2 Sheet Transfer',{meshRefs:['transfer-pu1-pu2'],sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.MEDIUM,explodeVector:[0,.28,-.65],description:'Functional visual reference between PU1 and PU2; timing and service dimensions are unverified.'});

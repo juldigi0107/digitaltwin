@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v10', status: 'RECONSTRUCTED / PU1 GRIPPER & TRANSFER FUNCTIONAL DETAIL',
+  version: 'offset5-photo-v11', status: 'RECONSTRUCTED / PU1 NON-OVERLAP CYLINDER & ROLLER DETAIL',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -215,18 +215,24 @@ export class OffsetMachineTemplate {
     const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'];
     const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · cylinder & sheet-transfer reference`,[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
     // Neutral sectional references stay inside the verified housing envelope.
-    const cylinderSpec=[
+    const cylinderSpec=i===0?[
+      ['plate cylinder reference',.215,[.16,1.79,0],'steel'],
+      ['blanket cylinder reference',.245,[-.12,1.39,0],'rubber'],
+      ['impression cylinder reference',.255,[.16,.95,0],'steel'],
+      ['transfer cylinder reference',.225,[-.12,.55,0],'graphite']
+    ]:[
       ['plate cylinder reference',.215,[.17,1.78,0],'steel'],
       ['blanket cylinder reference',.245,[-.06,1.42,0],'rubber'],
       ['impression cylinder reference',.255,[.13,1.02,0],'steel'],
       ['transfer cylinder reference',.225,[-.10,.66,0],'graphite']
     ];
+    if(i===0)this.root.userData.pu1CylinderLayout=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
     for(const [name,r,pos,kind] of cylinderSpec){const roller=this.cylinder(cylinders,r,1.52,pos,kind);roller.name=name;}
     for(const z of [-.79,.79]){
-      this.cylinder(cylinders,.285,.035,[.13,1.02,z],'graphite');
-      this.cylinder(cylinders,.255,.035,[-.10,.66,z],'graphite');
+      this.cylinder(cylinders,.285,.035,[i===0?.16:.13,i===0?.95:1.02,z],'graphite');
+      this.cylinder(cylinders,.255,.035,[i===0?-.12:-.10,i===0?.55:.66,z],'graphite');
     }
-    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,1.16,0],[Math.PI/2,0,Math.PI/2]);
+    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,i===0?1.10:1.16,0],[Math.PI/2,0,Math.PI/2]);
     path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
     if(i===0){
       const impressionGripper=this.group(g,'press-0-impression-gripper','PU1 · impression-cylinder gripper bar, fingers & pads',[0,0,0],[.18,.18,-.58],photos,'Assembly menunjukkan fungsi penjepitan leading edge pada impression cylinder. Jumlah finger, pitch, sudut buka, preload dan phasing aktual belum diverifikasi.');
@@ -248,25 +254,25 @@ export class OffsetMachineTemplate {
 
     const damp=this.group(g,`${id}-dampening`,`${label} · dampening reference`,[0,0,0],[0,.48,-.35],photos,'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
     this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
-    this.cylinder(damp,.092,1.45,[-.12,2.16,0],'rubber');
-    this.cylinder(damp,.072,1.43,[.03,2.27,0],'steel');
+    this.cylinder(damp,i===0?.065:.092,1.45,[i===0?-.34:-.12,i===0?2.36:2.16,0],'rubber');
+    this.cylinder(damp,i===0?.060:.072,1.43,[i===0?-.15:.03,i===0?2.38:2.27,0],'steel');
     for(const z of [-.72,.72])this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015);
     if(i===0){
       const dampForm=this.group(g,'press-0-dampening-form','PU1 · metering/intermediate/form roller reference',[0,0,0],[0,.46,-.28],photos,'Urutan roller adalah representasi fungsional continuous dampening; diameter, nip dan bahan aktual tidak diverifikasi.');
-      for(const [x,y,r,kind] of [[-.27,2.11,.055,'steel'],[-.15,2.03,.068,'rubber'],[-.02,1.94,.074,'rubber']])this.cylinder(dampForm,r,1.38,[x,y,0],kind);
+      for(const [x,y,r,kind] of [[-.30,2.19,.052,'steel'],[-.20,2.10,.060,'rubber'],[-.10,1.99,.062,'rubber']])this.cylinder(dampForm,r,1.38,[x,y,0],kind);
       const plateClamp=this.group(g,'press-0-plate-clamp','PU1 · plate-cylinder clamp/channel reference',[0,0,0],[.12,.18,.42],photos,'Clamp channel menunjukkan lokasi fungsi pada plate cylinder. Bentuk clamp, torque dan register mechanism aktual tidak diverifikasi.');
       this.box(plateClamp,[.055,.035,1.34],[.17,1.995,0],'graphite',.008);
       for(const z of [-.64,.64])this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z');
     }
 
     const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train reference`,[0,0,0],[0,.68,.25],photos,'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
-    const rollers=[[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']];
+    const rollers=i===0?[[-.26,2.35,.090,'rubber'],[-.08,2.30,.080,'steel'],[.10,2.25,.086,'rubber'],[.27,2.17,.072,'steel'],[.39,2.03,.068,'rubber']]:[[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']];
     for(const [x,y,r,kind] of rollers)this.cylinder(inking,r,1.44,[x,y,0],kind);
     for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
     if(i===0){
       const distribution=this.group(g,'press-0-inking-distribution','PU1 · distributor & form roller reference',[0,0,0],[0,.62,.22],photos,'Zonal ink delivery, oscillation dan roller pressure tidak dimodelkan; geometri hanya menunjukkan rantai fungsi menuju plate cylinder.');
-      const detail=[[-.24,2.30,.060,'steel'],[-.11,2.20,.068,'rubber'],[.02,2.10,.073,'steel'],[.12,1.98,.065,'rubber'],[.20,1.87,.060,'rubber']];
-      for(const [x,y,r,kind] of detail)this.cylinder(distribution,r,1.34,[x,y,0],kind);
+      const detail=[[-.26,2.35,.105,'steel'],[-.08,2.30,.095,'graphite'],[.10,2.25,.101,'steel'],[.27,2.17,.087,'graphite'],[.39,2.03,.083,'steel']];
+      for(const [x,y,r,kind] of detail)for(const z of [-.735,.735])this.cylinder(distribution,r,.025,[x,y,z],kind,'z');
       for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
     }
 

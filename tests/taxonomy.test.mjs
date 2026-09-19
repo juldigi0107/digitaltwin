@@ -35,6 +35,11 @@ test('PU1 and transfer gripper taxonomy separates gripping and actuation compone
  for(const ref of ['transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-cam'])assert.ok(transfer.meshRefs.includes(ref),`missing ${ref}`);
  assert.equal(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL.ACTUATION').confidence,'REFERENCE_ONLY');
 });
+test('PU1 cylinder taxonomy separates four assemblies and nip path',()=>{
+ for(const id of ['PLATESET','BLANKETSET','IMPRESSIONSET','TRANSFERSET','NIPPATH']){
+  const node=TAXONOMY_BY_ID.get(`O5.PRINT.PU1.CYL.${id}`);assert.ok(node);assert.equal(node.confidence,'REFERENCE_ONLY');
+ }
+});
 test('source registry separates photo evidence from technical reference',()=>{
  const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,22);assert.equal(stats.unique,22);assert.equal(stats.active_geometry_reference,14);
  assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');

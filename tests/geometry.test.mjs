@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-v10');
+ assert.equal(t.root.userData.version,'offset5-photo-v11');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -51,5 +51,16 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  for(const id of ['press-1-cylinder-train','press-1-dampening','press-1-inking-train','press-1-service-access','transfer-pu1-pu2','transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-guide'])assert.ok(t.findNode(id),`missing ${id}`);
  assert.equal(t.findNode('press-2-cylinder-train'),null,'PU3 internals must remain unchanged');
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
+ t.dispose();
+});
+test('PU1 primary cylinders are ordered and have no volumetric overlap',()=>{
+ const t=new OffsetMachineTemplate(),layout=t.root.userData.pu1CylinderLayout;
+ assert.equal(layout.length,4);
+ assert.deepEqual(layout.map(c=>c.name),['plate cylinder reference','blanket cylinder reference','impression cylinder reference','transfer cylinder reference']);
+ for(let i=0;i<layout.length-1;i++){
+  const a=layout[i],b=layout[i+1],distance=Math.hypot(a.center[0]-b.center[0],a.center[1]-b.center[1]);
+  assert.ok(distance>=a.radius+b.radius,`${a.name} overlaps ${b.name}`);
+  assert.ok(distance-(a.radius+b.radius)<.035,`${a.name} to ${b.name} is not a plausible near-nip arrangement`);
+ }
  t.dispose();
 });
