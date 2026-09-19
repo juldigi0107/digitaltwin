@@ -51,7 +51,11 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/command-center-ui-phase21-20260919/);
+  assert.match(responsiveCss,/Mobile composition lock/);
+  assert.match(responsiveCss,/--app-height,100dvh/);
+  assert.match(responsiveCss,/orientation:landscape/);
+  assert.match(ui,/visualViewport\?\.height/);
+  assert.match(sw,/mobile-layout-phase22-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
 });
