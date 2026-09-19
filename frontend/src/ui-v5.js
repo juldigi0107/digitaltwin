@@ -61,6 +61,7 @@ function bindNav(){
   navInfo('nav-alerts','Alerts belum terhubung ke data live; tidak ada alarm yang difabrikasi.');
   $('#filter-close')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f){f.hidden=true;uiNotice('Layer & Filter disembunyikan. Tekan ALL untuk menampilkannya lagi.');}});
   $('#legend-all')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f)f.hidden=false;$('#legend-all')?.classList.add('active');uiNotice('Filter aset direset ke ALL untuk data yang tersedia.');});
+  $('#global-search')?.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const q=e.currentTarget.value.trim();$('#nav-assets')?.click();setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);});
   $('#ui-workbench-toggle')?.addEventListener('click',()=>{document.body.classList.remove('nav-open','mobile-panel-open');document.body.classList.toggle('ui-workbench-open');});
   $('#ui-close-workbench')?.addEventListener('click',()=>document.body.classList.remove('ui-workbench-open'));
   $('#ui-asset-panel')?.addEventListener('click',()=>{document.body.classList.remove('panel-hidden','nav-open','ui-workbench-open');document.body.classList.add('mobile-panel-open');$('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});});
