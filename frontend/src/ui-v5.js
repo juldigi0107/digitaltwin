@@ -1,96 +1,137 @@
-const PHOTO_REGISTRY=[
-  {id:'p01',file:'IMG_2312.jpeg',zone:'Delivery pile / machine end',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p02',file:'IMG_1970.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p03',file:'IMG_1971.jpeg',zone:'Upper ink / roller view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p04',file:'IMG_1656.jpeg',zone:'Delivery / panel view',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p05',file:'IMG_1624.jpeg',zone:'Feeder end / controls',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p06',file:'IMG_1625.jpeg',zone:'Feeder pile / suction head',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p07',file:'IMG_1626.jpeg',zone:'Feed board / PU1 interface',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p08',file:'IMG_1627.jpeg',zone:'Printing units / operator side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p09',file:'IMG_1628.jpeg',zone:'Printing units / upper side',kind:'active_geometry_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p10',file:'IMG_1629.jpeg',zone:'Coating / delivery transition',kind:'supplementary_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p11',file:'IMG_1630.jpeg',zone:'Inspection hood / camera gantry',kind:'supplementary_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p12',file:'IMG_1631.jpeg',zone:'Inspection gantry / camera pods',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p13',file:'IMG_1633.jpeg',zone:'Inspection gantry / top beam',kind:'supplementary_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p14',file:'IMG_1634.jpeg',zone:'Control / machine-end overview',kind:'orientation_reference',confidence:'HIGH_CONFIDENCE'},
-  {id:'p15',file:'IMG_1165.jpeg',zone:'Gauge / hose / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
-  {id:'p16',file:'IMG_0947.jpeg',zone:'Roller / service detail',kind:'detail_reference',confidence:'MEDIUM_CONFIDENCE'},
-  {id:'p17',file:'IMG_2388(2).jpeg',zone:'Operator-side longitudinal overview',kind:'orientation_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p18',file:'IMG_2391(1).jpeg',zone:'Operator walkway / inspection bridge',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p19',file:'IMG_2392.jpeg',zone:'Operator steps / covers / platform',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p20',file:'IMG_2389(1).jpeg',zone:'Drive-side longitudinal overview',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p21',file:'IMG_2390(1).jpeg',zone:'Drive railing / flat covers / steps',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p22',file:'IMG_2395.jpeg',zone:'Drive feeder / utilities / hoses',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'},
-  {id:'p23',file:'IMG_1628(2).jpeg',zone:'PU1 top view from feeder toward delivery',kind:'active_geometry_reference',confidence:'PHOTO_VERIFIED'}
-];
-const UNIQUE_PHOTOS=PHOTO_REGISTRY.length;
-const ACTIVE_GEOMETRY_PHOTOS=PHOTO_REGISTRY.filter(p=>p.kind==='active_geometry_reference').length;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-function setText(selector,value){const el=$(selector);if(el)el.textContent=value;}
-function uiNotice(message,error=false){const el=$('#toast');if(!el)return;el.textContent=message;el.classList.toggle('error',error);el.hidden=false;clearTimeout(uiNotice.timer);uiNotice.timer=setTimeout(()=>{el.hidden=true;},error?7000:4200);}
-function patchReferenceCopy(){
-  const notice=$('#scene-notice div>span');if(notice)notice.textContent=`${UNIQUE_PHOTOS} foto unik terdaftar · ${ACTIVE_GEOMETRY_PHOTOS} foto aktif pada geometry baseline stabil. Skala dan posisi DWG belum diterapkan.`;
-  setText('#photo-unique-count',String(UNIQUE_PHOTOS));setText('#photo-active-count',String(ACTIVE_GEOMETRY_PHOTOS));setText('#source-photo-count',`${UNIQUE_PHOTOS} UNIQUE / ${ACTIVE_GEOMETRY_PHOTOS} ACTIVE`);
-  const panel=$('#panel-content');if(!panel)return;
-  const walker=document.createTreeWalker(panel,NodeFilter.SHOW_TEXT),texts=[];while(walker.nextNode())texts.push(walker.currentNode);
-  for(const node of texts){
-    if(node.nodeValue?.includes('9 foto aktual'))node.nodeValue=node.nodeValue.replaceAll('9 foto aktual',`${ACTIVE_GEOMETRY_PHOTOS} foto aktif pada geometry stabil`);
-    if(node.nodeValue?.includes('Sumber: 9 foto aktual pengguna'))node.nodeValue=node.nodeValue.replace('Sumber: 9 foto aktual pengguna',`Sumber geometry aktif: ${ACTIVE_GEOMETRY_PHOTOS} foto · registry: ${UNIQUE_PHOTOS} foto unik`);
-  }
-  if(panel.textContent.includes('Sumber geometri')&&!panel.querySelector('.photo-registry-card')){
-    const card=document.createElement('div');card.className='card photo-registry-card';card.innerHTML=`<h4>Photo Registry</h4><p>${UNIQUE_PHOTOS} foto unik tersimpan sebagai evidence registry. ${ACTIVE_GEOMETRY_PHOTOS} foto dipakai oleh geometry baseline stabil; ${UNIQUE_PHOTOS-ACTIVE_GEOMETRY_PHOTOS} foto tambahan tetap dipertahankan sebagai supplementary/orientation/detail reference dan belum dipakai untuk rewrite geometry.</p><span class="tag">${UNIQUE_PHOTOS} UNIQUE</span><span class="tag">${ACTIVE_GEOMETRY_PHOTOS} ACTIVE</span>`;panel.prepend(card);
-  }
+const UNIQUE_PHOTOS=23;
+const ACTIVE_GEOMETRY_PHOTOS=15;
+
+function uiNotice(message,error=false){
+  const el=$('#toast'); if(!el)return;
+  el.textContent=message; el.classList.toggle('error',error); el.hidden=false;
+  clearTimeout(uiNotice.timer); uiNotice.timer=setTimeout(()=>{el.hidden=true;},error?6500:3600);
 }
-function bindNav(){
-  const closeTransientPanels=()=>{document.body.classList.remove('nav-open','ui-workbench-open','mobile-panel-open');};
-  $('#ui-menu-toggle')?.addEventListener('click',()=>{document.body.classList.remove('ui-workbench-open','mobile-panel-open');document.body.classList.toggle('nav-open');});
-  document.addEventListener('click',e=>{if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');});
-  $('#mode-2d')?.addEventListener('click',()=>{$('#nav-layout')?.click();$('#mode-2d').classList.add('active');$('#mode-3d')?.classList.remove('active');});
-  $('#mode-3d')?.addEventListener('click',()=>{$('#nav-machine')?.click();$('#mode-3d').classList.add('active');$('#mode-2d')?.classList.remove('active');});
-  $('#nav-layout')?.addEventListener('click',()=>{$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');});
-  $('#nav-machine')?.addEventListener('click',()=>{$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');});
+function setText(selector,value){const el=$(selector);if(el)el.textContent=value;}
+function showDetail(tab){
+  document.body.classList.remove('panel-hidden','nav-open','ui-workbench-open');
+  document.body.classList.add('mobile-panel-open');
+  if(tab)document.querySelector(`[data-tab="${tab}"]`)?.click();
+  $('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});
+}
+function hideDetail(){document.body.classList.add('panel-hidden');document.body.classList.remove('mobile-panel-open');}
+function setFloatVisible(selector,visible){
+  const el=$(selector); if(!el)return;
+  el.hidden=!visible;
+}
+function toggleLauncher(force){
+  const menu=$('#panel-launcher-menu'); if(!menu)return;
+  const open=typeof force==='boolean'?force:menu.hidden;
+  menu.hidden=!open;
+  $('#panel-launcher')?.classList.toggle('active',open);
+}
+function closeTransientPanels(){
+  document.body.classList.remove('nav-open','ui-workbench-open','mobile-panel-open');
+  toggleLauncher(false);
+}
+function setLegendActive(id){$$('.asset-legend button').forEach(b=>b.classList.toggle('active',b.id===id));}
+
+function bindShell(){
+  $('#ui-menu-toggle')?.addEventListener('click',e=>{
+    e.stopPropagation();
+    document.body.classList.remove('ui-workbench-open','mobile-panel-open');
+    toggleLauncher(false);
+    document.body.classList.toggle('nav-open');
+  });
+  document.addEventListener('click',e=>{
+    if(document.body.classList.contains('nav-open')&&!e.target.closest('.rail')&&!e.target.closest('#ui-menu-toggle'))document.body.classList.remove('nav-open');
+    if(!$('#panel-launcher-menu')?.hidden&&!e.target.closest('#panel-launcher-menu')&&!e.target.closest('#panel-launcher'))toggleLauncher(false);
+  });
+
+  $('#mode-2d')?.addEventListener('click',()=>{$('#nav-layout')?.click();$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');});
+  $('#mode-3d')?.addEventListener('click',()=>{$('#nav-machine')?.click();$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');});
+  $('#nav-layout')?.addEventListener('click',()=>{$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');document.body.classList.remove('nav-open');});
+  $('#nav-machine')?.addEventListener('click',()=>{$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');document.body.classList.remove('nav-open');});
+  $('#nav-components')?.addEventListener('click',()=>{showDetail('structure');document.body.classList.remove('nav-open');});
+  $('#nav-view-panels')?.addEventListener('click',()=>{toggleLauncher(true);document.body.classList.remove('nav-open');});
+
   $('#ui-theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-mode'));
-  const navInfo=(id,message,target)=>$('#'+id)?.addEventListener('click',()=>{if(target)$('#'+target)?.click();uiNotice(message);document.body.classList.remove('nav-open');});
-  navInfo('nav-machines','Machines: membuka daftar aset mesin yang tersedia.','nav-assets');
-  navInfo('nav-prepress','Prepress: data area belum terhubung; daftar aset yang tersedia dibuka.','nav-assets');
-  navInfo('nav-finishing','Finishing: data area belum terhubung; daftar aset yang tersedia dibuka.','nav-assets');
-  navInfo('nav-utilities','Utilities belum memiliki data backend aktif pada build ini.');
-  navInfo('nav-relationships','Utility relationships belum memiliki data backend aktif pada build ini.');
-  navInfo('nav-documents','Documents: membuka Source Documents untuk bukti yang sudah tersedia.','nav-sources');
-  navInfo('nav-analytics','Analytics belum memiliki telemetry backend aktif pada build ini.');
-  navInfo('nav-alerts','Alerts belum terhubung ke data live; tidak ada alarm yang difabrikasi.');
-  $('#filter-close')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f){f.hidden=true;uiNotice('Layer & Filter disembunyikan. Tekan ALL untuk menampilkannya lagi.');}});
-  $('#legend-all')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f)f.hidden=false;$('#legend-all')?.classList.add('active');uiNotice('Filter aset direset ke ALL untuk data yang tersedia.');});
-  $('#global-search')?.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const q=e.currentTarget.value.trim();$('#nav-assets')?.click();setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);});
+  $('#panel-launcher')?.addEventListener('click',e=>{e.stopPropagation();toggleLauncher();});
+  $('#panel-launcher-close')?.addEventListener('click',()=>toggleLauncher(false));
+
+  $('#filter-close')?.addEventListener('click',()=>setFloatVisible('.floating-filter',false));
+  $('#keyplan-close')?.addEventListener('click',()=>setFloatVisible('.keyplan-mini',false));
+  document.addEventListener('click',e=>{if(e.target.closest('#notice-close'))setFloatVisible('#scene-notice',false);});
+  $('#show-filter')?.addEventListener('click',()=>{setFloatVisible('.floating-filter',true);toggleLauncher(false);});
+  $('#show-keyplan')?.addEventListener('click',()=>{setFloatVisible('.keyplan-mini',true);toggleLauncher(false);});
+  $('#show-notice')?.addEventListener('click',()=>{setFloatVisible('#scene-notice',true);toggleLauncher(false);});
+  $('#show-detail')?.addEventListener('click',()=>{showDetail();toggleLauncher(false);});
+  $('#show-workbench')?.addEventListener('click',()=>{document.body.classList.remove('nav-open','mobile-panel-open');document.body.classList.add('ui-workbench-open');toggleLauncher(false);setTimeout(()=>window.dispatchEvent(new Event('resize')),80);});
+
   $('#ui-workbench-toggle')?.addEventListener('click',()=>{document.body.classList.remove('nav-open','mobile-panel-open');document.body.classList.toggle('ui-workbench-open');});
   $('#ui-close-workbench')?.addEventListener('click',()=>document.body.classList.remove('ui-workbench-open'));
-  $('#ui-asset-panel')?.addEventListener('click',()=>{document.body.classList.remove('panel-hidden','nav-open','ui-workbench-open');document.body.classList.add('mobile-panel-open');$('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});});
-  $('#close-panel')?.addEventListener('click',()=>document.body.classList.remove('mobile-panel-open'));
+  $('#ui-asset-panel')?.addEventListener('click',()=>showDetail());
+  $('#panel-toggle')?.addEventListener('click',()=>{if(document.body.classList.contains('panel-hidden'))showDetail();else hideDetail();});
+  $('#close-panel')?.addEventListener('click',hideDetail);
   $('#ui-backdrop')?.addEventListener('click',closeTransientPanels);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTransientPanels();});
+
+  $('#legend-all')?.addEventListener('click',()=>{setLegendActive('legend-all');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',true);setFloatVisible('.keyplan-mini',true);setFloatVisible('#scene-notice',true);uiNotice('Semua informasi tampilan ditampilkan.');});
+  $('#legend-machine')?.addEventListener('click',()=>{setLegendActive('legend-machine');document.body.classList.remove('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();$('#focus-machine')?.click();uiNotice('Fokus pada mesin.');});
+  $('#legend-info')?.addEventListener('click',()=>{setLegendActive('legend-info');document.body.classList.remove('clean-view');showDetail('overview');});
+  $('#legend-clean')?.addEventListener('click',()=>{setLegendActive('legend-clean');document.body.classList.add('clean-view');setFloatVisible('.floating-filter',false);setFloatVisible('.keyplan-mini',false);setFloatVisible('#scene-notice',false);hideDetail();document.body.classList.remove('ui-workbench-open');uiNotice('Tampilan bersih aktif. Gunakan tombol Panel untuk menampilkan informasi kembali.');});
+
+  $('#global-search')?.addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;
+    const q=e.currentTarget.value.trim();
+    $('#nav-assets')?.click();
+    setTimeout(()=>{const input=$('#asset-search');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}},0);
+  });
+
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTransientPanels();hideDetail();setFloatVisible('#scene-notice',false);}});
 }
+
 function bindWorkbench(){
   const buttons=$$('[data-workbench]'),cards=$$('.wb-card[data-workbench-card]');
-  const activate=name=>{buttons.forEach(b=>b.classList.toggle('active',b.dataset.workbench===name));cards.forEach(c=>c.classList.toggle('active-mobile',c.dataset.workbenchCard===name));};
-  buttons.forEach(b=>b.addEventListener('click',()=>activate(b.dataset.workbench)));activate('dwg');
+  const activate=name=>{
+    buttons.forEach(b=>b.classList.toggle('active',b.dataset.workbench===name));
+    cards.forEach(c=>c.classList.toggle('active-mobile',c.dataset.workbenchCard===name));
+  };
+  buttons.forEach(b=>b.addEventListener('click',()=>activate(b.dataset.workbench)));
+  activate('dwg');
 }
-function wheelZoom(deltaY){const canvas=$('#viewport canvas');if(canvas)canvas.dispatchEvent(new WheelEvent('wheel',{deltaY,bubbles:true,cancelable:true,clientX:canvas.clientWidth/2,clientY:canvas.clientHeight/2}));}
-function bindZoomProxy(){
-  $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
+
+function wheelZoom(deltaY){
+  const canvas=$('#viewport canvas'); if(!canvas)return;
+  canvas.dispatchEvent(new WheelEvent('wheel',{deltaY,bubbles:true,cancelable:true,clientX:canvas.clientWidth/2,clientY:canvas.clientHeight/2}));
+}
+function bindShortcuts(){
+  $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));
+  $('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));
+  $('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
   $('#asset-focus-shortcut')?.addEventListener('click',()=>$('#focus-machine')?.click());
   $('#asset-explore-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="structure"]')?.click());
   $('#asset-components-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="structure"]')?.click());
   $('#asset-docs-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="sources"]')?.click());
 }
-function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-pdf-v16';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 PHOTO EXTERIOR + OEM-PDF INTERNALS · V16';}
+
+function patchFriendlyCounts(){
+  setText('#photo-unique-count',String(UNIQUE_PHOTOS));
+  setText('#photo-active-count',String(ACTIVE_GEOMETRY_PHOTOS));
+}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
+  let wasMobile=null;
   const sync=()=>{
     const mobile=query.matches;
     document.documentElement.dataset.viewport=mobile?'compact':'wide';
     document.documentElement.style.setProperty('--app-height',`${window.visualViewport?.height||window.innerHeight}px`);
-    if(!mobile)document.body.classList.remove('nav-open','ui-workbench-open','mobile-panel-open');
+    if(mobile&&wasMobile!==true){
+      setFloatVisible('.floating-filter',false);
+      setFloatVisible('.keyplan-mini',false);
+      setFloatVisible('#scene-notice',false);
+      hideDetail();
+    }
+    if(!mobile&&wasMobile===true){
+      document.body.classList.remove('nav-open','mobile-panel-open');
+      setFloatVisible('.floating-filter',true);
+      setFloatVisible('.keyplan-mini',true);
+    }
+    wasMobile=mobile;
     requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
   };
   query.addEventListener?.('change',sync);
@@ -98,4 +139,12 @@ function bindResponsiveLayout(){
   window.addEventListener('orientationchange',()=>setTimeout(sync,120),{passive:true});
   sync();
 }
-window.addEventListener('DOMContentLoaded',()=>{bindNav();bindWorkbench();bindZoomProxy();observePanel();bindResponsiveLayout();stampGeometryFreeze();patchReferenceCopy();});
+
+window.addEventListener('DOMContentLoaded',()=>{
+  document.documentElement.dataset.uiMode='test-user';
+  bindShell();
+  bindWorkbench();
+  bindShortcuts();
+  bindResponsiveLayout();
+  patchFriendlyCounts();
+});

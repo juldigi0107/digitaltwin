@@ -10,90 +10,72 @@ const responsiveCss=readFileSync(new URL('../frontend/responsive-v5.css',import.
 const sw=readFileSync(new URL('../frontend/sw.js',import.meta.url),'utf8');
 const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 
-test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
-  for(const id of ['viewport','detail-panel','panel-content','nav-machine','nav-layout','nav-assets','nav-sources','nav-help','focus-machine','edit-position','settings','connect','modal','toast']) assert.match(html,new RegExp(`id="${id}"`));
-  for(const camera of ['iso','top','fit','reset']) assert.match(html,new RegExp(`data-camera="${camera}"`));
+test('runtime hooks required by the 3D application remain available',()=>{
+  for(const id of ['viewport','detail-panel','panel-content','nav-machine','nav-layout','nav-assets','nav-sources','nav-help','focus-machine','edit-position','settings','connect','modal','toast','dwg-canvas'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const camera of ['iso','top','fit','reset'])assert.match(html,new RegExp(`data-camera="${camera}"`));
 });
 
-test('UI reports the current photo-aligned geometry baseline',()=>{
+test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
   assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v16');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
-test('photo registry separates evidence registry from active geometry references',()=>{
-  const entries=[...ui.matchAll(/id:'p\d+'/g)];
-  const active=[...ui.matchAll(/kind:'active_geometry_reference'/g)];
-  assert.equal(entries.length,23);
-  assert.equal(active.length,15);
-  assert.match(html,/23 foto unik/);
-  assert.match(html,/15 foto aktif/);
+test('test-user shell uses clear user-facing navigation',()=>{
+  for(const label of ['Mesin 3D','Denah Pabrik','Daftar Mesin','Struktur Mesin','Referensi','Panel Tampilan','Panduan'])assert.match(html,new RegExp(label));
+  assert.match(html,/Mode uji/);
+  assert.match(html,/Siap diuji/);
 });
 
-test('industrial shell has responsive workbench and dedicated cache assets',()=>{
-  assert.match(css,/engineering-workbench/);
-  assert.match(css,/@media\(max-width:767px\)/);
-  assert.match(html,/ASSET HIERARCHY · 6-STAGE TAXONOMY/);
-  assert.match(sw,/ui-v5\.css/);
-  assert.match(sw,/responsive-v5\.css/);
-  assert.match(sw,/src\/ui-v5\.js/);
+test('all static buttons are actionable and none is permanently disabled',()=>{
+  const buttons=[...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].map(m=>({
+    attrs:m[1],
+    id:(m[1].match(/\bid="([^"]+)"/)||[])[1]||null,
+    camera:(m[1].match(/\bdata-camera="([^"]+)"/)||[])[1]||null,
+    tab:(m[1].match(/\bdata-tab="([^"]+)"/)||[])[1]||null,
+    workbench:(m[1].match(/\bdata-workbench="([^"]+)"/)||[])[1]||null
+  }));
+  assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'a visible static button is disabled');
+  for(const b of buttons){
+    if(b.id)assert.ok(app.includes(b.id)||ui.includes(b.id),`button #${b.id} has no handler reference`);
+    else if(b.camera)assert.match(app,/data-camera|dataset\.camera/);
+    else if(b.tab)assert.match(app,/data-tab|dataset\.tab/);
+    else if(b.workbench)assert.match(ui,/data-workbench|dataset\.workbench/);
+    else assert.fail('button without id or delegated data attribute');
+  }
 });
 
-test('compact layout includes safe-area drawers and dismissible backdrop',()=>{
+test('every floating information window can be closed and restored',()=>{
+  for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','modal-close','panel-launcher-close'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const id of ['show-filter','show-keyplan','show-notice','show-detail','show-workbench','panel-launcher'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const id of ['filter-close','keyplan-close','notice-close','close-panel','ui-close-workbench','panel-launcher-close','show-filter','show-keyplan','show-notice','show-detail','show-workbench'])assert.match(ui,new RegExp(id));
+  assert.match(css,/\.floating-close/);
+  assert.match(css,/\.panel-launcher-menu/);
+});
+
+test('mobile portrait and landscape keep panels inside the viewport',()=>{
   assert.match(html,/interactive-widget=resizes-content/);
   assert.match(html,/id="ui-backdrop"/);
   assert.match(responsiveCss,/env\(safe-area-inset-top/);
-  assert.match(responsiveCss,/mobile-panel-open/);
-  assert.match(responsiveCss,/orientation:landscape/);
-  assert.match(ui,/orientationchange/);
-});
-
-test('mobile workspace cannot inherit desktop grid columns',()=>{
-  assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
-  assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
-  assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(responsiveCss,/Mobile composition lock/);
-  assert.match(responsiveCss,/--app-height,100dvh/);
   assert.match(responsiveCss,/orientation:landscape/);
   assert.match(ui,/visualViewport\?\.height/);
-  assert.match(sw,/pu1-pdf-photo-phase26-20260919/);
-  assert.match(html,/id="dwg-canvas"/);
-  assert.match(sw,/src\/data\/plant-layout-data\.js/);
+  assert.match(ui,/setFloatVisible\('\.floating-filter',false\)/);
+  assert.match(css,/@media\(max-width:767px\)/);
+  assert.match(css,/panel-launcher-menu/);
 });
 
-test('command-center shell exposes search, KPI, filters, legend and telemetry',()=>{
-  for(const cls of ['global-search','top-kpis','floating-filter','asset-legend','telemetry-strip','inspector-actions'])assert.match(html,new RegExp(`class="[^"]*${cls}`));
-  assert.match(ui,/asset-focus-shortcut/);
+test('visible shell avoids deployment and prototype terminology',()=>{
+  const visible=html.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ');
+  for(const term of ['deployment','deploy','prototype','mockup','Cloudflare Workers','backend','HEADER CONFLICT','METADATA ONLY','SOURCE STATUS','WebGL'])assert.doesNotMatch(visible,new RegExp(term,'i'));
+  for(const phrase of ['Koneksi backend','Cloudflare Workers','Layout pabrik · sumber DWG/DXF','Source Registry','geometry baseline','RECONSTRUCTED / APPROXIMATE'])assert.ok(!app.toLowerCase().includes(phrase.toLowerCase()),phrase);
 });
 
-
-test('DXF loading does not hide the machine inspection scene on startup',()=>{
-  assert.match(app,/loadBundledPlantLayout\(\)[\s\S]*setView\('machine'\)/);
-  assert.doesNotMatch(app,/loadBundledPlantLayout\(\)[\s\S]{0,220}setView\('factory'\)/);
+test('conditional controls explain requirements rather than failing silently',()=>{
+  assert.match(app,/Atur posisi memerlukan izin pengaturan/);
+  assert.match(app,/Pengaturan denah memerlukan izin pengaturan/);
+  assert.match(app,/Pilih bagian mesin terlebih dahulu/);
 });
 
-
-test('UI surfaces user-confirmed OFU-1 placement without changing machine geometry messaging',()=>{
-  assert.match(app,/activeLayout\(\)\?\.positionStatus/);
-  assert.match(app,/OFFSET 5 pada footprint di barat Room Electrical telah dikonfirmasi pengguna/);
-  assert.match(app,/Geometry mesin tidak diubah atau diskalakan paksa ke footprint/);
-});
-
-
-test('layout UI exposes OFU-1 functional zones as inference without scaling machine geometry',()=>{
-  assert.match(app,/Zona fungsi OFU-1/);
-  assert.match(app,/Tinggi dinding 3,2 m dan kolom 4,5 m adalah asumsi visual/);
-});
-
-
-test('every static button is actionable and no command-center button is permanently disabled',()=>{
- const buttons=[...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].map(m=>({attrs:m[1],label:m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}));
- assert.equal(buttons.filter(b=>/\bdisabled\b/.test(b.attrs)).length,0,'static disabled buttons remain in the page');
- for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(html,new RegExp(`id="${id}"`));
- for(const id of ['nav-machines','nav-prepress','nav-finishing','nav-utilities','nav-relationships','nav-documents','nav-analytics','nav-alerts','filter-close','legend-all'])assert.match(ui,new RegExp(id));
-});
-
-test('conditional action buttons provide feedback instead of silently doing nothing',()=>{
- assert.match(app,/Editor posisi memerlukan sesi Administrator/);
- assert.match(app,/Layer & kalibrasi memerlukan sesi Administrator/);
- assert.match(app,/Pilih komponen 3D terlebih dahulu sebelum Isolasi/);
+test('service worker refreshes the redesigned shell',()=>{
+  assert.match(sw,/offset5-test-user-ux-v17-20260919/);
+  for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });

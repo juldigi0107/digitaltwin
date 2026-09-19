@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#07121b">
-<meta name="description" content="BMJ Packaging Offset industrial 3D Factory Digital Twin workspace.">
-<title>OFFSET 5 · Factory Digital Twin</title>
+<meta name="description" content="Tampilan interaktif mesin Offset 5 untuk eksplorasi dan pengujian pengguna.">
+<title>OFFSET 5 · Digital Twin</title>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./ui-v5.css">
@@ -14,117 +14,159 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="./" class="brand" aria-label="Beranda Factory Digital Twin"><span class="brandmark">F<span>5</span></span><span>FACTORY DIGITAL TWIN<small>BMJ PACKAGING OFFSET · REAL-TIME 3D WORKSPACE</small></span></a>
-  <label class="global-search"><span>⌕</span><input id="global-search" type="search" aria-label="Cari aset, model, part, atau dokumen" placeholder="Cari aset, model, part, dokumen…"></label>
-  <div class="top-kpis" aria-label="Ringkasan evidence dan model"><div><small>PHOTO SOURCES</small><b>23</b><span>Unique Evidence</span></div><div><small>ACTIVE REF.</small><b>15</b><span>Geometry Sources</span></div><div><small>TAXONOMY</small><b>758</b><span>Six-stage Nodes</span></div><div><small>3D MESH</small><b>373</b><span>Geometry Batches</span></div><div class="alert-kpi"><small>LIVE ALERTS</small><b>—</b><span>Not Connected</span></div></div>
+  <a href="./" class="brand" aria-label="Beranda Digital Twin"><span class="brandmark">F<span>5</span></span><span>FACTORY DIGITAL TWIN<small>BMJ PACKAGING OFFSET · EKSPLORASI MESIN 3D</small></span></a>
+  <label class="global-search"><span>⌕</span><input id="global-search" type="search" aria-label="Cari mesin, komponen, atau dokumen" placeholder="Cari mesin, komponen, atau dokumen…"></label>
+  <div class="top-kpis" aria-label="Ringkasan aplikasi">
+    <div><small>MESIN</small><b>1</b><span>Offset 5</span></div>
+    <div><small>FOTO ACUAN</small><b>23</b><span>Referensi</span></div>
+    <div><small>STRUKTUR</small><b>758</b><span>Bagian mesin</span></div>
+    <div class="ready-kpi"><small>STATUS</small><b>✓</b><span>Siap diuji</span></div>
+  </div>
   <div class="header-actions">
-    <span id="connection" class="chip">Data awal · lokal</span>
-    <button id="connect" class="quiet">Koneksi</button>
+    <span id="connection" class="chip">Mode lokal</span>
+    <button id="connect" class="quiet" title="Sambungkan data">Data</button>
     <button id="ui-theme-toggle" class="icon-btn" aria-label="Ganti tema" title="Ganti tema">◐</button>
     <button id="settings" class="icon-btn" aria-label="Pengaturan tampilan" title="Pengaturan">⚙</button>
-    <span class="user-profile"><i>AU</i><span><b>Admin User</b><small>Administrator</small></span></span>
+    <span class="user-profile"><i>U</i><span><b>Pengguna</b><small>Mode uji</small></span></span>
     <button id="ui-menu-toggle" class="icon-btn ui-menu-toggle" aria-label="Buka navigasi">☰</button>
   </div>
 </header>
 
 <main class="twin-shell">
   <nav class="rail" aria-label="Navigasi utama">
-    <div class="rail-title">FACTORY NAVIGATION</div>
-    <button id="nav-machine" class="active" title="3D Factory"><span>◈</span><small>3D Factory</small></button>
-    <button id="nav-layout" title="Layout pabrik"><span>▱</span><small>Area / DWG</small></button>
-    <button id="nav-assets" title="Daftar aset"><span>▦</span><small>Assets</small></button>
-    <button id="nav-machines" title="Kategori mesin produksi"><span>▥</span><small>Machines</small></button>
-    <button id="nav-prepress" title="Area prepress"><span>◫</span><small>Prepress</small></button>
-    <button id="nav-finishing" title="Area finishing"><span>⌑</span><small>Finishing</small></button>
-    <button id="nav-utilities" title="Utilitas"><span>◉</span><small>Utilities</small></button>
-    <button id="nav-relationships" title="Hubungan utilitas"><span>⌘</span><small>Relationships</small></button>
-    <button id="nav-sources" title="Sumber data"><span>▤</span><small>Sources</small></button>
-    <button id="nav-documents" title="Dokumen teknis"><span>□</span><small>Documents</small></button>
-    <button id="nav-analytics" title="Analytics"><span>⌁</span><small>Analytics</small></button>
-    <button id="nav-alerts" title="Alerts"><span>△</span><small>Alerts</small></button>
-    <div class="source-health" aria-label="Status sumber data">
-      <h4>SOURCE STATUS</h4>
-      <div class="source-health-row"><span>DWG Layout</span><b class="confidence-high">DXF-DERIVED</b></div>
-      <div class="source-health-row"><span>Machine Data</span><b class="confidence-high">HIGH</b></div>
-      <div class="source-health-row"><span>Dimensions</span><b class="confidence-unknown">UNKNOWN</b></div>
-      <div class="source-health-row"><span>3D Model</span><b class="confidence-approx">APPROX.</b></div>
-      <div class="source-health-row"><span>Photo Ref.</span><b id="source-photo-count" class="confidence-high">16 UNIQUE / 9 ACTIVE</b></div>
-      <div class="source-health-row"><span>Geometry</span><b id="geometry-safety-status" class="confidence-high">FROZEN</b></div>
-    </div>
+    <div class="rail-title">MENU UTAMA</div>
+    <button id="nav-machine" class="active" title="Tampilan mesin 3D"><span>◈</span><small>Mesin 3D</small></button>
+    <button id="nav-layout" title="Denah pabrik"><span>▱</span><small>Denah Pabrik</small></button>
+    <button id="nav-assets" title="Daftar mesin"><span>▦</span><small>Daftar Mesin</small></button>
+    <button id="nav-components" title="Struktur mesin"><span>⌘</span><small>Struktur Mesin</small></button>
+    <button id="nav-sources" title="Dokumen dan foto referensi"><span>▤</span><small>Referensi</small></button>
+    <button id="nav-view-panels" title="Atur panel tampilan"><span>▣</span><small>Panel Tampilan</small></button>
     <div class="rail-bottom"><button id="nav-help" title="Panduan"><span>?</span><small>Panduan</small></button></div>
   </nav>
 
   <div class="center-stack">
-    <section class="workspace" aria-label="Penampil tiga dimensi">
+    <section class="workspace" aria-label="Tampilan tiga dimensi">
       <div class="scene-heading">
         <div>
-          <span class="eyebrow" id="view-kicker">3D FACTORY · MACHINE INSPECTION</span>
+          <span class="eyebrow" id="view-kicker">TAMPILAN MESIN 3D</span>
           <h1 id="view-title">OFFSET 5</h1>
           <p id="view-subtitle">Heidelberg Speedmaster · CD 102-8+L</p>
-          <div class="scene-context-line"><span>FACTORY · OFFSET PRINTING PLANT</span><span>AREA · PRODUCTION HALL</span><span>VIEW · 3D PERSPECTIVE</span></div>
+          <div class="scene-context-line"><span>Packaging Offset</span><span>Area Produksi</span><span>Tampilan Interaktif</span></div>
         </div>
-        <button id="panel-toggle" class="icon-btn" aria-label="Buka detail aset">☷</button>
+        <button id="panel-toggle" class="icon-btn" aria-label="Buka detail mesin">☷</button>
       </div>
 
-      <div id="viewport"><div id="boot" class="boot"><strong>Menyiapkan ruang 3D…</strong><p>Memuat penampil dan data aset.</p></div></div>
+      <div id="viewport"><div id="boot" class="boot"><strong>Menyiapkan tampilan 3D…</strong><p>Memuat mesin dan informasi yang tersedia.</p></div></div>
 
       <div class="compass" aria-hidden="true"><span class="n">N</span><span class="e">E</span><span class="s">S</span><span class="w">W</span><span class="needle"></span></div>
-      <div class="keyplan-mini" aria-label="Keyplan mini"><header><span>KEYPLAN</span><span>⌗</span></header><div class="keyplan-grid"></div></div>
 
-      <div id="machine-label" class="machine-label" hidden><span>◇</span><div><strong>OFFSET 5</strong><small id="label-detail">CD 102-8+L · UNKNOWN</small></div></div>
+      <div class="keyplan-mini floating-window" aria-label="Denah mini">
+        <header><span>DENAH MINI</span><button id="keyplan-close" class="floating-close" aria-label="Tutup denah mini">×</button></header>
+        <div class="keyplan-grid"></div>
+      </div>
 
-      <aside class="floating-filter" aria-label="Layer dan filter"><header><b>LAYER & FILTER</b><button id="filter-close" aria-label="Tutup filter">×</button></header><section><h4>ASSET CATEGORY</h4><label><i class="dot production"></i><span>Production Machines</span><b>26</b></label><label><i class="dot prepress"></i><span>Prepress</span><b>6</b></label><label><i class="dot finishing"></i><span>Finishing</span><b>7</b></label><label><i class="dot inspection"></i><span>Inspection</span><b>4</b></label><label><i class="dot utility"></i><span>Utility</span><b>16</b></label><label><i class="dot hvac"></i><span>HVAC</span><b>8</b></label></section><section><h4>STATUS FILTER</h4><label><i class="dot normal"></i><span>Normal</span><b>40</b></label><label><i class="dot warning"></i><span>Warning</span><b>5</b></label><label><i class="dot problem"></i><span>Problem</span><b>1</b></label></section></aside>
+      <div id="machine-label" class="machine-label" hidden><span>◇</span><div><strong>OFFSET 5</strong><small id="label-detail">CD 102-8+L</small></div></div>
+
+      <aside class="floating-filter floating-window" aria-label="Filter tampilan">
+        <header><b>FILTER TAMPILAN</b><button id="filter-close" class="floating-close" aria-label="Tutup filter">×</button></header>
+        <section><h4>KATEGORI</h4><label><i class="dot production"></i><span>Mesin Produksi</span><b>1</b></label><label><i class="dot inspection"></i><span>Inspeksi</span><b>1</b></label><label><i class="dot utility"></i><span>Utilitas</span><b>—</b></label></section>
+        <section><h4>STATUS</h4><label><i class="dot normal"></i><span>Tersedia</span><b>1</b></label><label><i class="dot warning"></i><span>Perlu Data</span><b>—</b></label></section>
+      </aside>
 
       <div class="viewport-mode-switch" role="group" aria-label="Mode tampilan"><button id="mode-2d">2D</button><button id="mode-3d" class="active">3D</button></div>
       <div class="viewport-zoom" role="group" aria-label="Kontrol zoom"><button id="zoom-plus" aria-label="Perbesar">+</button><button id="zoom-fit" aria-label="Fokus">⌖</button><button id="zoom-minus" aria-label="Perkecil">−</button></div>
 
-      <div class="notice" id="scene-notice"><span class="notice-icon">!</span><div><strong>Rekonstruksi foto Offset 5</strong><span>23 foto unik · 15 foto aktif. Operator side −Z dan drive side +Z dimodelkan asimetris.</span></div><button id="notice-details" aria-label="Detail kebutuhan DWG">Detail ↗</button></div>
+      <div class="notice floating-window" id="scene-notice">
+        <span class="notice-icon">i</span>
+        <div><strong id="notice-title">Catatan tampilan</strong><span id="notice-text">Model dibuat dengan mengacu pada foto mesin dan dokumen yang tersedia.</span></div>
+        <button id="notice-details">Lihat info</button>
+        <button id="notice-close" class="floating-close" aria-label="Tutup catatan">×</button>
+      </div>
 
       <div class="scene-bottom">
-        <div class="view-switch" role="group" aria-label="Toolbar scene"><button data-camera="iso" class="active">ISO <span>Isometrik</span></button><button data-camera="top">TOP <span>Atas</span></button><button data-camera="fit">FIT <span>Fokus</span></button><button id="tool-pan">PAN <span>Geser</span></button><button id="tool-explode">EXP <span>Explode</span></button><button id="tool-isolate">ISO-L <span>Isolasi</span></button><button data-camera="reset">RST <span>Reset</span></button></div>
-        <div class="scene-options"><button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan/sembunyikan label">Aa</button><button id="fullscreen" class="icon-btn" title="Layar penuh" aria-label="Layar penuh">⛶</button></div>
+        <div class="view-switch" role="group" aria-label="Kontrol tampilan">
+          <button data-camera="iso" class="active">3D <span>Isometrik</span></button>
+          <button data-camera="top">ATAS <span>Tampak Atas</span></button>
+          <button data-camera="fit">FOKUS <span>Pusatkan</span></button>
+          <button id="tool-pan">GESER <span>Pan</span></button>
+          <button id="tool-explode">URAI <span>Pisahkan</span></button>
+          <button id="tool-isolate">SOLO <span>Isolasi</span></button>
+          <button data-camera="reset">RESET <span>Awal</span></button>
+        </div>
+        <div class="scene-options">
+          <button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan atau sembunyikan label">Aa</button>
+          <button id="panel-launcher" class="icon-btn" title="Panel tampilan" aria-label="Panel tampilan">▣</button>
+          <button id="fullscreen" class="icon-btn" title="Layar penuh" aria-label="Layar penuh">⛶</button>
+        </div>
       </div>
-      <div class="scene-caption"><span id="geometry-caption">GEOMETRY V16 · PU1 PHOTO EXTERIOR + OEM-PDF INTERNALS</span><span id="scene-hint">Geser: orbit · Scroll/pinch: zoom · Klik: pilih</span></div>
-      <div class="asset-legend" aria-label="Legenda kategori"><button id="legend-all" class="active">ALL</button><span class="production">● PRODUCTION</span><span class="prepress">● PREPRESS</span><span class="finishing">● FINISHING</span><span class="inspection">● INSPECTION</span><span class="utility">● UTILITY</span><span class="hvac">● HVAC</span><span class="electrical">● ELECTRICAL</span><span class="water">● WATER</span></div>
-      <div class="telemetry-strip"><section><h4>QUICK INFORMATION</h4><span>Asset <b>OFFSET 5</b></span><span>Code <b>OFU-1</b></span><span>Model <b>CD 102-8+L</b></span></section><section class="quality"><h4>DATA CONFIDENCE</h4><div><b>PHOTO</b><b>OEM PDF</b><b>DXF</b><b>REVIEW</b><b>LOCAL</b></div></section><section><h4>SYSTEM STATUS</h4><span>Geometry <b class="ok">V16 Ready</b></span><span>Source <b class="ok">Registry</b></span><span>Live Data <b>Not Connected</b></span></section></div>
-      <div class="ui-mobile-actions"><button id="ui-workbench-toggle">Engineering</button><button id="ui-asset-panel">Asset Info</button></div>
+
+      <div class="scene-caption"><span id="geometry-caption">Model Offset 5</span><span id="scene-hint">Putar: seret · Zoom: cubit/scroll · Klik komponen untuk melihat detail</span></div>
+
+      <div class="asset-legend" aria-label="Pilihan tampilan">
+        <button id="legend-all" class="active">Semua</button>
+        <button id="legend-machine">Mesin</button>
+        <button id="legend-info">Info</button>
+        <button id="legend-clean">Tampilan Bersih</button>
+      </div>
+
+      <div class="telemetry-strip">
+        <section><h4>INFORMASI CEPAT</h4><span>Mesin <b>OFFSET 5</b></span><span>Kode <b>OFU-1</b></span><span>Model <b>CD 102-8+L</b></span></section>
+        <section class="quality"><h4>REFERENSI TERSEDIA</h4><div><b>23</b><span>Foto</span><b>2</b><span>Dokumen</span></div></section>
+        <section><h4>STATUS</h4><span>3D <b class="ok">Siap</b></span><span>Denah <b class="ok">Tersedia</b></span><span>Data <b>Mode lokal</b></span></section>
+      </div>
+
+      <div class="ui-mobile-actions"><button id="ui-workbench-toggle">Panel Info</button><button id="ui-asset-panel">Detail Mesin</button></div>
+
+      <div id="panel-launcher-menu" class="panel-launcher-menu floating-window" hidden>
+        <header><strong>Panel Tampilan</strong><button id="panel-launcher-close" class="floating-close" aria-label="Tutup pilihan panel">×</button></header>
+        <button id="show-filter">Filter</button>
+        <button id="show-keyplan">Denah Mini</button>
+        <button id="show-notice">Catatan</button>
+        <button id="show-detail">Detail Mesin</button>
+        <button id="show-workbench">Panel Info</button>
+      </div>
     </section>
 
-    <section class="engineering-workbench" aria-label="Engineering workbench">
-      <div class="wb-tabs" aria-label="Workbench mobile tabs"><button data-workbench="dwg" class="active">DWG</button><button data-workbench="layers">Layers</button><button data-workbench="hierarchy">Hierarchy</button><button data-workbench="quick">Quick Info</button><button id="ui-close-workbench">Tutup</button></div>
+    <section class="engineering-workbench" aria-label="Panel informasi">
+      <div class="wb-tabs" aria-label="Tab panel informasi">
+        <button data-workbench="dwg" class="active">Denah</button>
+        <button data-workbench="layers">Lapisan</button>
+        <button data-workbench="hierarchy">Struktur</button>
+        <button data-workbench="quick">Info</button>
+        <button id="ui-close-workbench">× Tutup</button>
+      </div>
 
       <article class="wb-card" data-workbench-card="dwg">
-        <header><span>DWG 2D PLAN · SOURCE</span><small>MM→M CALIBRATED · HEADER CONFLICT</small></header>
-        <div class="wb-body"><div class="dwg-stage"><canvas id="dwg-canvas" aria-label="Denah 2D aktual hasil ekstraksi DXF dari DWG pengguna"></canvas><div id="dwg-warning" class="dwg-warning">DXF aktual · 0.001 m/unit · HEADER CONFLICT · OFFSET 5 position review required</div></div></div>
+        <header><span>DENAH PABRIK</span><small>Sumber layout aktual</small></header>
+        <div class="wb-body"><div class="dwg-stage"><canvas id="dwg-canvas" aria-label="Denah 2D pabrik"></canvas><div id="dwg-warning" class="dwg-warning">Posisi Offset 5 ditampilkan berdasarkan layout yang tersedia.</div></div></div>
       </article>
 
       <article class="wb-card" data-workbench-card="layers">
-        <header><span>FACTORY LAYERS</span><small>DWG VIEW</small></header>
-        <div class="wb-body"><div class="layer-list">
-          <label class="layer-item"><input type="checkbox" checked disabled> Walls</label>
-          <label class="layer-item"><input type="checkbox" checked disabled> Columns</label>
-          <label class="layer-item"><input type="checkbox" checked disabled> Doors</label>
-          <label class="layer-item"><input type="checkbox" disabled> Windows</label>
-          <label class="layer-item"><input type="checkbox" checked disabled> Machines Existing</label>
-          <label class="layer-item"><input type="checkbox" disabled> Machines Future</label>
-          <label class="layer-item"><input type="checkbox" disabled> Pathways / Safety</label>
-          <label class="layer-item"><input type="checkbox" disabled> Electrical / Utilities</label>
-        </div><div class="layer-note">Layer berikut adalah referensi sumber. Toggle fisik/3D tetap nonaktif sampai semantik dan engineering scale tervalidasi.</div></div>
+        <header><span>LAPISAN DENAH</span><small>Pilih informasi yang ingin dilihat</small></header>
+        <div class="wb-body"><div class="layer-list layer-status-list">
+          <div class="layer-item"><span>✓</span> Dinding</div>
+          <div class="layer-item"><span>✓</span> Kolom</div>
+          <div class="layer-item"><span>✓</span> Pintu</div>
+          <div class="layer-item"><span>—</span> Jendela</div>
+          <div class="layer-item"><span>✓</span> Mesin</div>
+          <div class="layer-item"><span>—</span> Area Cadangan</div>
+          <div class="layer-item"><span>—</span> Jalur Akses</div>
+          <div class="layer-item"><span>—</span> Utilitas</div>
+        </div><div class="layer-note">Tanda ✓ menunjukkan informasi yang tersedia pada denah saat ini.</div></div>
       </article>
 
       <article class="wb-card" data-workbench-card="hierarchy">
-        <header><span>ASSET HIERARCHY · 6-STAGE TAXONOMY</span><small>METADATA ONLY</small></header>
+        <header><span>STRUKTUR MESIN · 6 TINGKAT</span><small>Offset 5</small></header>
         <div class="wb-body asset-tree">
-          <details open><summary>Factory <span class="tax-level">L0</span></summary>
-            <details open><summary>Production Hall</summary>
+          <details open><summary>Pabrik <span class="tax-level">L0</span></summary>
+            <details open><summary>Area Produksi</summary>
               <details open><summary><span class="active-node">OFFSET 5</span> <span class="tax-level">L1 · Mesin</span></summary>
-                <details><summary>Feeder <span class="tax-level">L2 · Unit Utama</span></summary><div>Pile Inlet · Feeding Head · Feed Board · Controls · Covers</div></details>
+                <details><summary>Feeder <span class="tax-level">L2</span></summary><div>Pile Inlet · Feeding Head · Feed Board · Controls · Covers</div></details>
                 <details open><summary>Printing Units <span class="tax-level">L2</span></summary><div>PU1 · PU2 · PU3 · PU4 · PU5 · PU6 · PU7 · PU8 <span class="tax-level">L3</span></div></details>
                 <details><summary>Coating Unit <span class="tax-level">L2</span></summary><div>Housing · Roller Section · Access Covers · Service Side</div></details>
                 <details><summary>Delivery <span class="tax-level">L2</span></summary><div>Sheet Exit · Brake Section · Pile Section · Hood</div></details>
                 <details><summary>Inline Inspection <span class="tax-level">L2</span></summary><div>Bridge · Camera Heads · Lighting · Mounting</div></details>
                 <details><summary>Platform & Walkway <span class="tax-level">L2</span></summary></details>
-                <details><summary>Console & Auxiliary <span class="tax-level">L2</span></summary></details>
               </details>
             </details>
           </details>
@@ -132,35 +174,34 @@
       </article>
 
       <article class="wb-card" data-workbench-card="quick">
-        <header><span>ASSET QUICK INFO</span><small>OFFSET 5</small></header>
+        <header><span>INFORMASI MESIN</span><small>OFFSET 5</small></header>
         <div class="wb-body"><dl class="quick-grid">
-          <dt>Asset ID</dt><dd>OFF-05</dd><dt>Model</dt><dd>CD 102-8+L</dd><dt>Type</dt><dd>Offset Printing Machine</dd><dt>Area</dt><dd>Production Hall</dd><dt>Status</dt><dd class="unknown">UNKNOWN</dd><dt>Dimension</dt><dd class="unknown">UNKNOWN</dd><dt>Weight</dt><dd class="unknown">UNKNOWN</dd><dt>Power</dt><dd class="unknown">UNKNOWN</dd><dt>Photo Registry</dt><dd><span id="photo-unique-count">22</span> unique</dd><dt>Geometry Ref.</dt><dd><span id="photo-active-count">14</span> active</dd><dt>Confidence</dt><dd>APPROXIMATE</dd>
+          <dt>Kode</dt><dd>OFF-05</dd><dt>Model</dt><dd>CD 102-8+L</dd><dt>Jenis</dt><dd>Mesin Offset</dd><dt>Area</dt><dd>Area Produksi</dd><dt>Status</dt><dd>Belum ada data operasi</dd><dt>Dimensi</dt><dd>Belum tersedia</dd><dt>Berat</dt><dd>Belum tersedia</dd><dt>Daya</dt><dd>Belum tersedia</dd><dt>Foto acuan</dt><dd><span id="photo-unique-count">23</span> foto</dd><dt>Foto model</dt><dd><span id="photo-active-count">15</span> foto</dd>
         </dl></div>
       </article>
     </section>
   </div>
 
-  <aside id="detail-panel" aria-label="Panel detail aset">
-    <div class="panel-top"><span class="eyebrow">ASSET DETAIL · SELECTED MACHINE</span><button id="close-panel" class="icon-btn" aria-label="Tutup panel">×</button></div>
+  <aside id="detail-panel" aria-label="Detail mesin">
+    <div class="panel-top"><span class="eyebrow">DETAIL MESIN</span><button id="close-panel" class="icon-btn" aria-label="Tutup detail mesin">×</button></div>
     <div class="asset-preview"><span class="preview-lines"></span></div>
-    <div class="photo-source-strip"><div><small>Photo Registry</small><strong>22 Unique</strong></div><div><small>Geometry Active</small><strong>14 Photos</strong></div></div>
-    <div class="asset-heading"><div class="asset-icon">05</div><div><h2>OFFSET 5</h2><p>Heidelberg Speedmaster · CD 102-8+L</p></div><span class="chip">APPROX.</span></div>
-    <div class="confidence-panel"><h4>CONFIDENCE LEVEL</h4><div class="confidence-row"><span class="confidence-dot green"></span><span>Identity / user evidence</span><b>HIGH</b></div><div class="confidence-row"><span class="confidence-dot blue"></span><span>Outer geometry</span><b>APPROX.</b></div><div class="confidence-row"><span class="confidence-dot yellow"></span><span>DWG transform</span><b>REVIEW</b></div><div class="confidence-row"><span class="confidence-dot gray"></span><span>Actual dimensions</span><b>UNKNOWN</b></div></div>
-    <div class="inspector-actions"><button id="asset-focus-shortcut">⌖ FOCUS</button><button id="asset-explore-shortcut">◉ EXPLORE</button><button id="asset-docs-shortcut">▤ DOCUMENTS</button><button id="asset-components-shortcut">▦ COMPONENTS</button></div>
-    <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="overview">Asset Info</button><button role="tab" aria-selected="false" data-tab="structure">Component Explorer</button><button role="tab" aria-selected="false" data-tab="sources">Source Documents</button></div>
+    <div class="asset-heading"><div class="asset-icon">05</div><div><h2>OFFSET 5</h2><p>Heidelberg Speedmaster · CD 102-8+L</p></div><span class="chip">REFERENSI</span></div>
+    <div class="confidence-panel"><h4>SUMBER INFORMASI</h4><div class="confidence-row"><span class="confidence-dot green"></span><span>Identitas mesin</span><b>Tersedia</b></div><div class="confidence-row"><span class="confidence-dot blue"></span><span>Foto mesin</span><b>Tersedia</b></div><div class="confidence-row"><span class="confidence-dot yellow"></span><span>Ukuran detail</span><b>Belum lengkap</b></div></div>
+    <div class="inspector-actions"><button id="asset-focus-shortcut">⌖ FOKUS</button><button id="asset-explore-shortcut">◉ STRUKTUR</button><button id="asset-docs-shortcut">▤ REFERENSI</button><button id="asset-components-shortcut">▦ KOMPONEN</button></div>
+    <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="overview">Info Mesin</button><button role="tab" aria-selected="false" data-tab="structure">Struktur</button><button role="tab" aria-selected="false" data-tab="sources">Referensi</button></div>
     <div id="panel-content" class="panel-content"></div>
-    <div class="panel-footer"><button id="focus-machine" class="primary">⌖ Fokus Mesin</button><button id="edit-position" class="secondary">Posisi</button></div>
+    <div class="panel-footer"><button id="focus-machine" class="primary">⌖ Fokus Mesin</button><button id="edit-position" class="secondary">Atur Posisi</button></div>
   </aside>
 </main>
 
 <button id="ui-backdrop" class="ui-backdrop" aria-label="Tutup panel terbuka" tabindex="-1"></button>
 
-<footer class="statusbar"><span><i></i> <span id="engine-status">Inisialisasi WebGL</span></span><span id="layout-status">DWG: DXF-DERIVED · TRANSFORM REVIEW</span><span id="scale-status">SKALA: 0.001 m/unit · HEADER CONFLICT</span><span id="lod-status">LOD 1 · GEOMETRY FROZEN</span></footer>
+<footer class="statusbar"><span><i></i> <span id="engine-status">Menyiapkan tampilan 3D</span></span><span id="layout-status">Denah tersedia</span><span id="scale-status">Data posisi tersedia</span><span id="lod-status">Model siap</span></footer>
 
 <dialog id="modal"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" class="icon-btn" aria-label="Tutup dialog">×</button></div><div id="modal-body"></div></dialog>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <script type="module" src="./src/app.js"></script>
 <script type="module" src="./src/ui-v5.js"></script>
-<script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Penampil 3D belum berhasil dimuat</strong><p>Pastikan vendor tersedia dan perangkat mendukung WebGL 2.</p>'; }},15000);</script>
+<script>setTimeout(()=>{const b=document.getElementById('boot');if(b&&!b.hidden){b.innerHTML='<strong>Tampilan 3D belum berhasil dimuat</strong><p>Coba muat ulang halaman atau gunakan perangkat lain.</p>'; }},15000);</script>
 </body>
 </html>
