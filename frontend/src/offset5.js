@@ -498,24 +498,46 @@ export class OffsetMachineTemplate {
     this.box(control,[.44,.48,.34],[.42,1.78,.78],'graphite',.025);
   }
   delivery(x){
-    const g=this.group(this.root,'delivery','Delivery · panel & pagar',[x,0,0],[1.8,0,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
-    const frame=this.group(g,'delivery-frame','Rangka delivery',[0,0,0],[.15,0,-.45],['IMG_2312.jpeg']);
+    const photos=['IMG_2312.jpeg','IMG_1656.jpeg','IMG_2388(2).jpeg','IMG_2389(1).jpeg'];
+    const g=this.group(this.root,'delivery','Delivery · pile, controls & end frame',[x,0,0],[1.8,0,0],photos,'Exterior silhouette, front control face, vertical pile gate and operator-side steps follow the actual machine photos. Pile-control device names follow the supplied CD102 service manual.');
+    const frame=this.group(g,'delivery-frame','Delivery end frame & columns',[0,0,0],[.15,0,-.45],photos);
     for(const x0 of [-.68,.77])for(const z of [-1.06,1.06])this.box(frame,[.22,1.65,.26],[x0,.94,z],'graphite',.025);
     this.box(frame,[1.72,.16,2.24],[.04,1.61,0],'graphite',.025);
-    this.box(frame,[1.12,.11,1.78],[.1,.26,0],'steel');this.box(frame,[1.05,.87,1.66],[.1,.76,0],'paper',.012);
-    const hood=this.group(g,'delivery-hood','Panel atas & jendela inspeksi',[0,0,0],[0,.7,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
-    this.box(hood,[1.64,.78,.21],[0,2.05,-1.07],'graphite',.06);
-    this.box(hood,[1.65,.15,2.3],[0,2.5,0],'light',.03);
-    this.box(hood,[.16,.80,2.3],[.84,2.03,0],'graphite',.025);
-    for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.08,z],'light',.025);
-    this.box(hood,[.045,.53,1.40],[.948,2.05,0],'glass',.012);
-    this.box(hood,[.035,.35,.82],[.971,2.08,0],'black',.01);
-    this.box(hood,[.06,.18,2.28],[.95,2.52,0],'light',.018);
-    for(const z of [-.97,.97])for(let i=0;i<4;i++)this.cylinder(hood,.025,.024,[1,2.35-i*.115,z],i===0?'red':'black','x');
-    this.cylinder(hood,.035,2.2,[1,1.72,0],'steel');
-    const gate=this.group(g,'delivery-gate','Pagar vertikal delivery',[0,0,0],[.85,0,0],['IMG_2312.jpeg']);
+    this.box(frame,[1.66,.34,2.20],[.04,2.23,0],'light',.035);
+    this.box(frame,[1.38,.46,.10],[.00,2.07,-1.10],'light',.018);
+    this.box(frame,[1.05,.34,.025],[.10,2.07,-1.165],'glass',.008);
+    for(const z of [-.82,.82])this.controls(frame,[.60,2.18,z],'x',4);
+
+    const pile=this.group(g,'delivery-pile','Delivery main pile & pile table',[0,0,0],[.15,-.10,0],['IMG_2312.jpeg','IMG_1656.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Pile table and sheet stack are photo-derived. Main/auxiliary pile drive and sensors are functional references from the supplied manual.');
+    this.box(pile,[1.22,.10,1.72],[.08,.20,0],'steel',.012);
+    this.box(pile,[1.10,.72,1.60],[.08,.61,0],'paper',.010);
+    for(let n=0;n<18;n++)this.box(pile,[1.105,.006,1.605],[.08,.28+n*.035,0],'light');
+    for(const z of [-.88,.88])this.chain(pile,[.72,.20,z],1.25);
+    const pileSensors=this.group(pile,'delivery-pile-sensors','Delivery pile sensors 12B65 / 12B69 / 12B129 / 12S34',[0,0,0],[.18,.14,.44],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Changeover fast/slow, pile-height control, upper edge of pile and lower limit are represented as sensor zones only.');
+    for(const [name,y,z] of [['12B65',1.18,-.91],['12B69',.98,-.91],['12B129',1.34,.91],['12S34',.26,.91]]){const sn=this.group(pileSensors,`delivery-sensor-${name.toLowerCase()}`,`Delivery sensor ${name}`,[0,0,0],[.08,.08,z<0?-.16:.16],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.09,.07,.06],[.66,y,z],'graphite',.010);}
+
+    const sheetBrake=this.group(g,'delivery-sheet-brake','Sheet brake / slowdown zone',[0,0,0],[.45,.25,0],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf','IMG_2312.jpeg'],'Delivery sheet slowdown is documented in the supplied manual; sheet-brake placement is a functional visual reference.');
+    for(const z of [-.54,0,.54]){this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
+    const joggers=this.group(g,'delivery-joggers','Delivery joggers D.S. / O.S.',[0,0,0],[.35,.18,.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'12M6 / 12M7 jogger function is represented at the pile sides; exact stroke is not inferred.');
+    for(const z of [-.86,.86]){this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);this.box(joggers,[.34,.05,.10],[.18,.84,z],'steel',.008);}
+
+    const hood=this.group(g,'delivery-hood','Delivery upper hood & side enclosure',[0,0,0],[0,.7,0],photos);
+    this.box(hood,[1.64,.72,.22],[0,1.95,-1.07],'graphite',.06);
+    this.box(hood,[1.65,.14,2.28],[0,2.49,0],'light',.03);
+    this.box(hood,[.18,.80,2.28],[.84,2.00,0],'graphite',.025);
+    for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.06,z],'light',.025);
+    this.box(hood,[.045,.53,1.40],[.948,2.04,0],'glass',.012);
+    this.box(hood,[.035,.35,.82],[.971,2.06,0],'black',.010);
+    this.cylinder(hood,.035,2.18,[1,1.70,0],'steel');
+
+    const gate=this.group(g,'delivery-gate','Vertical delivery pile gate',[0,0,0],[.85,0,0],['IMG_2312.jpeg']);
     for(let i=0;i<13;i++)this.cylinder(gate,.014,1.23,[.96,.92,-.88+i*.147],'steel','y');
-    this.cylinder(gate,.021,1.92,[.96,.3,0]);this.cylinder(gate,.021,1.92,[.96,1.53,0]);
+    this.cylinder(gate,.021,1.92,[.96,.30,0]);this.cylinder(gate,.021,1.92,[.96,1.53,0]);
+
+    const steps=this.group(g,'delivery-steps','Delivery operator access steps',[0,0,0],[.35,.10,1.0],['IMG_2312.jpeg','IMG_2388(2).jpeg']);
+    this.tread(steps,[.52,.12,.82],[-.70,.45,1.46]);
+    this.tread(steps,[.44,.12,.70],[-.36,.68,1.46]);
+    this.box(steps,[.10,.42,.15],[-.52,.32,1.38],'graphite');
   }
   resolvePart(object){let p=object;while(p&&p!==this.root){if(p.userData.selectable)return p;p=p.parent;}return null;}
   findNode(nodeId){return nodeId==='MACHINE-OFFSET5'?this.root:this.nodes.find(n=>n.userData.nodeId===nodeId)||null;}
