@@ -5,9 +5,11 @@ import {OFFSET5_TAXONOMY,TAXONOMY_BY_ID} from './data/taxonomy-offset5.js';
 import {ORIENTATION} from './data/sources-offset5.js';
 import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './data/dimensions-offset5.js';
 
-// Photo reconstruction. All coordinates below are visual units, NOT surveyed metres.
-// Eight repeated housings are a reviewable visual arrangement, not verification of
-// the installed unit configuration. No hidden cylinders, gears or part IDs invented.
+// Offset 5 reconstruction.
+// The outer longitudinal/lateral envelope and repeated-unit pitch are calibrated from
+// the user-confirmed OFU-1 DXF footprint. Exterior surfaces are photo-derived.
+// Internal coordinates remain functional/visual unless a supplied OEM document states
+// a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
   version: 'offset5-photo-pdf-v19',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
@@ -565,7 +567,14 @@ export class OffsetMachineTemplate {
   }
   resolvePart(object){let p=object;while(p&&p!==this.root){if(p.userData.selectable)return p;p=p.parent;}return null;}
   findNode(nodeId){return nodeId==='MACHINE-OFFSET5'?this.root:this.nodes.find(n=>n.userData.nodeId===nodeId)||null;}
-  resolveTaxonomyNode(taxonomyId){const meta=this.taxonomyById.get(taxonomyId);if(!meta)return null;for(const ref of meta.meshRefs){const node=this.findNode(ref);if(node)return node;}return null;}
+  resolveTaxonomyNode(taxonomyId){
+    let meta=this.taxonomyById.get(taxonomyId);
+    while(meta){
+      for(const ref of meta.meshRefs||[]){const node=this.findNode(ref);if(node)return node;}
+      meta=meta.parentId?this.taxonomyById.get(meta.parentId):null;
+    }
+    return taxonomyId==='O5'?this.root:null;
+  }
   contains(parent,node){for(let p=node;p;p=p.parent)if(p===parent)return true;return false;}
   explode(t,selected=null){
     const amount=THREE.MathUtils.clamp(Number(t)||0,0,1);for(const n of this.nodes)n.position.copy(n.userData.rest);
