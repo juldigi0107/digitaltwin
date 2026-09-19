@@ -11,7 +11,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v30',
+  version: 'offset5-photo-pdf-v31',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
   dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
@@ -25,7 +25,7 @@ const V=(a)=>new THREE.Vector3(...a);
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v11',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v12',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
@@ -147,7 +147,7 @@ export class OffsetMachineTemplate {
     }
   }
   tagAdaptiveDetails(){
-    const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-lubrication|-pneumatic-service|-inspection-points|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|feeder-separator-brushes|gripper-spring|coater-supply|coater-chamber-locks|coater-blade-adjusters|dryer-ventilation|dryer-air-plenum|dryer-monitoring|inspection-cabling|inspection-calibration|inspection-trigger|delivery-chain-path|delivery-drive-sprockets|delivery-chain-tensioners|delivery-pile-lift|delivery-powder-jogger-air|pu8-coater-access|coater-dryer-service-bay|dryer-delivery-access)$/;
+    const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-dampening-form|-inking-train|-inking-distribution|-cylinder-train|-impression-gripper|-gripper-control|-plate-clamp|-register-drives|-washup|-lubrication|-pneumatic-service|-inspection-points|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|feeder-separator-brushes|gripper-spring|coater-supply|coater-chamber-locks|coater-blade-adjusters|dryer-ventilation|dryer-air-plenum|dryer-monitoring|inspection-cabling|inspection-calibration|inspection-trigger|delivery-chain-path|delivery-drive-sprockets|delivery-chain-tensioners|delivery-pile-lift|delivery-powder-jogger-air|pu8-coater-access|coater-dryer-service-bay|dryer-delivery-access)$/;
     for(const node of this.nodes)if(deep.test(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
   }
   build(){
@@ -272,18 +272,18 @@ export class OffsetMachineTemplate {
     const stepCenter=frameWidth/2+nextGap/2;
     if(i<7){
       const clearWidth=Math.max(.48,nextGap-.08);
-      // Keep the photo-matched three-step route; only close the horizontal bay at the top.
-      this.tread(stair,[clearWidth,.10,.38],[stepCenter,.52,1.82]);
-      this.box(stair,[clearWidth-.04,.23,.30],[stepCenter,.365,1.82],'graphite',.018);
-      this.tread(stair,[clearWidth,.10,.42],[stepCenter,.76,1.55]);
-      this.box(stair,[clearWidth-.04,.23,.34],[stepCenter,.605,1.55],'graphite',.018);
+      // IMG_1662: broad lower approach, compact middle step, then a deep main landing.
+      this.tread(stair,[clearWidth,.10,.76],[stepCenter,.29,1.98]);
+      this.box(stair,[clearWidth-.04,.20,.68],[stepCenter,.14,1.98],'graphite',.018);
+      this.tread(stair,[clearWidth,.10,.56],[stepCenter,.53,1.58]);
+      this.box(stair,[clearWidth-.04,.30,.48],[stepCenter,.33,1.58],'graphite',.018);
       const landing=this.group(stair,`press-${i}-gap-footplate`,`PU${i+1} → PU${i+2} · full-width inter-unit footplate`,[0,0,0],[0,.10,.45],[...sources,'IMG_1662.jpeg'],'Only the missing horizontal checker-plate infill is added; the previously photo-matched stair direction and route are retained.');
       const landingWidth=nextGap;
-      this.tread(landing,[landingWidth,.11,.76],[stepCenter,1.00,1.14]);
-      this.box(landing,[landingWidth-.04,.43,.70],[stepCenter,.73,1.14],'graphite',.020);
-      for(const dx of [-clearWidth*.42,clearWidth*.42])this.cylinder(stair,.018,.70,[stepCenter+dx,1.18,.72],'steel','y');
-      this.cylinder(stair,.020,clearWidth*.84,[stepCenter,1.47,.72],'steel','x');
-      this.cylinder(stair,.017,clearWidth*.84,[stepCenter,1.22,.72],'steel','x');
+      this.tread(landing,[landingWidth,.12,1.18],[stepCenter,.78,.72]);
+      this.box(landing,[landingWidth-.04,.51,1.10],[stepCenter,.47,.72],'graphite',.020);
+      for(const dx of [-clearWidth*.42,clearWidth*.42])this.cylinder(stair,.018,.72,[stepCenter+dx,1.15,.16],'steel','y');
+      this.cylinder(stair,.020,clearWidth*.84,[stepCenter,1.50,.16],'steel','x');
+      this.cylinder(stair,.017,clearWidth*.84,[stepCenter,1.25,.16],'steel','x');
     }
     const drive=this.group(g,'press-'+i+'-drive','Drive-side service cover & step',[0,0,0],[0,.1,-1.15],['IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],'Flat service cover, secondary step dan hose luar terverifikasi dari foto drive side.');
     this.box(drive,[i===0?.76:.86,1.54,.20],[0,1.35,-1.13],'graphite',.028);
@@ -298,6 +298,12 @@ export class OffsetMachineTemplate {
     this.handle(driveDetails,[-.24,.92,-1.28],'z',.14);
     for(let n=0;n<3;n++)this.tube(driveDetails,[[-.30+n*.18,.56,-1.25],[-.20+n*.15,.38,-1.35],[-.28+n*.17,.15,-1.43]],.012,n===2?'red':'rubber');
     const ink=this.group(g,'press-'+i+'-ink','Bak tinta & roller atas terlihat',[0,0,0],[0,.9,0],['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1628.jpeg'],'Bentuk bak dan roller yang terlihat pada foto. Warna tinta hanya ilustrasi, bukan status operasi.');
+    // Fixed side guards visually attach the exposed ink assembly to the upper housing.
+    for(const z of [-.76,.76]){
+      this.box(ink,[.54,.32,.075],[-.04,2.39,z],'graphite',.018);
+      this.box(ink,[.40,.18,.045],[-.12,2.57,z],'light',.012);
+    }
+    this.box(ink,[.16,.34,1.48],[.31,2.39,0],'graphite',.020);
     if(i===0){
       this.box(ink,[.38,.070,1.58],[-.12,2.38,0],'steel',.022);
       this.cylinder(ink,.095,1.52,[-.10,2.49,0],'red');
