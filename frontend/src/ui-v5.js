@@ -1,5 +1,5 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const UNIQUE_PHOTOS=23;
+const UNIQUE_PHOTOS=24;
 const ACTIVE_GEOMETRY_PHOTOS=15;
 
 function uiNotice(message,error=false){
