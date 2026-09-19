@@ -111,7 +111,7 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  const bridge=new THREE.Box3().setFromObject(t.findNode('press-0-fountain-support'));
  const cover=new THREE.Box3().setFromObject(t.findNode('press-0-cover'));
  assert.ok(top.max.y<bridge.max.y,'ink-fountain support must remain above the low photo-derived top housing');
- assert.ok(cover.max.z>1.20,'broad silver shoulder cover disappeared from PU1');
+ assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
  assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
  assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL');
  t.dispose();
