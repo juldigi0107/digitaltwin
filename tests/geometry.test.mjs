@@ -123,14 +123,24 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
 test('all eight printing units carry the complete OEM roller topology without roller overlap',()=>{
  const t=new OffsetMachineTemplate();
  for(let unit=0;unit<8;unit++){
-  const rollers=[];
-  for(const n of t.nodes.filter(n=>new RegExp('^press-'+unit+'-(ink-roller-|ink-distributor-|damp-roller-)([^-]+)
+  const rollers=[],prefix='press-'+unit+'-';
+  const roots=t.nodes.filter(n=>{
+   const id=n.userData.nodeId||'';
+   const family=id.startsWith(prefix+'ink-roller-')||id.startsWith(prefix+'ink-distributor-')||id.startsWith(prefix+'damp-roller-');
+   return family&&!id.endsWith('-body')&&!id.endsWith('-journals');
+  });
+  for(const n of roots){
+   let mesh=null;n.traverse(c=>{if(!mesh&&c.isMesh&&c.geometry?.parameters?.radiusTop)mesh=c;});
+   assert.ok(mesh,`missing geometry for ${n.userData.nodeId}`);
+   mesh.getWorldPosition(mesh.userData.testCenter=new THREE.Vector3());
+   rollers.push({id:n.userData.nodeId,r:mesh.geometry.parameters.radiusTop,p:mesh.userData.testCenter});
+  }
   assert.equal(rollers.filter(r=>r.id.includes('ink-roller-')).length,15,`PU${unit+1} inking roller count`);
   assert.equal(rollers.filter(r=>r.id.includes('ink-distributor-')).length,4,`PU${unit+1} distributor count`);
   assert.equal(rollers.filter(r=>r.id.includes('damp-roller-')).length,5,`PU${unit+1} dampening roller count`);
   for(let i=0;i<rollers.length;i++)for(let j=i+1;j<rollers.length;j++){
-   const a=rollers[i],b=rollers[j],distance=Math.hypot(a.p.x-b.p.x,a.p.y-b.p.y);
-   assert.ok(distance>=a.r+b.r-.001,`${a.id} overlaps ${b.id}`);
+   const aa=rollers[i],bb=rollers[j],distance=Math.hypot(aa.p.x-bb.p.x,aa.p.y-bb.p.y);
+   assert.ok(distance>=aa.r+bb.r-.001,`${aa.id} overlaps ${bb.id}`);
   }
  }
  t.dispose();
