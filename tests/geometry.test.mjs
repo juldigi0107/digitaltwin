@@ -183,61 +183,6 @@ test('inspection bridge remains above the press housings without inflating the m
  assert.ok(bridge.max.y<3.25,'inspection bridge is vertically exaggerated');
  t.dispose();
 });
-).test(n.userData.nodeId))){
-   let mesh=null;n.traverse(c=>{if(!mesh&&c.isMesh&&c.geometry?.parameters?.radiusTop)mesh=c;});
-   assert.ok(mesh,`missing geometry for ${n.userData.nodeId}`);
-   mesh.getWorldPosition(mesh.userData.testCenter=new THREE.Vector3());
-   rollers.push({id:n.userData.nodeId,r:mesh.geometry.parameters.radiusTop,p:mesh.userData.testCenter});
-  }
-  assert.equal(rollers.filter(r=>r.id.includes('ink-roller-')).length,15,`PU${unit+1} inking roller count`);
-  assert.equal(rollers.filter(r=>r.id.includes('ink-distributor-')).length,4,`PU${unit+1} distributor count`);
-  assert.equal(rollers.filter(r=>r.id.includes('damp-roller-')).length,5,`PU${unit+1} dampening roller count`);
-  for(let i=0;i<rollers.length;i++)for(let j=i+1;j<rollers.length;j++){
-   const a=rollers[i],b=rollers[j],distance=Math.hypot(a.p.x-b.p.x,a.p.y-b.p.y);
-   assert.ok(distance>=a.r+b.r-.001,`${a.id} overlaps ${b.id}`);
-  }
- }
- t.dispose();
-});
-
-test('sheet-transfer chain exists between every adjacent printing unit',()=>{
- const t=new OffsetMachineTemplate();
- for(let n=1;n<=7;n++){
-  const base=`transfer-pu${n}-pu${n+1}`;
-  for(const id of [base,`${base}-gripper-a`,`${base}-gripper-b`,`${base}-gripper-shaft`,`${base}-gripper-cam`,`${base}-guide`])assert.ok(t.findNode(id),`missing ${id}`);
- }
- t.dispose();
-});
-
-test('feeder-to-delivery functional assemblies are present in process order',()=>{
- const t=new OffsetMachineTemplate();
- for(const id of ['feeder','feed-board','feeder-pile-centering','feeder-nonstop','feeder-sheet-monitoring','coater','coater-chamber','dryer-extension','dryer-hood','inspection-bridge','inspection-camera-a','inspection-camera-b','delivery','delivery-pile','delivery-sheet-brake','delivery-joggers','delivery-pile-sensors'])assert.ok(t.findNode(id),`missing ${id}`);
- const xs=['feeder','feed-board','press-1','press-8','coater','dryer-extension','inspection-bridge','delivery'].map(id=>t.findNode(id).getWorldPosition(new THREE.Vector3()).x);
- for(let i=1;i<xs.length;i++)assert.ok(xs[i]>xs[i-1],`process order not increasing at index ${i}`);
- t.dispose();
-});
-
-test('mobile low-detail mode hides deep roller details while preserving exterior and primary cylinders',()=>{
- const t=new OffsetMachineTemplate();
- const deep=t.meshes.filter(m=>m.userData.detail);
- assert.ok(deep.length>120,'expected deep-detail meshes');
- t.setLow(true);
- assert.ok(deep.every(m=>!m.visible),'deep details must hide in low mode');
- assert.ok(t.findNode('press-0-frame').visible);
- assert.ok(t.findNode('press-0-cylinder-train').visible);
- t.dispose();
-});
-
-
-test('inspection bridge remains above the press housings without inflating the machine envelope',()=>{
- const t=new OffsetMachineTemplate();
- const bridge=new THREE.Box3().setFromObject(t.findNode('inspection-bridge'));
- const pu=new THREE.Box3().setFromObject(t.findNode('press-4'));
- assert.ok(bridge.max.y>pu.max.y,'inspection bridge should visibly clear the printing-unit housings');
- assert.ok(bridge.max.y<3.25,'inspection bridge is vertically exaggerated');
- t.dispose();
-});
-
 
 test('DXF-calibrated dimensional contract expands the machine without distorting module rhythm',()=>{
  const d=OFFSET5_DIMENSIONS,a=offset5DimensionAudit();
