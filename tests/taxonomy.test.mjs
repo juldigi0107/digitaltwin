@@ -25,7 +25,15 @@ test('feeder through PU1 taxonomy resolves the new functional geometry',()=>{
  assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.INK').meshRefs.includes('press-0-inking-distribution'));
  assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.DAMP').meshRefs.includes('press-0-dampening-form'));
  assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-plate-clamp'));
+ assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-impression-gripper'));
+ assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-gripper-control'));
  assert.ok(!TAXONOMY_BY_ID.get('O5.PRINT.PU2.CYL').meshRefs.includes('press-0-plate-clamp'));
+});
+test('PU1 and transfer gripper taxonomy separates gripping and actuation components',()=>{
+ for(const id of ['O5.PRINT.PU1.CYL.GRIPBAR','O5.PRINT.PU1.CYL.FINGER','O5.PRINT.PU1.CYL.ACTUATION'])assert.ok(TAXONOMY_BY_ID.has(id),`missing ${id}`);
+ const transfer=TAXONOMY_BY_ID.get('O5.PRINT.TRANSFER12.GRIPPER');
+ for(const ref of ['transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-cam'])assert.ok(transfer.meshRefs.includes(ref),`missing ${ref}`);
+ assert.equal(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL.ACTUATION').confidence,'REFERENCE_ONLY');
 });
 test('source registry separates photo evidence from technical reference',()=>{
  const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,22);assert.equal(stats.unique,22);assert.equal(stats.active_geometry_reference,14);

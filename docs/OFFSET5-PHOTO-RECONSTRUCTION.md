@@ -9,6 +9,7 @@ Model tujuh balok diganti dengan rekonstruksi bentuk luar yang bisa dipilih:
 - Pijakan antarunit, platform dengan pola pelat bordes berupa instanced geometry, dan tangga akses.
 - Passage ke delivery, rangka delivery, panel terang, jendela gelap, serta pagar batang vertikal.
 - Baseline V9 memperinci jalur feeder sampai PU1: guide pile, linkage kepala feeder, rear-edge separator, suction tape/pressure roller, front/side lay, infeed gripper, serta referensi roller dampening, plate-clamp, dan distribusi tinta PU1.
+- Baseline V10 memperinci gripper system PU1 dan transfer PU1–PU2: impression gripper bar/shaft, finger, pad, pivot, end support, return-spring reference, operating lever, cam follower, dan opening-cam reference.
 
 Acuan: sembilan foto pengguna. Tidak ada foto asli atau berkas DWG pabrik yang diterbitkan bersama frontend.
 
@@ -35,8 +36,8 @@ DWG `250804 layout offset(1).dwg` berhasil diproses dengan @mlightcad/libredwg-w
 - Isolasi mempertahankan visibility ancestor agar objek pilihan tetap terlihat.
 - Rakit kembali, Reset, dan klik ganda mengembalikan transformasi tersimpan.
 - Mode ringan menghilangkan detail pola bordes dan bayangan.
-- Geometri statis digabung per kelompok/material. Baseline V9 memiliki 326 mesh/instance batches, 42 instanced mesh, 87 node geometri yang bisa dipilih, dan 632 node taxonomy enam tingkat.
+- Geometri statis digabung per kelompok/material. Baseline V10 memiliki 335 mesh/instance batches, 42 instanced mesh, 91 node geometri yang bisa dipilih, dan 649 node taxonomy enam tingkat.
 
 ## Validasi
 
-Build lokal dan 43 pengujian Node lulus, termasuk resolusi taxonomy feeder–PU1, explode terpilih, reset berulang, hierarki, isolasi, nilai geometri finite, batas envelope, anggaran mesh mobile, serta regression backend. Envelope visual tetap 15,72 × 2,83 × 4,19 m. QA visual pada perangkat fisik dan verifikasi terhadap pengukuran mesin nyata tetap diperlukan.
+Build lokal dan 44 pengujian Node lulus, termasuk resolusi taxonomy feeder–PU1 dan gripper system, explode terpilih, reset berulang, hierarki, isolasi, nilai geometri finite, batas envelope, anggaran mesh mobile, serta regression backend. Envelope visual tetap 15,72 × 2,83 × 4,19 m. QA visual pada perangkat fisik dan verifikasi terhadap pengukuran mesin nyata tetap diperlukan.

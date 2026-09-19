@@ -65,7 +65,7 @@ function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v9';const status=$('#geometry-safety-status');if(status)status.textContent='FEEDER → PU1 · V9';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v10';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 GRIPPER SYSTEM · V10';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{

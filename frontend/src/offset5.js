@@ -8,7 +8,7 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v9', status: 'RECONSTRUCTED / FEEDER-TO-PU1 FUNCTIONAL DETAIL',
+  version: 'offset5-photo-v10', status: 'RECONSTRUCTED / PU1 GRIPPER & TRANSFER FUNCTIONAL DETAIL',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
   photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
@@ -228,6 +228,23 @@ export class OffsetMachineTemplate {
     }
     const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,1.16,0],[Math.PI/2,0,Math.PI/2]);
     path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
+    if(i===0){
+      const impressionGripper=this.group(g,'press-0-impression-gripper','PU1 · impression-cylinder gripper bar, fingers & pads',[0,0,0],[.18,.18,-.58],photos,'Assembly menunjukkan fungsi penjepitan leading edge pada impression cylinder. Jumlah finger, pitch, sudut buka, preload dan phasing aktual belum diverifikasi.');
+      this.cylinder(impressionGripper,.028,1.36,[.13,1.245,0],'steel','z');
+      this.box(impressionGripper,[.07,.055,1.36],[.13,1.21,0],'graphite',.01);
+      for(let n=0;n<8;n++){
+        const z=-.595+n*.17;
+        this.box(impressionGripper,[.12,.025,.050],[.19,1.245,z],'graphite',.007);
+        this.box(impressionGripper,[.055,.014,.070],[.245,1.255,z],'steel',.005);
+        this.cylinder(impressionGripper,.018,.045,[.135,1.275,z],'steel','z');
+      }
+      const control=this.group(g,'press-0-gripper-control','PU1 · gripper cam, follower, lever & spring reference',[0,0,0],[.22,.20,-.72],photos,'Drive-side control train is a functional reference. Cam profile, dwell, spring rate, lubrication point and angular timing are not service data.');
+      this.cylinder(control,.115,.025,[.13,1.02,.815],'graphite','z');
+      this.cylinder(control,.032,.035,[.28,1.08,.82],'steel','z');
+      const lever=this.box(control,[.20,.035,.045],[.22,1.14,.82],'steel',.008);lever.rotation.z=-.52;
+      this.cylinder(control,.024,.055,[.13,1.245,.81],'steel','z');
+      for(const y of [1.18,1.22])this.cylinder(control,.018,.05,[.16,y,.81],'rubber','z');
+    }
 
     const damp=this.group(g,`${id}-dampening`,`${label} · dampening reference`,[0,0,0],[0,.48,-.35],photos,'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
     this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
@@ -270,8 +287,17 @@ export class OffsetMachineTemplate {
         const z=-.60+n*.20;
         this.box(bar,[.11,.035,.055],[a+.045,.935,z],'graphite',.010);
         this.box(bar,[.065,.018,.075],[a+.085,.955,z],'steel',.008);
+        this.cylinder(bar,.014,.045,[a+.005,.955,z],'steel','z');
       }
+      for(const z of [-.69,.69])this.box(bar,[.11,.13,.05],[a,.90,z],'graphite',.01);
     }
+    const shaft=this.group(transfer,'transfer-pu1-pu2-gripper-shaft','PU1 → PU2 · gripper shaft, supports & return-spring reference',[0,0,0],[0,.22,-.52],photos,'Shaft and spring reference completes the visible gripper kinematic chain; torsion, preload, bearing and material specification remain unverified.');
+    this.cylinder(shaft,.030,1.42,[0,.895,0],'steel','z');
+    for(const z of [-.72,.72]){this.cylinder(shaft,.066,.055,[0,.895,z],'graphite','z');this.cylinder(shaft,.025,.085,[.08,.87,z],'steel','z');}
+    const cam=this.group(transfer,'transfer-pu1-pu2-gripper-cam','PU1 → PU2 · opening cam, follower & lever reference',[0,0,0],[.28,.20,-.72],photos,'Cam-control geometry is explanatory only. Opening/closing angle, dwell and synchronization with PU1/PU2 are not measured.');
+    this.cylinder(cam,.125,.025,[0,.70,.815],'graphite','z');
+    this.cylinder(cam,.036,.04,[.16,.80,.82],'steel','z');
+    const camLever=this.box(cam,[.22,.040,.050],[.10,.84,.82],'steel',.008);camLever.rotation.z=.62;
     const guide=this.group(transfer,'transfer-pu1-pu2-guide','PU1 → PU2 · sheet guide reference',[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
     const arc=new THREE.CatmullRomCurve3([[-.42,.78,-.66],[-.18,.96,-.66],[.18,.96,-.66],[.42,.78,-.66]].map(V));
     this.mesh(guide,()=>new THREE.TubeGeometry(arc,20,.018,6,false),'pu1-pu2-guide-arc','steel',[0,0,0]);
