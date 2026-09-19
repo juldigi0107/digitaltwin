@@ -7,7 +7,7 @@ import {execFileSync} from 'node:child_process';
 test('production HTML resolves the complete local module graph at a GitHub Pages subpath',()=>{
   execFileSync(process.execPath,['scripts/build.mjs']);
   const root=resolve('dist'), html=readFileSync(resolve(root,'index.html'),'utf8');
-  assert.match(html,/<script type="module" src="\.\/src\/app\.js"><\/script>/);
+  assert.match(html,/<script type="module" src="\.\/src\/app\.js\?v=21"><\/script>/);
   const seen=new Set();
   function visit(file){
     assert.ok(existsSync(file),`Missing production module: ${file}`);
@@ -22,7 +22,7 @@ test('production HTML resolves the complete local module graph at a GitHub Pages
       visit(next);
     }
   }
-  for(const [,src] of html.matchAll(/<script type="module" src="([^"]+)"/g))visit(resolve(root,src));
+  for(const [,src] of html.matchAll(/<script type="module" src="([^"]+)"/g))visit(resolve(root,src.split('?')[0]));
   assert.ok(seen.has(resolve(root,'src/engine.js')));
   assert.ok(seen.has(resolve(root,'src/data/dimensions-offset5.js')));
 });
