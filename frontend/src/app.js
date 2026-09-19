@@ -13,7 +13,7 @@ const safe=fn=>async(...args)=>{try{await fn(...args);}catch(e){toast(e.message,
 const on=(id,fn)=>$(id)?.addEventListener('click',safe(fn));
 function modal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
 function closeModal(){$('#modal').close();}
-function showPanel(){document.body.classList.remove('panel-hidden');}
+function showPanel(){document.body.classList.remove('panel-hidden');if(matchMedia('(max-width:767px)').matches)document.body.classList.add('mobile-panel-open');}
 const activeLayout=()=>state.layout||bundledLayout;
 function redrawPlantPlan(){if(bundledLayout)drawPlantPlan($('#dwg-canvas'),bundledLayout);}
 function pair(label,value){return `<dt>${esc(label)}</dt><dd${value==null?' class="unknown"':''}>${esc(value)}</dd>`;}
