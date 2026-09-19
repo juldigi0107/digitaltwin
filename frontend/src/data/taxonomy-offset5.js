@@ -11,18 +11,18 @@ const mainUnits=[
 ];
 for(const [key,name,meshRefs,vec] of mainUnits)add(`O5.${key}`,'O5',2,'Unit Utama',name,{meshRefs,explodeVector:vec,sourceRefs:key==='INSPECTION'?['SRC-USER-PHOTOS','SRC-FOCUSIGHT-SWAN']:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:meshRefs.length?CONFIDENCE.REFERENCE_PLUS_PHOTO:CONFIDENCE.REFERENCE_ONLY});
 
-const feederSourceRefs=['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102','SRC-HD-SUCTION-BELT-PATENT','SRC-HD-SHEET-ALIGN-PATENT','SRC-HD-PRESET-PLUS-MANUAL'];
+const feederSourceRefs=['SRC-USER-PHOTOS','SRC-CD102-SERVICE-MANUAL','SRC-HEIDELBERG-CD102','SRC-HD-SUCTION-BELT-PATENT','SRC-HD-SHEET-ALIGN-PATENT','SRC-HD-PRESET-PLUS-MANUAL'];
 const feederSubs=[
  ['PILE','Pile Inlet',['feeder-pile','feeder-pile-guides'],['Pile Table','Pile Lift & Guides','Side / Rear Pile Alignment']],
- ['HEAD','Feeding Head',['feeder-head','feeder-head-linkage'],['Head Carrier','Height / Format Reference','Drive / Linkage Reference']],
+ ['HEAD','Feeding Head',['feeder-head','feeder-head-linkage','feeder-drive-11m5','feeder-drive-11m6'],['Head Carrier','Height / Format Reference','Drive / Linkage Reference']],
  ['SEPARATION','Sheet Separation',['feeder-separation','feeder-rear-edge'],['Separating Suckers','Forwarding Suckers','Rear-edge Separator / Foot']],
- ['AIR','Blast-air Separation',['feeder-air'],['Blowing / Suction Nozzle','Blast-air Bar']],
+ ['AIR','Blast-air Separation',['feeder-air','feeder-drive-1m9'],['Blowing / Suction Nozzle','Blast-air Bar']],
  ['BOARD','Feed Table',['feed-board'],['Table Surface','Transfer / Propelling Zone']],
  ['VACUUM','Vacuum Table / Suction Tape',['vacuum-table','feedboard-transport'],['Suction Tape Module','Vacuum Transport Module','Pressure / Transport Roller Reference']],
- ['GUIDE','Sheet Guidance & Register',['feedboard-guides','feedboard-register'],['Guide Plate','Side / Front Alignment Reference','Register Interface']],
+ ['GUIDE','Sheet Guidance & Register',['feedboard-guides','feedboard-register','feedboard-front-lays','feedboard-pull-lays','feedboard-cover-guide-drive'],['Guide Plate','Side / Front Alignment Reference','Register Interface']],
  ['INFEED','Infeed to PU1',['feedboard-infeed-gripper'],['Infeed Gripper Bar','Sheet Handover Reference']],
  ['DETECTION','Sheet Detection',['feedboard-detection'],['Sheet-arrival Sensor','Multiple-sheet Detector Reference']],
- ['CONTROL','Feeder Controls',['feeder-panel'],['Local Control Panel','Air / Transport Adjustment']],
+ ['CONTROL','Feeder Controls',['feeder-panel','feeder-adjustment-drives'],['Local Control Panel','Air / Transport Adjustment']],
  ['FRAME','Portal & Covers',['feeder-frame'],['Main Portal','Pile Lift Rails']]
 ];
 for(const [key,name,meshRefs,blocks] of feederSubs){
@@ -32,6 +32,22 @@ for(const [key,name,meshRefs,blocks] of feederSubs){
   partNames.forEach((partName,pi)=>{const pid=`${bid}.P${pi+1}`;add(pid,bid,5,'Part',partName,{meshRefs,sourceRefs:feederSourceRefs,confidence:meshRefs.length&&pi===0?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,.10,pi?.18:-.18]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${partName} · visual/reference item`,{sourceRefs:feederSourceRefs,confidence:meshRefs.length&&pi===0?CONFIDENCE.MEDIUM:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.08,.08,.12],maintenanceTag:'VISUAL_INSPECTION'});});
  });
 }
+
+const feederOemParts=[
+ ['PILE','PILE_CENTER','Pile Centering',['feeder-drive-11m9'],'11M9 servo-drive','lateral pile displacement correction'],
+ ['PILE','PILE_SUPPORT','Pile Support Plate Adjustment',['feeder-drive-11m8'],'11M8 servo-drive','non-stop feeder pile-support positioning'],
+ ['HEAD','HEAD_HEIGHT','Suction-head Height Adjustment',['feeder-drive-11m5'],'11M5 servo-drive','vertical head positioning'],
+ ['HEAD','HEAD_FORMAT','Suction-head / Format Adjustment',['feeder-drive-11m6'],'11M6 servo-drive','paper-length positioning'],
+ ['PILE','STOP_DS','Pile Stop D.S.',['feeder-drive-11m11'],'11M11 servo-drive','drive-side pile-stop positioning'],
+ ['PILE','STOP_OS','Pile Stop O.S.',['feeder-drive-11m12'],'11M12 servo-drive','operator-side pile-stop positioning'],
+ ['GUIDE','FORMAT_WHEEL','Format Wheel Adjustment',['feeder-drive-11m4'],'11M4 servo-drive','feeder format-wheel positioning'],
+ ['AIR','BLAST_REG','Blast-air Regulation',['feeder-drive-1m9'],'1M9 actuator','feeder blast-air pressure adaptation'],
+ ['GUIDE','FRONT_LAY_DS','Front-lay Adjustment D.S.',['feedboard-front-lays'],'1M2 servo-drive','print-free margin D.S.'],
+ ['GUIDE','FRONT_LAY_OS','Front-lay Adjustment O.S.',['feedboard-front-lays'],'1M3 servo-drive','print-free margin O.S.'],
+ ['GUIDE','PULL_LAY','Pull-lay Control',['feedboard-pull-lays'],'1B9 / 1B10 sensing reference','lateral sheet alignment'],
+ ['GUIDE','COVER_GUIDE','Transfer-gripper Cover Guide',['feedboard-cover-guide-drive'],'1M4 servo-drive at PU1 operator side','gripper opening 0.1–1.9 mm per manual']
+];
+for(const [parent,key,name,meshRefs,device,fn] of feederOemParts){const pid=`O5.FEEDER.${parent}.OEM_${key}`;add(pid,`O5.FEEDER.${parent}`,4,'Block',name,{meshRefs,sourceRefs:['SRC-CD102-SERVICE-MANUAL'],confidence:CONFIDENCE.HIGH,description:`${device}; ${fn}. Geometry remains a visual reference inside the photo-derived exterior.`,explodeVector:[-.18,.18,meshRefs[0].includes('front')?.35:-.35]});const part=`${pid}.P1`;add(part,pid,5,'Part',device,{meshRefs,sourceRefs:['SRC-CD102-SERVICE-MANUAL'],confidence:CONFIDENCE.HIGH,explodeVector:[.12,.10,.16]});add(`${part}.S1`,part,6,'Spesifik Part',fn,{sourceRefs:['SRC-CD102-SERVICE-MANUAL'],confidence:CONFIDENCE.HIGH,explodeVector:[.06,.06,.10],maintenanceTag:'OEM_MANUAL_REFERENCE'});}
 
 const printingBlocks=[['FRAME','Side Frame'],['INK','Ink System'],['DAMP','Dampening System'],['CYL','Cylinder Zone'],['COVER','Covers & Doors'],['STEP','Step & Access']];
 const printingParts={FRAME:['Side Frame','Lower Base','Service Opening'],INK:['Ink Fountain','Ink Fountain Cover','Visible Roller Guard','Ink Ductor Reference'],DAMP:['Dampening Housing','Water Pan Reference','Dampening Roller Reference'],CYL:['Plate Cylinder Reference','Blanket Cylinder Reference','Impression Cylinder Reference','Transfer Cylinder Reference'],COVER:['Upper Cover','Operator-side Cover','Lower Access Door'],STEP:['Step Plate','Step Support','Handle']};
@@ -55,6 +71,13 @@ for(const [key,name,specific] of [
  ['TRANSFERSET','Transfer Cylinder Assembly',['Cylinder Body','Sheet-support Surface','Journal / Bearing Reference','Bearer Ring Reference']],
  ['NIPPATH','Cylinder Nip & Sheet Path',['Plate–Blanket Nip','Blanket–Impression Nip','Impression–Transfer Handover','Leading-edge Sheet Path']]
 ]){const pid=`O5.PRINT.PU1.CYL.${key}`;add(pid,'O5.PRINT.PU1.CYL',5,'Part',name,{meshRefs:['press-0-cylinder-train'],sourceRefs:['SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[0,.16,-.26],description:'PU1 cylinder topology is non-overlapping and functionally ordered; installed diameters, bearer setting and nip pressure are unverified.'});specific.forEach((part,index)=>add(`${pid}.S${index+1}`,pid,6,'Spesifik Part',part,{meshRefs:index===0?['press-0-cylinder-train']:[],sourceRefs:['SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_ONLY,explodeVector:[.06,.07,(index-1.5)*.10],maintenanceTag:'VISUAL_INSPECTION'}));}
+
+const pu1InkRollers=[
+ ['1','Inking Form Roller 2',72,'blue','rubber'],['2','Inking Form Roller 3',66,'red','rubber'],['3','Ink Transfer Roller',56,null,'Rilsan'],['4','Ink Transfer Roller',80,'yellow','rubber'],['5','Ink Transfer Roller',68,null,'Rilsan'],['6','Ink Transfer Roller',72,'blue','rubber'],['7','Ink Transfer Roller',56,null,'Rilsan'],['8','Ink Transfer Roller',60,'white','rubber'],['9','Ink Transfer Roller',66,'red','rubber'],['10','Ink Transfer Roller',56,null,'Rilsan'],['11','Ink Transfer Roller',80,'yellow','rubber'],['12','Ink Transfer Roller',68,null,'Rilsan'],['13','Inking Form Roller 4',80,'yellow','rubber'],['14','Inking Form Roller 1',60,'white','rubber'],['15','Ink Vibrator',59,null,'rubber']
+];
+for(const [code,name,diameter,color,material] of pu1InkRollers){const pid=`O5.PRINT.PU1.INK.R${code}`;add(pid,'O5.PRINT.PU1.INK',5,'Part',`${code} · ${name}`,{meshRefs:[`press-0-ink-roller-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,description:`OEM nominal Ø${diameter} mm · ${material}${color?` · ${color} identification`:''}.`,explodeVector:[0,.20,(Number(code)%3-1)*.18]});add(`${pid}.S1`,pid,6,'Spesifik Part',`Roller ${code} · Ø${diameter} mm`,{meshRefs:[`press-0-ink-roller-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,explodeVector:[.06,.08,.10],maintenanceTag:'OEM_ROLLER_MAP'});}
+for(const code of ['A','B','C','D']){const pid=`O5.PRINT.PU1.INK.DIST_${code}`;add(pid,'O5.PRINT.PU1.INK',5,'Part',`Ink Distributor ${code}`,{meshRefs:[`press-0-ink-distributor-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,description:'OEM nominal Ø85 mm · Rilsan.',explodeVector:[0,.22,.18]});add(`${pid}.S1`,pid,6,'Spesifik Part',`Distributor ${code} · Ø85 mm`,{meshRefs:[`press-0-ink-distributor-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,explodeVector:[.06,.08,.10],maintenanceTag:'OEM_ROLLER_MAP'});}
+for(const [code,name,diameter,material] of [['16','Dampening Form Roller FEAW',78,'rubber'],['17','Intermediate Roller ZW',56,'Rilsan'],['18','Water Pan Roller T',108,'rubber, crowned'],['19','Metering Roller DW',98,'stainless steel'],['FR','Dampening Distributor FR',85,'chromium-plated']]){const pid=`O5.PRINT.PU1.DAMP.R${code}`;add(pid,'O5.PRINT.PU1.DAMP',5,'Part',`${code} · ${name}`,{meshRefs:[`press-0-damp-roller-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,description:`OEM nominal Ø${diameter} mm · ${material}.`,explodeVector:[0,.18,-.20]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · Ø${diameter} mm`,{meshRefs:[`press-0-damp-roller-${code}`],sourceRefs:['SRC-CD102-ROLLER-PROCEDURE'],confidence:CONFIDENCE.HIGH,explodeVector:[.06,.08,.10],maintenanceTag:'OEM_ROLLER_MAP'});}
 
 const transfer12='O5.PRINT.TRANSFER12';
 add(transfer12,'O5.PRINT',3,'Sub','PU1–PU2 Sheet Transfer',{meshRefs:['transfer-pu1-pu2'],sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.MEDIUM,explodeVector:[0,.28,-.65],description:'Functional visual reference between PU1 and PU2; timing and service dimensions are unverified.'});
