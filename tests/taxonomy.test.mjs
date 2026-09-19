@@ -12,6 +12,21 @@ test('eight printing units have repeatable block taxonomy without claiming inter
  for(let unit=1;unit<=8;unit++){const pu=TAXONOMY_BY_ID.get(`O5.PRINT.PU${unit}`);assert.ok(pu);assert.equal(pu.meshRefs[0],`press-${unit}`);assert.equal(taxonomyChildren(pu.id).length,6);}
  const referenceOnly=OFFSET5_TAXONOMY.filter(n=>n.confidence==='REFERENCE_ONLY');assert.ok(referenceOnly.length>50);assert.ok(referenceOnly.some(n=>n.name.includes('Cylinder')));
 });
+test('feeder through PU1 taxonomy resolves the new functional geometry',()=>{
+ const expectedFeeder={
+  'O5.FEEDER.PILE':['feeder-pile-guides'],
+  'O5.FEEDER.HEAD':['feeder-head-linkage'],
+  'O5.FEEDER.SEPARATION':['feeder-rear-edge'],
+  'O5.FEEDER.VACUUM':['feedboard-transport'],
+  'O5.FEEDER.GUIDE':['feedboard-register'],
+  'O5.FEEDER.INFEED':['feedboard-infeed-gripper']
+ };
+ for(const [id,refs] of Object.entries(expectedFeeder))for(const ref of refs)assert.ok(TAXONOMY_BY_ID.get(id).meshRefs.includes(ref),`${id} missing ${ref}`);
+ assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.INK').meshRefs.includes('press-0-inking-distribution'));
+ assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.DAMP').meshRefs.includes('press-0-dampening-form'));
+ assert.ok(TAXONOMY_BY_ID.get('O5.PRINT.PU1.CYL').meshRefs.includes('press-0-plate-clamp'));
+ assert.ok(!TAXONOMY_BY_ID.get('O5.PRINT.PU2.CYL').meshRefs.includes('press-0-plate-clamp'));
+});
 test('source registry separates photo evidence from technical reference',()=>{
  const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,22);assert.equal(stats.unique,22);assert.equal(stats.active_geometry_reference,14);
  assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');

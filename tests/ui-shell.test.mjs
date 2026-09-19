@@ -16,7 +16,7 @@ test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
 });
 
 test('UI reports the current photo-aligned geometry baseline',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v8');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v9');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
@@ -51,7 +51,7 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/factory-layout-3d-phase16-20260919/);
+  assert.match(sw,/feeder-pu1-phase17-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
 });

@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-v8');
+ assert.equal(t.root.userData.version,'offset5-photo-v9');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -44,7 +44,9 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(size.x>=15.5&&size.x<=16.1);assert.ok(size.y>=2.8&&size.y<=3.0);assert.ok(size.z>=3.8&&size.z<=4.4);
  assert.ok(t.meshes.length<380,'mobile mesh budget exceeded');
  for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
+ for(const id of ['feeder-pile-guides','feeder-head-linkage','feeder-rear-edge','feedboard-transport','feedboard-register','feedboard-infeed-gripper'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-0-cylinder-train','press-0-dampening','press-0-inking-train','press-0-service-access'])assert.ok(t.findNode(id),`missing ${id}`);
+ for(const id of ['press-0-dampening-form','press-0-plate-clamp','press-0-inking-distribution'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-1-cylinder-train','press-1-dampening','press-1-inking-train','press-1-service-access','transfer-pu1-pu2','transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-guide'])assert.ok(t.findNode(id),`missing ${id}`);
  assert.equal(t.findNode('press-2-cylinder-train'),null,'PU3 internals must remain unchanged');
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
