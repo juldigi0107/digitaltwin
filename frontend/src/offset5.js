@@ -11,7 +11,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v28',
+  version: 'offset5-photo-pdf-v29',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
   dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
@@ -25,7 +25,7 @@ const V=(a)=>new THREE.Vector3(...a);
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v9',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v10',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
@@ -253,36 +253,34 @@ export class OffsetMachineTemplate {
     this.box(operatorDetails,[.075,.095,.035],[-.28,1.87,1.34],'black',.008);
     this.fasteners(operatorDetails,[-.04,1.43,1.365],.48,.72,'z');
     const top=this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · photo-derived upper housing & vent deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Upper housing follows the actual top/operator-side photos: a low dark deck with a long ventilation field and clear separation from the ink fountain. It is not derived from the roller diagram.');
-    this.box(top,[i===0?.68:.78,.065,1.58],[-.05,2.27,0],'graphite',.022);
-    this.box(top,[i===0?.58:.66,.018,1.34],[-.05,2.314,0],'black',.006);
-    for(let n=0;n<12;n++)this.box(top,[i===0?.50:.58,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
+    // Low attached roof cassette: every surface bears on the main side frames.
+    this.box(top,[i===0?.72:.82,.10,1.76],[-.04,2.25,0],'graphite',.028);
+    this.box(top,[i===0?.60:.70,.035,1.48],[-.08,2.318,0],'black',.010);
+    for(let n=0;n<10;n++)this.box(top,[i===0?.52:.62,.014,.032],[-.08,2.342,-.58+n*.129],'steel',.004);
+    for(const z of [-.78,.78])this.box(top,[i===0?.68:.78,.18,.08],[-.02,2.20,z],'graphite',.014);
     const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
-    this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
-    this.box(bridge,[.12,.045,1.46],[-.04,2.67,0],i%3===0?'red':'steel',.010);
+    this.box(bridge,[.18,.10,1.56],[-.03,2.49,0],'graphite',.016);
+    this.box(bridge,[.10,.045,1.44],[-.10,2.545,0],i%3===0?'red':'steel',.010);
     for(const z of [-.73,.73]){
-      const arm=this.box(bridge,[.095,.38,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
-      this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
-      this.box(bridge,[.14,.055,.10],[.10,2.65,z],'black',.009);
+      const arm=this.box(bridge,[.10,.30,.075],[.12,2.35,z],'graphite',.015);arm.rotation.z=-.08;
+      this.cylinder(bridge,.046,.080,[.14,2.20,z],'steel','z');
+      this.box(bridge,[.14,.055,.10],[-.02,2.51,z],'black',.009);
     }
     const stair=this.group(g,'press-'+i+'-steps',i<7?`PU${i+1} → PU${i+2} · operator access stair & landing`:'PU8 · coater-side access steps',[0,0,0],[0,.12,1.35],[...sources,'IMG_1662.jpeg'],i<7?'Tiga tingkat akses, landing diamond-plate dan guard rail mengikuti IMG_1662. Lebar ditahan di dalam clear bay antar-PU; ukuran tetap photo-derived, bukan dimensi OEM.':'Pijakan sisi PU8 mempertahankan akses menuju coater.');
     const nextGap=OFFSET5_DIMENSIONS.layout.printingUnitPitch-frameWidth/2-OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth/2;
     // Center access treads in the clear structural bay; do not clamp them back into the cover.
     const stepCenter=frameWidth/2+nextGap/2;
     if(i<7){
-      const clearWidth=Math.max(.48,nextGap-.08);
-      this.tread(stair,[clearWidth,.10,.38],[stepCenter,.52,1.82]);
-      this.box(stair,[clearWidth-.04,.23,.30],[stepCenter,.365,1.82],'graphite',.018);
-      this.tread(stair,[clearWidth,.10,.42],[stepCenter,.76,1.55]);
-      this.box(stair,[clearWidth-.04,.23,.34],[stepCenter,.605,1.55],'graphite',.018);
-      this.tread(stair,[clearWidth,.11,.76],[stepCenter,1.00,1.14]);
-      this.box(stair,[clearWidth-.04,.43,.70],[stepCenter,.73,1.14],'graphite',.020);
+      const clearWidth=Math.max(.48,nextGap-.06);
+      // Full-depth landing closes the visible hole between adjacent housings.
+      this.tread(stair,[clearWidth,.11,.90],[stepCenter,.52,1.48]);
+      this.box(stair,[clearWidth-.04,.34,.82],[stepCenter,.30,1.48],'graphite',.018);
+      this.tread(stair,[clearWidth,.10,.36],[stepCenter,.30,1.95]);
+      this.box(stair,[clearWidth-.04,.16,.32],[stepCenter,.17,1.95],'graphite',.016);
+      this.tread(stair,[clearWidth,.09,.18],[stepCenter,.13,2.18]);
       for(const dx of [-clearWidth*.42,clearWidth*.42])this.cylinder(stair,.018,.70,[stepCenter+dx,1.18,.72],'steel','y');
       this.cylinder(stair,.020,clearWidth*.84,[stepCenter,1.47,.72],'steel','x');
       this.cylinder(stair,.017,clearWidth*.84,[stepCenter,1.22,.72],'steel','x');
-    }else{
-      this.tread(stair,[.38,.10,.50],[.54,.82,1.43]);
-      this.tread(stair,[.32,.10,.40],[.54,1.10,1.35]);
-      this.box(stair,[.09,.33,.13],[.54,.62,1.34],'graphite');
     }
     const drive=this.group(g,'press-'+i+'-drive','Drive-side service cover & step',[0,0,0],[0,.1,-1.15],['IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],'Flat service cover, secondary step dan hose luar terverifikasi dari foto drive side.');
     this.box(drive,[i===0?.76:.86,1.54,.20],[0,1.35,-1.13],'graphite',.028);
@@ -566,8 +564,8 @@ export class OffsetMachineTemplate {
     this.box(frame,[.98,.20,1.92],[0,2.22,0],'graphite',.04);
     const op=this.group(g,'coater-operator-cover','Coater operator-side silver cover',[0,0,0],[.15,.20,1.0],photos);
     this.shell(op,[.02,.48,1.13],.82,1.88,.35,1);
-    this.tread(op,[.42,.09,.46],[.53,.77,1.42]);
-    this.tread(op,[.37,.09,.37],[.53,1.03,1.34]);
+    this.tread(op,[.32,.09,.46],[.35,.77,1.42]);
+    this.tread(op,[.30,.09,.37],[.35,1.03,1.34]);
     const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
     this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
     this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');
@@ -605,6 +603,7 @@ export class OffsetMachineTemplate {
     const dryerLeft=D.dryerCenterX-D.dryerLength/2;
     const transition=this.group(this.root,'coater-dryer-service-bay','Coater / dryer service transition',[(coaterRight+dryerLeft)/2,0,0],[.18,.14,.62],photos,'Separated coater-to-dryer service bay provides visible machine spacing and protected operator footing.');
     this.tread(transition,[Math.max(.30,dryerLeft-coaterRight),.10,.82],[0,.53,1.48]);
+    for(const z of [1.17,1.79])this.box(transition,[.12,.48,.12],[0,.29,z],'graphite',.014);
     this.cylinder(transition,.030,1.48,[0,1.30,0],'steel','z');
     for(const z of [-.72,.72])this.box(transition,[.09,.70,.09],[0,.88,z],'graphite',.012);
     this.tube(transition,[[-.12,1.64,-.72],[0,1.77,-.72],[.12,1.64,-.72]],.018,'rubber');
@@ -613,7 +612,7 @@ export class OffsetMachineTemplate {
     const deliveryLeft=D.deliveryCenterX-D.deliveryBodyLength/2;
     const access=this.group(this.root,'dryer-delivery-access','Dryer / inspection / delivery operator access',[(dryerRight+deliveryLeft)/2,0,0],[.28,.18,.78],photos,'The delivery approach is deliberately opened for inspection and operator access; tread and guard geometry is photo-derived and not a certified platform drawing.');
     this.tread(access,[Math.max(.48,deliveryLeft-dryerRight),.11,.88],[0,.54,1.47]);
-    this.tread(access,[.58,.11,.72],[.02,.30,1.62]);
+    this.tread(access,[.42,.11,.72],[0,.30,1.62]);
     this.box(access,[.12,.44,.16],[0,.31,1.38],'graphite',.014);
     for(const x0 of [-.20,.20])this.cylinder(access,.022,.72,[x0,.91,1.92],'steel','y');
     this.cylinder(access,.022,.45,[0,1.26,1.92],'steel','x');

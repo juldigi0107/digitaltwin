@@ -33,7 +33,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v28');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v29');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -92,6 +92,31 @@ test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
  assert.ok(steps.min.x>frame1.max.x,'operator steps must start outside PU1 frame');
  assert.ok(steps.max.x<frame2.min.x,'operator steps must end before PU2 frame');
  assert.ok(drive.max.x<frame2.min.x,'drive-side PU1 step/cover intrudes into PU2 frame');
+ t.dispose();
+});
+test('all seven inter-PU bays have continuous supported operator landings',()=>{
+ const t=new OffsetMachineTemplate();
+ for(let i=0;i<7;i++){
+  const a=new THREE.Box3().setFromObject(t.findNode(`press-${i+1}`));
+  const b=new THREE.Box3().setFromObject(t.findNode(`press-${i+2}`));
+  const landing=new THREE.Box3().setFromObject(t.findNode(`press-${i}-steps`));
+  assert.ok(landing.min.x<=a.max.x+.04,`PU${i+1}/PU${i+2} landing leaves a gap at the upstream frame`);
+  assert.ok(landing.max.x>=b.min.x-.04,`PU${i+1}/PU${i+2} landing leaves a gap at the downstream frame`);
+  assert.ok(landing.min.y<=.13&&landing.max.y>=.55,`PU${i+1}/PU${i+2} stair is unsupported or floating`);
+ }
+ assert.equal(t.findNode('press-7-steps').children.length,0,'PU8 legacy steps must not overlap the dedicated coater access');
+ t.dispose();
+});
+test('PU8 through delivery access geometry is supported and only meets adjacent module edges',()=>{
+ const t=new OffsetMachineTemplate();
+ const box=id=>new THREE.Box3().setFromObject(t.findNode(id));
+ const coater=box('coater'),dryer=box('dryer-extension'),inspection=box('inspection-bridge'),delivery=box('delivery');
+ const a=box('pu8-coater-access'),b=box('coater-dryer-service-bay'),c=box('dryer-delivery-access');
+ for(const [id,x] of [['pu8-coater-access',a],['coater-dryer-service-bay',b],['dryer-delivery-access',c]])assert.ok(x.min.y<=.10,`${id} has no ground support`);
+ assert.ok(a.max.x<=coater.min.x+.01,'PU8/coater access penetrates the coater housing');
+ assert.ok(b.min.x>=coater.max.x-.01&&b.max.x<=dryer.min.x+.04,'coater/dryer service bay penetrates a housing');
+ assert.ok(c.min.x>=dryer.max.x-.09&&c.max.x<=delivery.min.x+.02,'dryer/delivery access penetrates a housing');
+ assert.ok(inspection.min.y<=dryer.max.y+.01,'inspection bridge floats above the dryer deck');
  t.dispose();
 });
 
