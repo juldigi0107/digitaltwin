@@ -33,7 +33,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v29');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v30');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -89,20 +89,22 @@ test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
  const drive=new THREE.Box3().setFromObject(t.findNode('press-0-drive'));
  assert.ok(frame2.min.x-frame1.max.x>=.59,'PU1-PU2 exterior frame gap is insufficient');
  assert.equal(steps.intersectsBox(cover),false,'operator steps overlap PU1 cover');
- assert.ok(steps.min.x>frame1.max.x,'operator steps must start outside PU1 frame');
- assert.ok(steps.max.x<frame2.min.x,'operator steps must end before PU2 frame');
+ assert.ok(steps.min.x>=frame1.max.x-.001,'operator footplate must meet but not penetrate PU1 frame');
+ assert.ok(steps.max.x<=frame2.min.x+.001,'operator footplate must meet but not penetrate PU2 frame');
  assert.ok(drive.max.x<frame2.min.x,'drive-side PU1 step/cover intrudes into PU2 frame');
  t.dispose();
 });
-test('all seven inter-PU bays have continuous supported operator landings',()=>{
+test('all seven inter-PU bays retain the photo-matched stairs and add only a full-width footplate',()=>{
  const t=new OffsetMachineTemplate();
  for(let i=0;i<7;i++){
-  const a=new THREE.Box3().setFromObject(t.findNode(`press-${i+1}`));
-  const b=new THREE.Box3().setFromObject(t.findNode(`press-${i+2}`));
-  const landing=new THREE.Box3().setFromObject(t.findNode(`press-${i}-steps`));
-  assert.ok(landing.min.x<=a.max.x+.04,`PU${i+1}/PU${i+2} landing leaves a gap at the upstream frame`);
-  assert.ok(landing.max.x>=b.min.x-.04,`PU${i+1}/PU${i+2} landing leaves a gap at the downstream frame`);
-  assert.ok(landing.min.y<=.13&&landing.max.y>=.55,`PU${i+1}/PU${i+2} stair is unsupported or floating`);
+  const frameA=new THREE.Box3().setFromObject(t.findNode(`press-${i}-frame`));
+  const frameB=new THREE.Box3().setFromObject(t.findNode(`press-${i+1}-frame`));
+  const stairs=new THREE.Box3().setFromObject(t.findNode(`press-${i}-steps`));
+  const landing=new THREE.Box3().setFromObject(t.findNode(`press-${i}-gap-footplate`));
+  assert.ok(landing.min.x<=frameA.max.x+.01,`PU${i+1}/PU${i+2} footplate leaves an upstream hole`);
+  assert.ok(landing.max.x>=frameB.min.x-.01,`PU${i+1}/PU${i+2} footplate leaves a downstream hole`);
+  assert.ok(stairs.min.y>=.24&&stairs.max.y>=1.50,`PU${i+1}/PU${i+2} original stair elevation changed`);
+  assert.ok(stairs.min.z< -2.0&&stairs.max.z<=-.69,`PU${i+1}/PU${i+2} original stair route changed`);
  }
  assert.equal(t.findNode('press-7-steps').children.length,0,'PU8 legacy steps must not overlap the dedicated coater access');
  t.dispose();
