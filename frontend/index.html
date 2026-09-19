@@ -33,15 +33,15 @@
     <button id="nav-machine" class="active" title="3D Factory"><span>◈</span><small>3D Factory</small></button>
     <button id="nav-layout" title="Layout pabrik"><span>▱</span><small>Area / DWG</small></button>
     <button id="nav-assets" title="Daftar aset"><span>▦</span><small>Assets</small></button>
-    <button disabled title="Kategori mesin produksi"><span>▥</span><small>Machines</small></button>
-    <button disabled title="Area prepress"><span>◫</span><small>Prepress</small></button>
-    <button disabled title="Area finishing"><span>⌑</span><small>Finishing</small></button>
-    <button disabled title="Utilitas"><span>◉</span><small>Utilities</small></button>
-    <button disabled title="Hubungan utilitas"><span>⌘</span><small>Relationships</small></button>
+    <button id="nav-machines" title="Kategori mesin produksi"><span>▥</span><small>Machines</small></button>
+    <button id="nav-prepress" title="Area prepress"><span>◫</span><small>Prepress</small></button>
+    <button id="nav-finishing" title="Area finishing"><span>⌑</span><small>Finishing</small></button>
+    <button id="nav-utilities" title="Utilitas"><span>◉</span><small>Utilities</small></button>
+    <button id="nav-relationships" title="Hubungan utilitas"><span>⌘</span><small>Relationships</small></button>
     <button id="nav-sources" title="Sumber data"><span>▤</span><small>Sources</small></button>
-    <button disabled title="Belum tersedia pada backend saat ini"><span>□</span><small>Documents</small></button>
-    <button disabled title="Belum tersedia pada backend saat ini"><span>⌁</span><small>Analytics</small></button>
-    <button disabled title="Belum tersedia pada backend saat ini"><span>△</span><small>Alerts</small></button>
+    <button id="nav-documents" title="Dokumen teknis"><span>□</span><small>Documents</small></button>
+    <button id="nav-analytics" title="Analytics"><span>⌁</span><small>Analytics</small></button>
+    <button id="nav-alerts" title="Alerts"><span>△</span><small>Alerts</small></button>
     <div class="source-health" aria-label="Status sumber data">
       <h4>SOURCE STATUS</h4>
       <div class="source-health-row"><span>DWG Layout</span><b class="confidence-high">DXF-DERIVED</b></div>
@@ -73,7 +73,7 @@
 
       <div id="machine-label" class="machine-label" hidden><span>◇</span><div><strong>OFFSET 5</strong><small id="label-detail">CD 102-8+L · UNKNOWN</small></div></div>
 
-      <aside class="floating-filter" aria-label="Layer dan filter"><header><b>LAYER & FILTER</b><button aria-label="Tutup" disabled>×</button></header><section><h4>ASSET CATEGORY</h4><label><i class="dot production"></i><span>Production Machines</span><b>26</b></label><label><i class="dot prepress"></i><span>Prepress</span><b>6</b></label><label><i class="dot finishing"></i><span>Finishing</span><b>7</b></label><label><i class="dot inspection"></i><span>Inspection</span><b>4</b></label><label><i class="dot utility"></i><span>Utility</span><b>16</b></label><label><i class="dot hvac"></i><span>HVAC</span><b>8</b></label></section><section><h4>STATUS FILTER</h4><label><i class="dot normal"></i><span>Normal</span><b>40</b></label><label><i class="dot warning"></i><span>Warning</span><b>5</b></label><label><i class="dot problem"></i><span>Problem</span><b>1</b></label></section></aside>
+      <aside class="floating-filter" aria-label="Layer dan filter"><header><b>LAYER & FILTER</b><button id="filter-close" aria-label="Tutup filter">×</button></header><section><h4>ASSET CATEGORY</h4><label><i class="dot production"></i><span>Production Machines</span><b>26</b></label><label><i class="dot prepress"></i><span>Prepress</span><b>6</b></label><label><i class="dot finishing"></i><span>Finishing</span><b>7</b></label><label><i class="dot inspection"></i><span>Inspection</span><b>4</b></label><label><i class="dot utility"></i><span>Utility</span><b>16</b></label><label><i class="dot hvac"></i><span>HVAC</span><b>8</b></label></section><section><h4>STATUS FILTER</h4><label><i class="dot normal"></i><span>Normal</span><b>40</b></label><label><i class="dot warning"></i><span>Warning</span><b>5</b></label><label><i class="dot problem"></i><span>Problem</span><b>1</b></label></section></aside>
 
       <div class="viewport-mode-switch" role="group" aria-label="Mode tampilan"><button id="mode-2d">2D</button><button id="mode-3d" class="active">3D</button></div>
       <div class="viewport-zoom" role="group" aria-label="Kontrol zoom"><button id="zoom-plus" aria-label="Perbesar">+</button><button id="zoom-fit" aria-label="Fokus">⌖</button><button id="zoom-minus" aria-label="Perkecil">−</button></div>
@@ -84,9 +84,9 @@
         <div class="view-switch" role="group" aria-label="Toolbar scene"><button data-camera="iso" class="active">ISO <span>Isometrik</span></button><button data-camera="top">TOP <span>Atas</span></button><button data-camera="fit">FIT <span>Fokus</span></button><button id="tool-pan">PAN <span>Geser</span></button><button id="tool-explode">EXP <span>Explode</span></button><button id="tool-isolate">ISO-L <span>Isolasi</span></button><button data-camera="reset">RST <span>Reset</span></button></div>
         <div class="scene-options"><button id="labels" class="icon-btn active" title="Label" aria-label="Tampilkan/sembunyikan label">Aa</button><button id="fullscreen" class="icon-btn" title="Layar penuh" aria-label="Layar penuh">⛶</button></div>
       </div>
-      <div class="scene-caption"><span id="geometry-caption">GEOMETRY V15 · PU1 PHOTO-ALIGNED VISUAL TARGET</span><span id="scene-hint">Geser: orbit · Scroll/pinch: zoom · Klik: pilih</span></div>
-      <div class="asset-legend" aria-label="Legenda kategori"><button class="active">ALL</button><span class="production">● PRODUCTION</span><span class="prepress">● PREPRESS</span><span class="finishing">● FINISHING</span><span class="inspection">● INSPECTION</span><span class="utility">● UTILITY</span><span class="hvac">● HVAC</span><span class="electrical">● ELECTRICAL</span><span class="water">● WATER</span></div>
-      <div class="telemetry-strip"><section><h4>QUICK INFORMATION</h4><span>Asset <b>OFFSET 5</b></span><span>Code <b>OFU-1</b></span><span>Model <b>CD 102-8+L</b></span></section><section class="quality"><h4>DATA CONFIDENCE</h4><div><b>PHOTO</b><b>OEM PDF</b><b>DXF</b><b>REVIEW</b><b>LOCAL</b></div></section><section><h4>SYSTEM STATUS</h4><span>Geometry <b class="ok">V15 Ready</b></span><span>Source <b class="ok">Registry</b></span><span>Live Data <b>Not Connected</b></span></section></div>
+      <div class="scene-caption"><span id="geometry-caption">GEOMETRY V16 · PU1 PHOTO EXTERIOR + OEM-PDF INTERNALS</span><span id="scene-hint">Geser: orbit · Scroll/pinch: zoom · Klik: pilih</span></div>
+      <div class="asset-legend" aria-label="Legenda kategori"><button id="legend-all" class="active">ALL</button><span class="production">● PRODUCTION</span><span class="prepress">● PREPRESS</span><span class="finishing">● FINISHING</span><span class="inspection">● INSPECTION</span><span class="utility">● UTILITY</span><span class="hvac">● HVAC</span><span class="electrical">● ELECTRICAL</span><span class="water">● WATER</span></div>
+      <div class="telemetry-strip"><section><h4>QUICK INFORMATION</h4><span>Asset <b>OFFSET 5</b></span><span>Code <b>OFU-1</b></span><span>Model <b>CD 102-8+L</b></span></section><section class="quality"><h4>DATA CONFIDENCE</h4><div><b>PHOTO</b><b>OEM PDF</b><b>DXF</b><b>REVIEW</b><b>LOCAL</b></div></section><section><h4>SYSTEM STATUS</h4><span>Geometry <b class="ok">V16 Ready</b></span><span>Source <b class="ok">Registry</b></span><span>Live Data <b>Not Connected</b></span></section></div>
       <div class="ui-mobile-actions"><button id="ui-workbench-toggle">Engineering</button><button id="ui-asset-panel">Asset Info</button></div>
     </section>
 
