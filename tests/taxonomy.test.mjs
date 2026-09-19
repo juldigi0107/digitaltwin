@@ -41,6 +41,6 @@ test('PU1 cylinder taxonomy separates four assemblies and nip path',()=>{
  }
 });
 test('source registry separates photo evidence from technical reference',()=>{
- const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,22);assert.equal(stats.unique,22);assert.equal(stats.active_geometry_reference,14);
+ const stats=photoStats();assert.equal(PHOTO_REGISTRY.length,23);assert.equal(stats.unique,23);assert.equal(stats.active_geometry_reference,15);
  assert.ok(TECHNICAL_SOURCES.some(s=>s.publisher.includes('Heidelberger')));assert.equal(ORIENTATION.feedDirection,'FEEDER_TO_DELIVERY_POSITIVE_X');assert.equal(ORIENTATION.operatorSide,'NEGATIVE_Z');assert.equal(ORIENTATION.driveSide,'POSITIVE_Z');
 });

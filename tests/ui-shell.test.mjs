@@ -16,17 +16,17 @@ test('industrial shell keeps legacy runtime hooks required by app.js',()=>{
 });
 
 test('UI reports the current photo-aligned geometry baseline',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v11');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-v12');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
 test('photo registry separates evidence registry from active geometry references',()=>{
   const entries=[...ui.matchAll(/id:'p\d+'/g)];
   const active=[...ui.matchAll(/kind:'active_geometry_reference'/g)];
-  assert.equal(entries.length,22);
-  assert.equal(active.length,14);
-  assert.match(html,/22 foto unik/);
-  assert.match(html,/14 foto aktif/);
+  assert.equal(entries.length,23);
+  assert.equal(active.length,15);
+  assert.match(html,/23 foto unik/);
+  assert.match(html,/15 foto aktif/);
 });
 
 test('industrial shell has responsive workbench and dedicated cache assets',()=>{
@@ -51,7 +51,7 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/pu1-cylinder-phase19-20260919/);
+  assert.match(sw,/pu1-top-view-phase20-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
 });

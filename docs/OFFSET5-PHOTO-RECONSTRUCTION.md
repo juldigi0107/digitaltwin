@@ -11,6 +11,7 @@ Model tujuh balok diganti dengan rekonstruksi bentuk luar yang bisa dipilih:
 - Baseline V9 memperinci jalur feeder sampai PU1: guide pile, linkage kepala feeder, rear-edge separator, suction tape/pressure roller, front/side lay, infeed gripper, serta referensi roller dampening, plate-clamp, dan distribusi tinta PU1.
 - Baseline V10 memperinci gripper system PU1 dan transfer PU1–PU2: impression gripper bar/shaft, finger, pad, pivot, end support, return-spring reference, operating lever, cam follower, dan opening-cam reference.
 - Baseline V11 mengoreksi PU1: urutan plate–blanket–impression–transfer dibuat near-nip tanpa penetrasi volume, roller dampening/inking dipisahkan, dan taxonomy cylinder assembly serta jalur lembar diperinci.
+- Baseline V12 memakai foto `IMG_1628(2).jpeg` dari arah feeder menuju delivery untuk mengoreksi PU1 top deck, grille longitudinal, shoulder cover, ink-fountain bridge, dan support arm tanpa mengubah internal non-overlap V11.
 
 Acuan: sembilan foto pengguna. Tidak ada foto asli atau berkas DWG pabrik yang diterbitkan bersama frontend.
 
@@ -37,7 +38,7 @@ DWG `250804 layout offset(1).dwg` berhasil diproses dengan @mlightcad/libredwg-w
 - Isolasi mempertahankan visibility ancestor agar objek pilihan tetap terlihat.
 - Rakit kembali, Reset, dan klik ganda mengembalikan transformasi tersimpan.
 - Mode ringan menghilangkan detail pola bordes dan bayangan.
-- Geometri statis digabung per kelompok/material. Baseline V11 memiliki 334 mesh/instance batches, 42 instanced mesh, 91 node geometri yang bisa dipilih, dan 674 node taxonomy enam tingkat.
+- Geometri statis digabung per kelompok/material. Baseline V12 memiliki 341 mesh/instance batches, 42 instanced mesh, 93 node geometri yang bisa dipilih, dan 674 node taxonomy enam tingkat. Registry berisi 23 foto unik dengan 15 foto aktif pada baseline.
 
 ## Validasi
 

@@ -8,10 +8,10 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-v11', status: 'RECONSTRUCTED / PU1 NON-OVERLAP CYLINDER & ROLLER DETAIL',
+  version: 'offset5-photo-v12', status: 'RECONSTRUCTED / PU1 FEEDER-VIEW TOP GEOMETRY',
   dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
 };
 const V=(a)=>new THREE.Vector3(...a);
 
@@ -188,6 +188,24 @@ export class OffsetMachineTemplate {
     this.controls(cover,[.32,1.43,1.355]);
     this.box(cover,[.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
     this.box(cover,[.34,.026,.018],[-.11,1.72,1.36],'black',.005);
+    if(i===0){
+      const top=this.group(g,'press-0-top-deck','PU1 · feeder-view top deck, grille & shoulder covers',[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg'],'Arah foto dari feeder menuju delivery. Deck hitam, grille memanjang dan shoulder cover mengikuti tampak atas aktual PU1.');
+      this.box(top,[.72,.055,1.58],[-.02,2.38,0],'graphite',.025);
+      this.box(top,[.50,.018,1.32],[-.02,2.414,0],'black',.008);
+      for(let n=0;n<13;n++)this.box(top,[.43,.012,.025],[-.02,2.429,-.56+n*.093],'steel',.004);
+      for(const z of [-.88,.88]){
+        this.box(top,[.82,.10,.24],[-.02,2.34,z],'silver',.028);
+        this.box(top,[.36,.035,.07],[.20,2.405,z],'graphite',.008);
+      }
+      const bridge=this.group(g,'press-0-fountain-support','PU1 · ink-fountain bridge & support arms',[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg'],'Fountain bridge melintang dan dua support arm terlihat dari arah feeder; hinge, counterweight dan locking detail belum diukur.');
+      this.box(bridge,[.36,.12,1.72],[-.08,2.67,0],'graphite',.022);
+      this.box(bridge,[.26,.055,1.60],[-.22,2.73,0],'steel',.018);
+      for(const z of [-.76,.76]){
+        const arm=this.box(bridge,[.10,.62,.075],[.18,2.48,z],'graphite',.018);arm.rotation.z=-.18;
+        this.cylinder(bridge,.052,.085,[.23,2.25,z],'steel','z');
+        this.box(bridge,[.20,.07,.11],[.05,2.78,z],'black',.012);
+      }
+    }
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources);
     this.tread(stair,[.48,.10,.51],[.55,.82,1.43]);this.tread(stair,[.43,.10,.4],[.55,1.10,1.35]);
     this.box(stair,[.10,.33,.14],[.55,.62,1.34],'graphite');
