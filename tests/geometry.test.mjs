@@ -114,7 +114,7 @@ test('PU1 approved-target exterior keeps bridge, deck and service grille separat
  assert.ok(top.max.y<bridge.max.y,'raised bridge must remain visually above the low vent deck');
  assert.ok(bridge.min.y>2.15,'bridge collapsed into PU1 housing');
  assert.equal(grille.intersectsBox(steps),false,'service grille must not overlap operator steps');
- assert.ok(grille.max.z<1.40&&grille.min.z>.95,'service grille left PU1 side-panel envelope');
+ assert.ok(grille.min.z>-1.40&&grille.max.z<-.95,'service grille left the verified operator-side −Z envelope');
  assert.equal(t.root.userData.pu1ExteriorLayout.visualTarget,'USER_APPROVED_RENDER_DERIVED_FROM_PHOTOS');
  t.dispose();
 });
