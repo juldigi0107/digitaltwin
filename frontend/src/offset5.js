@@ -231,7 +231,8 @@ export class OffsetMachineTemplate {
     }
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources,i===0?'PU1 step diposisikan di access bay antara PU1–PU2; tidak menembus cover atau frame. Dimensi tetap visual-only.':'Pijakan mengikuti pola exterior foto; ukuran bukan data engineering.');
     const nextGap=OFFSET5_DIMENSIONS.layout.printingUnitPitch-frameWidth/2-OFFSET5_DIMENSIONS.layout.printingUnitFrameWidth/2;
-    const stepCenter=Math.min(frameWidth/2+nextGap*.52,OFFSET5_DIMENSIONS.layout.printingUnitPitch/2-.16);
+    // Center access treads in the clear structural bay; do not clamp them back into the cover.
+    const stepCenter=frameWidth/2+nextGap/2;
     if(i===0){
       this.tread(stair,[.30,.10,.50],[stepCenter,.78,1.42]);
       this.tread(stair,[.26,.10,.40],[stepCenter,1.05,1.34]);
