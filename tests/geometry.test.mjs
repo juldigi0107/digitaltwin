@@ -24,16 +24,16 @@ test('subassembly selection resolves meshes and isolation preserves parent chain
  t.reset();assert.ok(t.nodes.every(n=>n.visible));t.dispose();
 });
 test('geometry is finite, sourced and instanced; visual dimensions remain nonengineering',()=>{
- const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'DXF_CALIBRATED_OUTER_ENVELOPE');
+ const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT');
  assert.equal(t.root.userData.installedConfiguration,'PHOTO_CONFIRMED_CD102_8_PLUS_L');
  assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
  for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
- const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<20);
+ const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<21.10);
  t.setLow(true);assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.reset();assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.dispose();
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v26');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v27');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -42,7 +42,7 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z<0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('press-0-drive')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('drive-utilities')).getCenter(new THREE.Vector3()).z>0);
- assert.ok(size.x>=19.30&&size.x<=19.55,`longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.15&&size.z<=4.65,`lateral service envelope unexpected: ${size.z}`);
+ assert.ok(size.x>=20.80&&size.x<=21.05,`photo-corrected longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.15&&size.z<=4.65,`lateral service envelope unexpected: ${size.z}`);
  assert.ok(t.meshes.length<1500,`full-detail mesh budget exceeded: ${t.meshes.length}`);
  for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['feeder-pile-guides','feeder-head-linkage','feeder-rear-edge','feedboard-transport','feedboard-register','feedboard-infeed-gripper'])assert.ok(t.findNode(id),`missing ${id}`);
@@ -80,14 +80,14 @@ test('PU1 primary cylinders are ordered and have no volumetric overlap',()=>{
 
 test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
  const t=new OffsetMachineTemplate(),layout=t.root.userData.pu1ExteriorLayout;
- assert.equal(layout.dimensionUnit,'DXF_CALIBRATED_OUTER_ENVELOPE');
- assert.ok(layout.accessBay>=.39,'PU1-PU2 frame bay is still too narrow visually');
+ assert.equal(layout.dimensionUnit,'PHOTO_CORRECTED_INTERUNIT_ACCESS');
+ assert.ok(layout.accessBay>=.59,'PU1-PU2 access bay is still too narrow for operator landing');
  const frame1=new THREE.Box3().setFromObject(t.findNode('press-0-frame'));
  const frame2=new THREE.Box3().setFromObject(t.findNode('press-1-frame'));
  const steps=new THREE.Box3().setFromObject(t.findNode('press-0-steps'));
  const cover=new THREE.Box3().setFromObject(t.findNode('press-0-cover'));
  const drive=new THREE.Box3().setFromObject(t.findNode('press-0-drive'));
- assert.ok(frame2.min.x-frame1.max.x>=.39,'PU1-PU2 exterior frame gap is insufficient');
+ assert.ok(frame2.min.x-frame1.max.x>=.59,'PU1-PU2 exterior frame gap is insufficient');
  assert.equal(steps.intersectsBox(cover),false,'operator steps overlap PU1 cover');
  assert.ok(steps.min.x>frame1.max.x,'operator steps must start outside PU1 frame');
  assert.ok(steps.max.x<frame2.min.x,'operator steps must end before PU2 frame');
@@ -115,7 +115,7 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  assert.ok(top.max.y<bridge.max.y,'ink-fountain support must remain above the low photo-derived top housing');
  assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
  assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
- assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'DXF_ENVELOPE + USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL');
+ assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL');
  t.dispose();
 });
 
@@ -184,17 +184,17 @@ test('inspection bridge remains above the press housings without inflating the m
  t.dispose();
 });
 
-test('DXF-calibrated dimensional contract expands the machine without distorting module rhythm',()=>{
+test('photo-corrected dimensional contract preserves process order and operator access',()=>{
  const d=OFFSET5_DIMENSIONS,a=offset5DimensionAudit();
- assert.equal(d.structuralBody.length,18.3346);
+ assert.equal(d.structuralBody.length,19.80);
  assert.equal(d.structuralBody.width,3.5367);
- assert.equal(d.serviceInclusive.length,19.3687);
+ assert.equal(d.serviceInclusive.length,20.90);
  assert.equal(d.serviceInclusive.width,4.3801);
- assert.equal(d.repeatedPitch.value,1.37805);
+ assert.equal(d.repeatedPitch.value,1.58);
  assert.equal(OFFSET5_UNIT_CENTERS.length,8);
- for(let i=1;i<OFFSET5_UNIT_CENTERS.length;i++)assert.ok(Math.abs((OFFSET5_UNIT_CENTERS[i]-OFFSET5_UNIT_CENTERS[i-1])-1.37805)<1e-9);
- assert.ok(a.puGap>.37,'repeated PU structural gap should stay open');
- assert.ok(a.pu1ToPU2Gap>.39,'PU1-PU2 structural gap should stay open');
+ for(let i=1;i<OFFSET5_UNIT_CENTERS.length;i++)assert.ok(Math.abs((OFFSET5_UNIT_CENTERS[i]-OFFSET5_UNIT_CENTERS[i-1])-1.58)<1e-9);
+ assert.ok(a.puGap>=.58,'repeated PU access bay should fit the photo-derived landing');
+ assert.ok(a.pu1ToPU2Gap>=.60,'PU1-PU2 access bay should stay open');
  assert.ok(a.feederToBoardGap>-.08,'feeder/register transition overlaps excessively');
  assert.ok(a.boardToPU1Gap>0,'register table and PU1 overlap');
  assert.ok(a.pu8ToCoaterGap>0,'PU8 and coater overlap');
@@ -211,7 +211,7 @@ test('all eight printing-unit frames preserve the calibrated pitch and stay non-
  for(let i=0;i<7;i++){
    const a=new THREE.Box3().setFromObject(t.findNode(`press-${i}-frame`));
    const b=new THREE.Box3().setFromObject(t.findNode(`press-${i+1}-frame`));
-   assert.ok(b.min.x-a.max.x>.35,`PU${i+1}-PU${i+2} frame gap too narrow`);
+   assert.ok(b.min.x-a.max.x>=.57,`PU${i+1}-PU${i+2} frame gap too narrow`);
  }
  t.dispose();
 });

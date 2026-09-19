@@ -126,6 +126,11 @@ for(let unit=1;unit<=8;unit++){
  }
  for(const [key,name,ref] of [['OP','Operator Access Steps',`press-${i}-steps`],['DRIVE','Drive-side Service Step',`press-${i}-drive`]]){
   const pid=`${pu}.STEP.${key}`;add(pid,`${pu}.STEP`,5,'Part',name,{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.12,-.10,key==='DRIVE'?-.30:.30]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${name} · tread / support reference`,{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.05,.05,.08],maintenanceTag:'VISUAL_INSPECTION'});
+  if(key==='OP'&&i<7){
+   add(`${pid}.S2`,pid,6,'Spesifik Part','Lower diamond-plate step',{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.04,-.06,.12],maintenanceTag:'VISUAL_INSPECTION'});
+   add(`${pid}.S3`,pid,6,'Spesifik Part','Middle step & full inter-unit landing',{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.04,.03,.08],maintenanceTag:'VISUAL_INSPECTION'});
+   add(`${pid}.S4`,pid,6,'Spesifik Part','Landing-end guard rail',{meshRefs:[ref],sourceRefs:photo,confidence:CONFIDENCE.PHOTO_VERIFIED,explodeVector:[.04,.10,-.08],maintenanceTag:'VISUAL_INSPECTION'});
+  }
  }
 }
 
