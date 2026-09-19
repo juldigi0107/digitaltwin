@@ -16,7 +16,7 @@ test('runtime hooks required by the 3D application remain available',()=>{
 });
 
 test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v30');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v31');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
@@ -76,7 +76,7 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/offset5-geometry-v30-20260919/);
+  assert.match(sw,/offset5-geometry-v31-20260919/);
   assert.match(app,/template\.ghost\(true,part\)/,'object selection must automatically ghost all non-selected geometry');
   for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });

@@ -33,7 +33,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v30');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v31');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -94,7 +94,7 @@ test('PU1 operator access bay keeps steps clear of covers and PU2',()=>{
  assert.ok(drive.max.x<frame2.min.x,'drive-side PU1 step/cover intrudes into PU2 frame');
  t.dispose();
 });
-test('all seven inter-PU bays retain the photo-matched stairs and add only a full-width footplate',()=>{
+test('all seven inter-PU bays match the broad-step and deep-platform proportions in IMG_1662',()=>{
  const t=new OffsetMachineTemplate();
  for(let i=0;i<7;i++){
   const frameA=new THREE.Box3().setFromObject(t.findNode(`press-${i}-frame`));
@@ -103,8 +103,9 @@ test('all seven inter-PU bays retain the photo-matched stairs and add only a ful
   const landing=new THREE.Box3().setFromObject(t.findNode(`press-${i}-gap-footplate`));
   assert.ok(landing.min.x<=frameA.max.x+.01,`PU${i+1}/PU${i+2} footplate leaves an upstream hole`);
   assert.ok(landing.max.x>=frameB.min.x-.01,`PU${i+1}/PU${i+2} footplate leaves a downstream hole`);
-  assert.ok(stairs.min.y>=.24&&stairs.max.y>=1.50,`PU${i+1}/PU${i+2} original stair elevation changed`);
-  assert.ok(stairs.min.z< -2.0&&stairs.max.z<=-.69,`PU${i+1}/PU${i+2} original stair route changed`);
+  assert.ok(stairs.min.y<=.05&&stairs.max.y>=1.50,`PU${i+1}/PU${i+2} support or far-end rail is incomplete`);
+  assert.ok(stairs.min.z< -2.35&&stairs.max.z<=-.12,`PU${i+1}/PU${i+2} approach-to-platform route is incomplete`);
+  assert.ok(landing.max.z-landing.min.z>=1.17,`PU${i+1}/PU${i+2} main platform is not deep enough`);
  }
  assert.equal(t.findNode('press-7-steps').children.length,0,'PU8 legacy steps must not overlap the dedicated coater access');
  t.dispose();
@@ -143,6 +144,14 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
  assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
  assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'PHOTO_CORRECTED_PU_PITCH + DXF_PLACEMENT_REFERENCE + OEM_PDF_INTERNAL');
+ t.dispose();
+});
+test('mobile low-detail mode removes exposed internal PU mechanisms that look detached',()=>{
+ const t=new OffsetMachineTemplate();t.setLow(true);
+ for(const id of ['press-0-inking-train','press-0-inking-distribution','press-0-dampening-form','press-0-cylinder-train','press-0-gripper-control']){
+  const n=t.findNode(id);assert.ok(n,`missing ${id}`);assert.ok(n.children.length);n.traverse(o=>{if(o.isMesh)assert.equal(o.visible,false,`${id} remains exposed in mobile mode`);});
+ }
+ assert.ok(t.findNode('press-0-top-deck').children.some(o=>o.isMesh&&o.visible),'upper exterior must remain visible');
  t.dispose();
 });
 
