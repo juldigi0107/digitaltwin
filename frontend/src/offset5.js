@@ -258,95 +258,101 @@ export class OffsetMachineTemplate {
   }
   printingUnitInternals(g,i){
     const id=`press-${i}`,label=`PU${i+1}`;
-    const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'];
-    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · cylinder & sheet-transfer reference`,[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
-    // Neutral sectional references stay inside the verified housing envelope.
-    const cylinderSpec=i===0?[
+    const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_1628(2).jpeg'];
+    const oem=['SMCD102_roller_remove_procedure.pdf','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'];
+    const markDetail=mesh=>{if(mesh)mesh.userData.detail=true;return mesh;};
+
+    // Primary cylinder train: functional order only. The service PDF supports the
+    // printing-pressure/register functions, while exact installed cylinder CAD is unavailable.
+    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · plate / blanket / impression / transfer cylinders`,[0,0,0],[0,.12,-.48],photos,'Cylinder order is reconstructed inside the photo-derived housing. Bearer diameters, gear train, pressure setting and angular timing are not engineering dimensions.');
+    const cylinderSpec=[
       ['plate cylinder reference',.215,[.16,1.79,0],'steel'],
       ['blanket cylinder reference',.245,[-.12,1.39,0],'rubber'],
       ['impression cylinder reference',.255,[.16,.95,0],'steel'],
       ['transfer cylinder reference',.225,[-.12,.55,0],'graphite']
-    ]:[
-      ['plate cylinder reference',.215,[.17,1.78,0],'steel'],
-      ['blanket cylinder reference',.245,[-.06,1.42,0],'rubber'],
-      ['impression cylinder reference',.255,[.13,1.02,0],'steel'],
-      ['transfer cylinder reference',.225,[-.10,.66,0],'graphite']
     ];
-    if(i===0)this.root.userData.pu1CylinderLayout=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
+    if(!this.root.userData.printingUnitCylinderLayout)this.root.userData.printingUnitCylinderLayout={};
+    this.root.userData.printingUnitCylinderLayout[`PU${i+1}`]=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
+    if(i===0)this.root.userData.pu1CylinderLayout=this.root.userData.printingUnitCylinderLayout.PU1;
     for(const [name,r,pos,kind] of cylinderSpec){const roller=this.cylinder(cylinders,r,1.52,pos,kind);roller.name=name;}
     for(const z of [-.79,.79]){
-      this.cylinder(cylinders,.285,.035,[i===0?.16:.13,i===0?.95:1.02,z],'graphite');
-      this.cylinder(cylinders,.255,.035,[i===0?-.12:-.10,i===0?.55:.66,z],'graphite');
+      this.cylinder(cylinders,.285,.035,[.16,.95,z],'graphite');
+      this.cylinder(cylinders,.255,.035,[-.12,.55,z],'graphite');
     }
-    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,i===0?1.10:1.16,0],[Math.PI/2,0,Math.PI/2]);
-    path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
-    if(i===0){
-      const impressionGripper=this.group(g,'press-0-impression-gripper','PU1 · impression-cylinder gripper bar, fingers & pads',[0,0,0],[.18,.18,-.58],photos,'Assembly menunjukkan fungsi penjepitan leading edge pada impression cylinder. Jumlah finger, pitch, sudut buka, preload dan phasing aktual belum diverifikasi.');
-      this.cylinder(impressionGripper,.028,1.36,[.13,1.245,0],'steel','z');
-      this.box(impressionGripper,[.07,.055,1.36],[.13,1.21,0],'graphite',.01);
-      for(let n=0;n<8;n++){
-        const z=-.595+n*.17;
-        this.box(impressionGripper,[.12,.025,.050],[.19,1.245,z],'graphite',.007);
-        this.box(impressionGripper,[.055,.014,.070],[.245,1.255,z],'steel',.005);
-        this.cylinder(impressionGripper,.018,.045,[.135,1.275,z],'steel','z');
-      }
-      const control=this.group(g,'press-0-gripper-control','PU1 · gripper cam, follower, lever & spring reference',[0,0,0],[.22,.20,-.72],photos,'Drive-side control train is a functional reference. Cam profile, dwell, spring rate, lubrication point and angular timing are not service data.');
-      this.cylinder(control,.115,.025,[.13,1.02,.815],'graphite','z');
-      this.cylinder(control,.032,.035,[.28,1.08,.82],'steel','z');
-      const lever=this.box(control,[.20,.035,.045],[.22,1.14,.82],'steel',.008);lever.rotation.z=-.52;
-      this.cylinder(control,.024,.055,[.13,1.245,.81],'steel','z');
-      for(const y of [1.18,1.22])this.cylinder(control,.018,.05,[.16,y,.81],'rubber','z');
-    }
+    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),`printing-unit-sheet-path-${i}`,'paper',[.02,1.10,0],[Math.PI/2,0,Math.PI/2]);
+    path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.22;path.material.side=THREE.DoubleSide;path.userData.detail=true;
 
-    const damp=this.group(g,`${id}-dampening`,`${label} · dampening reference`,[0,0,0],[0,.48,-.35],i===0?[...photos,'SMCD102_roller_remove_procedure.pdf']:photos,i===0?'PU1 memakai peta OEM SM/CD102: FEAW 16, ZW 17, pan roller T/18, metering roller DW/19 dan distributor FR. Posisi visual mengikuti sectional reference; setting nip tetap data servis.':'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
+    // Impression-cylinder gripper and drive-side opening control.
+    const impressionGripper=this.group(g,`${id}-impression-gripper`,`${label} · impression-cylinder gripper bar`,[0,0,0],[.18,.18,-.58],photos,'Leading-edge gripper function is represented consistently on all eight units. Finger count/pitch and opening timing remain visual references.');
+    markDetail(this.cylinder(impressionGripper,.028,1.36,[.13,1.245,0],'steel','z'));
+    this.box(impressionGripper,[.07,.055,1.36],[.13,1.21,0],'graphite',.01).userData.detail=true;
+    for(let n=0;n<8;n++){
+      const z=-.595+n*.17;
+      this.box(impressionGripper,[.12,.025,.050],[.19,1.245,z],'graphite',.007).userData.detail=true;
+      this.box(impressionGripper,[.055,.014,.070],[.245,1.255,z],'steel',.005).userData.detail=true;
+    }
+    const control=this.group(g,`${id}-gripper-control`,`${label} · gripper cam / follower reference`,[0,0,0],[.22,.20,-.72],photos,'Drive-side control train is explanatory; cam dwell, spring rate and angular timing are not service values.');
+    markDetail(this.cylinder(control,.115,.025,[.13,1.02,.815],'graphite','z'));
+    markDetail(this.cylinder(control,.032,.035,[.28,1.08,.82],'steel','z'));
+    const lever=this.box(control,[.20,.035,.045],[.22,1.14,.82],'steel',.008);lever.rotation.z=-.52;lever.userData.detail=true;
+
+    // Dampening: OEM SM/CD102 roller designations 16–19 and FR.
+    const damp=this.group(g,`${id}-dampening`,`${label} · Alcolor dampening system`,[0,0,0],[0,.48,-.35],[...photos,...oem],'Roller identities and nominal diameters follow the supplied SM/CD102 roller procedure. Positions are sectional visual coordinates, not nip-setting values.');
     this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
-    if(i!==0){
-      this.cylinder(damp,.092,1.45,[-.12,2.16,0],'rubber');
-      this.cylinder(damp,.072,1.43,[.03,2.27,0],'steel');
-    }
     for(const z of [-.72,.72])this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015);
-    if(i===0){
-      const dampForm=this.group(g,'press-0-dampening-form','PU1 · OEM dampening roller map 16–19 + FR',[0,0,0],[0,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Peta dan diameter roller berasal dari prosedur OEM SM/CD102. Koordinat adalah rekonstruksi sectional non-overlap di dalam housing; bukan koordinat CAD atau nilai penyetelan.');
-      const dampRollers=[
-        ['16','Dampening form roller FEAW',78,[-.11,1.70,0],'rubber'],
-        ['17','Intermediate roller ZW',56,[-.22,1.78,0],'steel'],
-        ['19','Metering roller DW',98,[-.34,1.87,0],'steel'],
-        ['18','Water pan roller T',108,[-.43,2.02,0],'rubber'],
-        ['FR','Dampening distributor FR',85,[-.33,1.70,0],'steel']
-      ];
-      for(const [code,name,diameter,pos,kind] of dampRollers){
-        const roller=this.group(dampForm,`press-0-damp-roller-${code}`,`PU1 · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; model radius is visually scaled and must not be measured as engineering geometry.`);
-        this.cylinder(roller,diameter*.00085,1.38,pos,kind);
-      }
-      const plateClamp=this.group(g,'press-0-plate-clamp','PU1 · plate-cylinder clamp/channel reference',[0,0,0],[.12,.18,.42],photos,'Clamp channel menunjukkan lokasi fungsi pada plate cylinder. Bentuk clamp, torque dan register mechanism aktual tidak diverifikasi.');
-      this.box(plateClamp,[.055,.035,1.34],[.17,1.995,0],'graphite',.008);
-      for(const z of [-.64,.64])this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z');
+    const dampForm=this.group(g,`${id}-dampening-form`,`${label} · dampening roller map 16–19 + FR`,[0,0,0],[0,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM designations: 16/FEAW, 17/ZW, 18/T, 19/DW and FR. Nominal diameters are preserved in metadata and relative visual scaling.');
+    const dampRollers=[
+      ['16','Dampening form roller FEAW',78,[-.11,1.70,0],'rubber'],
+      ['17','Intermediate roller ZW',56,[-.22,1.78,0],'steel'],
+      ['19','Metering roller DW',98,[-.34,1.87,0],'steel'],
+      ['18','Water pan roller T',108,[-.43,2.02,0],'rubber'],
+      ['FR','Dampening distributor FR',85,[-.33,1.70,0],'steel']
+    ];
+    for(const [code,name,diameter,pos,kind] of dampRollers){
+      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; coordinates are visual-only.`);
+      markDetail(this.cylinder(roller,diameter*.00085,1.38,pos,kind));
     }
 
-    const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train reference`,[0,0,0],[0,.68,.25],i===0?[...photos,'SMCD102_roller_remove_procedure.pdf']:photos,i===0?'Roller 1–15 dan distributor A–D mengikuti diagram serta diameter OEM SM/CD102; posisi dalam housing adalah rekonstruksi non-overlap.':'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
-    if(i===0){
-      const rollerMap=[
-        ['13','Inking form roller 4',80,[-.10,1.97,0],'rubber'],['2','Inking form roller 3',66,[.04,2.08,0],'rubber'],['1','Inking form roller 2',72,[.20,2.09,0],'rubber'],['14','Inking form roller 1',60,[.35,2.00,0],'rubber'],
-        ['3','Ink transfer roller',56,[-.11,2.12,0],'steel'],['4','Ink transfer roller',80,[-.23,2.24,0],'rubber'],['5','Ink transfer roller',68,[-.10,2.34,0],'steel'],['6','Ink transfer roller',72,[.04,2.24,0],'rubber'],['7','Ink transfer roller',56,[-.23,2.42,0],'steel'],['8','Ink transfer roller',60,[-.04,2.48,0],'rubber'],['9','Ink transfer roller',66,[.30,2.42,0],'rubber'],['10','Ink transfer roller',56,[.18,2.32,0],'steel'],['11','Ink transfer roller',80,[.33,2.26,0],'rubber'],['12','Ink transfer roller',68,[.43,2.13,0],'steel'],['15','Ink vibrator',59,[-.30,2.55,0],'rubber']
-      ];
-      for(const [code,name,diameter,pos,kind] of rollerMap){
-        const roller=this.group(inking,`press-0-ink-roller-${code}`,`PU1 · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows Fig. 11 topology and is not service-measurable.`);
-        this.cylinder(roller,diameter*.00085,1.40,pos,kind);
-      }
-    }else{
-      for(const [x,y,r,kind] of [[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']])this.cylinder(inking,r,1.44,[x,y,0],kind);
+    const plateClamp=this.group(g,`${id}-plate-clamp`,`${label} · plate-cylinder clamp / AutoPlate reference`,[0,0,0],[.12,.18,.42],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Plate-clamping function is supported by the supplied CD102 manual. Clamp geometry and register setting are not reconstructed as service dimensions.');
+    this.box(plateClamp,[.055,.035,1.34],[.17,1.995,0],'graphite',.008).userData.detail=true;
+    for(const z of [-.64,.64])markDetail(this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z'));
+
+    // Inking: exact designations/nominal diameters from the supplied OEM roller procedure.
+    const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train 1–15`,[0,0,0],[0,.68,.25],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Roller numbers 1–15 and distributor rollers A–D follow the supplied OEM topology. Coordinates are fitted inside the photographed housing without volumetric overlap.');
+    const rollerMap=[
+      ['13','Inking form roller 4',80,[-.10,1.97,0],'rubber'],['2','Inking form roller 3',66,[.04,2.08,0],'rubber'],['1','Inking form roller 2',72,[.20,2.09,0],'rubber'],['14','Inking form roller 1',60,[.35,2.00,0],'rubber'],
+      ['3','Ink transfer roller',56,[-.11,2.12,0],'steel'],['4','Ink transfer roller',80,[-.23,2.24,0],'rubber'],['5','Ink transfer roller',68,[-.10,2.34,0],'steel'],['6','Ink transfer roller',72,[.04,2.24,0],'rubber'],['7','Ink transfer roller',56,[-.23,2.42,0],'steel'],['8','Ink transfer roller',60,[-.04,2.48,0],'rubber'],['9','Ink transfer roller',66,[.30,2.42,0],'rubber'],['10','Ink transfer roller',56,[.18,2.32,0],'steel'],['11','Ink transfer roller',80,[.33,2.26,0],'rubber'],['12','Ink transfer roller',68,[.43,2.13,0],'steel'],['15','Ink vibrator / ductor',59,[-.30,2.55,0],'rubber']
+    ];
+    for(const [code,name,diameter,pos,kind] of rollerMap){
+      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows Fig. 11 topology.`);
+      markDetail(this.cylinder(roller,diameter*.00085,1.40,pos,kind));
     }
     for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
-    if(i===0){
-      const distribution=this.group(g,'press-0-inking-distribution','PU1 · OEM distributor rollers A–D',[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Distributor A–D masing-masing berdiameter nominal 85 mm pada dokumen OEM. Oscillation stroke, journal, bearing dan pressure strip tidak dimodelkan.');
-      for(const [code,pos] of [['A',[-.16,2.60,0]],['B',[.02,2.64,0]],['C',[.20,2.60,0]],['D',[.42,2.58,0]]]){
-        const roller=this.group(distribution,`press-0-ink-distributor-${code}`,`PU1 · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm; visual coordinate is reconstructed from roller diagram.');
-        this.cylinder(roller,.072,1.40,pos,'steel');
-      }
-      for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
+
+    const distribution=this.group(g,`${id}-inking-distribution`,`${label} · distributor rollers A–D`,[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'A–D are 85 mm nominal distributor rollers in the supplied procedure. Oscillation stroke and bearing details are not inferred.');
+    for(const [code,pos] of [['A',[-.16,2.60,0]],['B',[.02,2.64,0]],['C',[.20,2.60,0]],['D',[.42,2.58,0]]]){
+      const roller=this.group(distribution,`${id}-ink-distributor-${code}`,`${label} · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm.');
+      markDetail(this.cylinder(roller,.072,1.40,pos,'steel'));
+    }
+    for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
+
+    // Register drives are located on the operator side in the supplied service manual.
+    const register=this.group(g,`${id}-register-drives`,`${label} · register adjustment drives`,[0,0,0],[.18,.20,.72],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Diagonal, lateral and circumferential register drives are functionally located on the operator side; housings are simplified visual references.');
+    for(const [name,y,z] of [['diagonal',1.38,.90],['lateral',1.15,.92],['circumferential',.92,.90]]){
+      const drive=this.group(register,`${id}-register-${name}`,`${label} · ${name} register drive`,[0,0,0],[.12,.10,.22],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+      this.box(drive,[.16,.16,.10],[.33,y,z],'graphite',.018).userData.detail=true;
+      markDetail(this.cylinder(drive,.030,.10,[.42,y,z],'steel','x'));
     }
 
-    const access=this.group(g,`${id}-service-access`,`${label} · service access & guards`,[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard menandai batas akses operator/drive. Interlock, latch dan titik pelumasan tetap reference-only.');
+    // Washup-device zones are explicitly listed in the supplied service manual.
+    const wash=this.group(g,`${id}-washup`,`${label} · washup device references`,[0,0,0],[.10,.12,-.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Blanket, inking-roller and impression-cylinder washup devices are represented as service zones. Brush geometry and chemical routing are not used as maintenance dimensions.');
+    for(const [name,y,x] of [['blanket',1.47,-.34],['inking',2.28,-.38],['impression',.96,.39]]){
+      const w=this.group(wash,`${id}-wash-${name}`,`${label} · ${name} washup zone`,[0,0,0],[.10,.10,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+      this.box(w,[.08,.10,1.28],[x,y,0],'graphite',.012).userData.detail=true;
+      markDetail(this.cylinder(w,.025,1.20,[x+.05,y-.03,0],'rubber'));
+    }
+
+    const access=this.group(g,`${id}-service-access`,`${label} · service access & guards`,[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard boundaries follow the photographed operator/drive-side access. Interlocks and lubrication points remain reference-only.');
     this.box(access,[.42,.55,.035],[.51,1.47,.73],'black',.018);
     this.box(access,[.42,.55,.035],[.51,1.47,-.73],'black',.018);
     for(const z of [-.75,.75])this.cylinder(access,.027,.24,[.52,1.48,z],'steel','y');
