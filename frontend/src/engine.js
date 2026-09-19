@@ -59,6 +59,21 @@ export class FactoryEngine {
   loadLayout(l){this.clearFactory();this.layout=l;if(!l)return;
     if(Array.isArray(l.referenceBatches)){
       this.layoutStats={total:l.source?.entityCount??l.referenceBatches.length,rendered:0,unimplemented:l.source?.entityCount??0};
+      const profile=l.layout3D;
+      if(profile){
+        const p0=plantDisplayPoint(l.bounds.minX,l.bounds.minY,l),p1=plantDisplayPoint(l.bounds.maxX,l.bounds.maxY,l);
+        const floor=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(p1.x-p0.x),profile.floor.thicknessMeters,Math.abs(p1.z-p0.z)),new THREE.MeshStandardMaterial({color:0xdce4e7,roughness:.96,metalness:0}));
+        floor.position.set((p0.x+p1.x)/2,-profile.floor.thicknessMeters/2,(p0.z+p1.z)/2);floor.receiveShadow=true;floor.name='DXF factory floor';floor.userData={sourceType:'DXF_PLAN_EXTRUSION',semantic:'FLOOR',confidence:profile.floor.confidence,renderStatus:'3D_ASSUMED_HEIGHT'};this.factory.add(floor);
+        const box=new THREE.BoxGeometry(1,1,1),dummy=new THREE.Object3D();
+        for(const spec of [{semantic:'WALL',color:0x8198a3,...profile.wall},{semantic:'COLUMN',color:0x526d7a,...profile.column}]){
+          const segments=[];
+          for(const batch of l.referenceBatches.filter(b=>b.semantic===spec.semantic))for(let i=0;i<batch.points.length;i+=4){const a=plantDisplayPoint(batch.points[i],batch.points[i+1],l),b=plantDisplayPoint(batch.points[i+2],batch.points[i+3],l),dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz);if(len>.02)segments.push({a,b,len,angle:Math.atan2(dz,dx)});}
+          if(!segments.length)continue;
+          const mat=new THREE.MeshStandardMaterial({color:spec.color,roughness:.88,metalness:0}),mesh=new THREE.InstancedMesh(box,mat,segments.length);mesh.name='DXF 3D '+spec.semantic.toLowerCase();mesh.castShadow=!this.low;mesh.receiveShadow=true;
+          segments.forEach((s,i)=>{dummy.position.set((s.a.x+s.b.x)/2,spec.heightMeters/2,(s.a.z+s.b.z)/2);dummy.rotation.set(0,-s.angle,0);dummy.scale.set(s.len,spec.heightMeters,spec.thicknessMeters);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});mesh.instanceMatrix.needsUpdate=true;
+          mesh.userData={sourceType:'DXF_PLAN_EXTRUSION',sourceFile:l.source.file,derivedFile:l.source.derivedFile,semantic:spec.semantic,confidence:'SOURCE_XY_WITH_ASSUMED_HEIGHT',heightMeters:spec.heightMeters,thicknessMeters:spec.thicknessMeters,heightConfidence:spec.heightConfidence,instanceCount:segments.length,renderStatus:'3D'};this.factory.add(mesh);this.layoutStats.rendered+=segments.length;
+        }
+      }
       const colors={CAD_REFERENCE:0x315363,WALL:0x91aab5,COLUMN:0x5f8fa5,WINDOW:0x5aa6c8,SECURITY:0xa58d58};
       for(const batch of l.referenceBatches){
         if(!Array.isArray(batch.points)||batch.points.length<4)continue;

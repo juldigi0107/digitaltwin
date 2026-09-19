@@ -10,7 +10,7 @@ The user explicitly identified the unlabeled eight-unit press footprint shown in
 - Asset: `OFFSET 5`
 - Model: Heidelberg Speedmaster `CD 102-8+L`
 
-This identity-to-footprint mapping is therefore `USER-CONFIRMED`, not a fabricated CAD text label.
+This identity-to-footprint mapping is therefore `USER-CONFIRMED`, not a fabricated CAD text label. On 2026-09-18 the user also supplied `IMG_2405(1).jpeg` with this exact footprint circled beside Room Electrical, confirming the placement anchor itself.
 
 ## CAD evidence at the confirmed footprint
 
@@ -53,9 +53,21 @@ This preserves the established drive/operator handedness without mirroring or mo
 - Three.js/factory X: approximately 18.2972 m from the calibrated layout origin
 - Three.js/factory Z: approximately −60.7183 m from the calibrated layout origin
 - confidence: `USER-CONFIRMED`
+- evidence: user-annotated screenshot `IMG_2405(1).jpeg` cross-checked against the DXF centerline and surrounding Room Electrical / pedestrian-path context
 
 The anchor uses the source centerline rather than the geometric center of the full envelope because the +X service cabinet makes the CAD footprint laterally asymmetric.
 
 ## Geometry safety
 
 This placement phase does not modify `frontend/src/offset5.js`, its taxonomy, feeder, PU1, PU2, gripper system, explode hierarchy, or operator/drive-side geometry. Factory placement is applied only through layout metadata.
+
+## 3D layout extrusion
+
+The factory view now turns the calibrated DXF plan into lightweight 3D geometry:
+
+- `WALL`: 71 source segments, instanced at 3.2 m visual height and 0.14 m visual thickness;
+- `COLUMN`: 67 source segments, instanced at 4.5 m visual height and 0.28 m visual thickness;
+- floor: one slab following the complete calibrated DXF bounds;
+- all original plan linework remains visible at floor level for traceability.
+
+Only XY position and segment length are source-derived. Building heights and thicknesses are tagged `ASSUMED_FOR_VISUALIZATION` because no verified elevation drawing was supplied. The procedural machine remains a separate object and is positioned through its parent transform; its vertices are unchanged.

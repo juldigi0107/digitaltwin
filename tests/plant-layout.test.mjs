@@ -23,10 +23,10 @@ test('metric scale is calibrated from source annotations while header conflict r
   assert.equal(l.transform.calibration.method,'SOURCE_ANNOTATION_CROSSCHECK');
   assert.equal(l.transform.calibration.headerConflict,true);
   assert.equal(l.displayTransform.status,'ENGINEERING_MM_CALIBRATED_WITH_HEADER_CONFLICT');
-  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
-  assert.match(l.positionStatus,/APPROXIMATE/);
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.match(l.positionStatus,/USER-CONFIRMED/);
   assert.equal(l.audit.offset5LabelFound,false);
-  assert.match(l.audit.offset5Placement,/APPROXIMATE/);
+  assert.match(l.audit.offset5Placement,/USER-CONFIRMED/);
 });
 
 test('DXF extraction preserves searchable identified assets without inventing Offset 5',async()=>{
@@ -66,15 +66,15 @@ test('identified CAD labels never promote OFFSET 5 without source evidence',asyn
   assert.ok(l.identifiedLabels.some(x=>x.text==='CX104'));
   assert.ok(l.identifiedLabels.some(x=>x.text==='Polar-115'));
   assert.ok(!l.identifiedLabels.some(x=>/OFFSET\s*5|CD\s*102/i.test(x.text)));
-  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
-  assert.equal(l.machineAnchor.evidenceFile,undefined);
-  assert.equal(l.machineAnchor.matchConfidence,'HIGH CONFIDENCE');
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.equal(l.machineAnchor.evidenceFile,'IMG_2405(1).jpeg');
+  assert.equal(l.machineAnchor.matchConfidence,'USER-CONFIRMED');
 });
 
 
 test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identity stays user-confirmed',async()=>{
   const l=await loadBundledPlantLayout();
-  assert.equal(l.extractionRevision,5);
+  assert.equal(l.extractionRevision,6);
   assert.equal(l.source.layerCount,23);
   assert.equal(l.source.xrefCount,0);
   assert.equal(l.assetCandidates.length,22);
@@ -87,8 +87,8 @@ test('DXF deep-dive overlay preserves source-labelled assets while OFU-1 identit
   assert.equal(l.userConfirmedAssets[0].scope,'IDENTITY_ONLY');
   assert.equal(l.placementCandidates.length,1);
   assert.equal(l.placementCandidates[0].placementConfidence,'HIGH CONFIDENCE');
-  assert.equal(l.machineAnchor.confidence,'APPROXIMATE');
-  assert.match(l.positionStatus,/APPROXIMATE/);
+  assert.equal(l.machineAnchor.confidence,'USER-CONFIRMED');
+  assert.match(l.positionStatus,/USER-CONFIRMED/);
 });
 
 test('printing press source labels keep context but never become inferred footprints',async()=>{
@@ -118,7 +118,7 @@ test('OFU-1 approximate anchor follows the high-confidence CAD geometric match o
   assert.equal(f.assetCode,'OFU-1');
   assert.equal(f.identityConfidence,'USER-CONFIRMED');
   assert.equal(f.placementConfidence,'HIGH CONFIDENCE');
-  assert.equal(a.confidence,'APPROXIMATE');
+  assert.equal(a.confidence,'USER-CONFIRMED');
   assert.equal(a.scaleFitApplied,false);
   assert.equal(f.assetName,'OFFSET 5');
   assert.equal(f.model,'CD 102-8+L');
@@ -179,4 +179,18 @@ test('OFU-1 functional zones remain inference-only and preserve source direction
   assert.ok(byKind.DELIVERY_EXTENSION_CANDIDATE.bounds.maxY<=byKind.REPEATED_PRESS_TRAIN_CANDIDATE.bounds.minY);
   assert.equal(f.feedDirectionCad,'NEGATIVE_Y');
   assert.match(byKind.REPEATED_PRESS_TRAIN_CANDIDATE.note,/not converted into an exact installed printing-unit count/i);
+});
+
+test('factory 3D profile preserves DXF plan geometry and labels unverified elevations',async()=>{
+  const l=await loadBundledPlantLayout();
+  assert.equal(l.layout3D.status,'DXF_PLAN_EXTRUSION');
+  assert.equal(l.layout3D.wall.heightMeters,3.2);
+  assert.equal(l.layout3D.column.heightMeters,4.5);
+  assert.equal(l.layout3D.wall.heightConfidence,'ASSUMED_FOR_VISUALIZATION');
+  assert.equal(l.machineAnchor.evidenceFile,'IMG_2405(1).jpeg');
+  const fs=await import('node:fs/promises');
+  const engine=await fs.readFile(new URL('../frontend/src/engine.js',import.meta.url),'utf8');
+  assert.match(engine,/InstancedMesh/);
+  assert.match(engine,/DXF_PLAN_EXTRUSION/);
+  assert.match(engine,/3D_ASSUMED_HEIGHT/);
 });
