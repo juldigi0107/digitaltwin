@@ -70,7 +70,7 @@ function bindZoomProxy(){
   $('#asset-docs-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="sources"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-pdf-v14';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 EXTERIOR + ACCESS BAY · PHOTO / OEM PDF V14';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-pdf-v15';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 VISUAL TARGET · PHOTO-ALIGNED V15';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{
