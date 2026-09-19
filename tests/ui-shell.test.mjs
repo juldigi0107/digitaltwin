@@ -76,6 +76,6 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/offset5-dimension-v19-20260919/);
+  assert.match(sw,/offset5-runtime-v20-20260919/);
   for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });
