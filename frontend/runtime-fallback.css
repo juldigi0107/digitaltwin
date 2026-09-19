@@ -1,0 +1,25 @@
+.static-machine-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: clamp(16px, 4vw, 48px);
+  background: linear-gradient(145deg, #e8eef2, #cfdbe1);
+  color: #26353d;
+  text-align: center;
+  overflow: auto;
+}
+
+.static-machine-fallback svg {
+  display: block;
+  width: min(100%, 1100px);
+  height: auto;
+  filter: drop-shadow(0 18px 20px rgba(25, 42, 50, .18));
+}
+
+.static-machine-fallback p {
+  max-width: 720px;
+  margin: 12px auto 0;
+  font-size: 12px;
+  font-weight: 650;
+}
