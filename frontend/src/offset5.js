@@ -210,19 +210,17 @@ export class OffsetMachineTemplate {
     this.controls(cover,[i===0?.28:.32,1.43,1.355]);
     this.box(cover,[i===0?.40:.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
     this.box(cover,[i===0?.30:.34,.026,.018],[-.11,1.72,1.36],'black',.005);
-    if(i===0){
-      const top=this.group(g,'press-0-top-deck','PU1 · photo-derived top housing & vent deck',[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg'],'Exterior geometry follows the actual top-view photographs only. The OEM PDFs define roller and service topology, not the outer top-cover shape.');
-      this.box(top,[.68,.065,1.58],[-.05,2.27,0],'graphite',.022);
-      this.box(top,[.58,.018,1.34],[-.05,2.314,0],'black',.006);
-      for(let n=0;n<12;n++)this.box(top,[.50,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
-      const bridge=this.group(g,'press-0-fountain-support','PU1 · ink-fountain support bridge from actual photos',[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Two end supports, pivots and the transverse fountain member follow the real photos. The PDF roller diagram is used only for the internal roller topology below this exterior.');
-      this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
-      this.box(bridge,[.12,.055,1.46],[-.04,2.68,0],'red',.012);
-      for(const z of [-.73,.73]){
-        const arm=this.box(bridge,[.095,.44,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
-        this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
-        this.box(bridge,[.14,.055,.10],[.10,2.66,z],'black',.009);
-      }
+    const top=this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · photo-derived upper housing & vent deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Upper housing follows the actual top/operator-side photos: a low dark deck with a long ventilation field and clear separation from the ink fountain. It is not derived from the roller diagram.');
+    this.box(top,[i===0?.68:.78,.065,1.58],[-.05,2.27,0],'graphite',.022);
+    this.box(top,[i===0?.58:.66,.018,1.34],[-.05,2.314,0],'black',.006);
+    for(let n=0;n<12;n++)this.box(top,[i===0?.50:.58,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
+    const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
+    this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
+    this.box(bridge,[.12,.045,1.46],[-.04,2.67,0],i%3===0?'red':'steel',.010);
+    for(const z of [-.73,.73]){
+      const arm=this.box(bridge,[.095,.38,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
+      this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
+      this.box(bridge,[.14,.055,.10],[.10,2.65,z],'black',.009);
     }
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources,i===0?'PU1 step diposisikan di access bay antara PU1–PU2; tidak menembus cover atau frame. Dimensi tetap visual-only.':'Pijakan mengikuti pola exterior foto; ukuran bukan data engineering.');
     if(i===0){
@@ -247,15 +245,14 @@ export class OffsetMachineTemplate {
       const lip=this.box(ink,[.20,.032,1.52],[-.31,2.52,0],'light');lip.rotation.z=-.30;
       for(const side of [-1,1])this.cylinder(ink,.050,.07,[.18,2.44,side*.79],'steel','z');
     }else{
-      this.box(ink,[.42,.08,1.69],[-.10,2.4,0],'steel',.025);
-      this.cylinder(ink,.105,1.6,[-.08,2.51,0],i===1?'blue':'rubber');
-      const lip=this.box(ink,[.24,.035,1.63],[-.29,2.55,0],'light');lip.rotation.z=-.32;
+      this.box(ink,[.42,.075,1.62],[-.10,2.40,0],'steel',.022);
+      this.cylinder(ink,.098,1.54,[-.08,2.50,0],i===1?'blue':'rubber');
+      const lip=this.box(ink,[.22,.032,1.56],[-.29,2.54,0],'light');lip.rotation.z=-.30;
       for(const side of [-1,1]){
-        this.box(ink,[.08,.4,.075],[.26,2.55,side*.81],'graphite',.018);
-        this.cylinder(ink,.064,.08,[.25,2.48,side*.83],'steel');
+        this.cylinder(ink,.052,.075,[.22,2.45,side*.79],'steel','z');
+        this.box(ink,[.06,.28,.06],[.22,2.50,side*.78],'graphite',.014);
       }
-      this.box(ink,[.26,.10,1.70],[.28,2.8,0],'graphite',.02);
-      this.tube(ink,[[.24,2.62,-.70],[.42,2.5,-.79],[.34,2.37,-.94]],.018);
+      this.tube(ink,[[.20,2.58,-.68],[.34,2.48,-.78],[.30,2.37,-.90]],.014);
     }
     this.printingUnitInternals(g,i);
   }
