@@ -92,3 +92,32 @@ The source linework is divided conservatively into four inference zones without 
 - **Drive-side service strip candidate**: CAD X 123842.0–124592.0 over much of the press length. Its positive-X external strip correlates with the service-heavy drive-side evidence from user photos; exact utilities/cabinet functions remain unverified.
 
 These zones are rendered as separate CAD inference overlays in factory view. They are not added to the OFFSET 5 six-level machine taxonomy and do not modify, scale, or distort the procedural Heidelberg reconstruction.
+
+
+## OFFSET 5 dimensional reconciliation — V19
+
+This later phase intentionally changes the procedural OFFSET 5 model after the user requested that the machine no longer look compressed or tightly packed.
+
+The source hierarchy for dimensional reconstruction is now explicit:
+
+1. The calibrated OFU-1 DXF footprint supplies the outer longitudinal/lateral envelope and the repeated-module pitch.
+2. User photographs supply exterior silhouette, operator-side/drive-side asymmetry, stairs, walkways, feeder, coater/extension and delivery appearance.
+3. The supplied CD102 service manual and roller procedure supply functional subsystem names, roller identity and service relationships.
+4. Public Heidelberg-family technical data is retained only as a reference cross-check and is not treated as serial-specific installation data.
+
+The V19 dimensional contract therefore uses:
+
+- structural body reference: **18.3346 m × 3.5367 m**;
+- service-inclusive reference: **19.3687 m × 4.3801 m**;
+- repeated external-module pitch: **1.37805 m**.
+
+Unlike earlier layout-only passes, V19 applies those three DXF-derived constraints to the detailed procedural machine. It does **not** globally scale all internal components. The eight printing-unit centers are laid out at the source-derived repeated pitch, while feeder, register table, coating, dryer/extension and delivery are distributed inside the structural envelope. Internal roller/cylinder coordinates remain functional/photo-fitted unless a supplied OEM source explicitly provides a dimension.
+
+This prevents two previous failure modes:
+
+- squeezing the eight printing units into an artificially short machine;
+- stretching internal roller/cylinder geometry merely to make the exterior match the CAD footprint.
+
+Operator and drive-side access remain photo-derived within the service-inclusive envelope. The FA-Swan inspection bridge height is photo-derived because the DXF plan does not contain verified elevation data.
+
+The application exposes this distinction to test users: structural/service envelope and repeated pitch are identified as drawing-derived, while unverified internal engineering dimensions remain reference-only.
