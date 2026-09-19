@@ -76,10 +76,12 @@ function bindResponsiveLayout(){
   const sync=()=>{
     const mobile=query.matches;
     document.documentElement.dataset.viewport=mobile?'compact':'wide';
+    document.documentElement.style.setProperty('--app-height',`${window.visualViewport?.height||window.innerHeight}px`);
     if(!mobile)document.body.classList.remove('nav-open','ui-workbench-open','mobile-panel-open');
     requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
   };
   query.addEventListener?.('change',sync);
+  window.visualViewport?.addEventListener('resize',sync,{passive:true});
   window.addEventListener('orientationchange',()=>setTimeout(sync,120),{passive:true});
   sync();
 }
