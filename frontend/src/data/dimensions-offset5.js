@@ -48,7 +48,7 @@ export const OFFSET5_DIMENSIONS=Object.freeze({
     driveWalkwayCenterZ:-1.62,
     driveWalkwayWidth:.64,
     utilityCenterZ:-2.04,
-    platformLength:19.22
+    platformLength:19.3687
   })
 });
 
