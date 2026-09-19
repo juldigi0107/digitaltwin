@@ -8,17 +8,20 @@ import {ORIENTATION} from './data/sources-offset5.js';
 // Eight repeated housings are a reviewable visual arrangement, not verification of
 // the installed unit configuration. No hidden cylinders, gears or part IDs invented.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v16', status: 'PU1 PHOTO EXTERIOR / OEM-PDF INTERNAL TOPOLOGY · GENERATED TARGET REMOVED',
-  dimensionUnit: 'VISUAL_ONLY', installedConfiguration: 'UNVERIFIED',
+  version: 'offset5-photo-pdf-v18',
+  status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
+  dimensionUnit: 'VISUAL_ONLY',
+  installedConfiguration: 'PHOTO_CONFIRMED_CD102_8_PLUS_L',
   repeatedHousings: 8,
-  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg']
+  photos: ['IMG_2312.jpeg','IMG_1970.jpeg','IMG_1971.jpeg','IMG_1656.jpeg','IMG_1624.jpeg','IMG_1625.jpeg','IMG_1626.jpeg','IMG_1627.jpeg','IMG_1628.jpeg','IMG_1628(2).jpeg','IMG_1629.jpeg','IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_1634.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_2388(2).jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg','IMG_2389(1).jpeg','IMG_2390(1).jpeg','IMG_2395.jpeg'],
+  sourcePolicy: 'EXTERIOR_FROM_USER_PHOTOS_INTERNAL_FUNCTION_FROM_OEM_PDF'
 };
 const V=(a)=>new THREE.Vector3(...a);
 
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v2'};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v3'};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();
@@ -131,10 +134,9 @@ export class OffsetMachineTemplate {
     for(let i=0;i<9;i++)this.cylinder(deck,.025,.72,[-6.6+i*1.65,.83,-1.76],'steel','y');
     this.cylinder(deck,.026,13.3,[0,1.15,-1.76],'steel','x');
     this.cylinder(deck,.021,13.3,[0,.88,-1.76],'steel','x');
-    const pu1X=-5.03,pu2X=-4.9+1.23;
-    this.pressUnit(0,pu1X,refUnits);
-    for(let i=1;i<8;i++)this.pressUnit(i,-4.9+i*1.23,refUnits);
-    this.interUnitTransfer((pu1X+pu2X)/2);
+    const unitXs=[-5.03,-3.67,-2.44,-1.21,.02,1.25,2.48,3.71],pu1X=unitXs[0],pu2X=unitXs[1];
+    unitXs.forEach((x,i)=>this.pressUnit(i,x,refUnits));
+    for(let i=0;i<unitXs.length-1;i++)this.interUnitTransfer((unitXs[i]+unitXs[i+1])/2,i);
     this.root.userData.pu1ExteriorLayout=Object.freeze({
       dimensionUnit:'VISUAL_ONLY',pu1CenterX:pu1X,pu2CenterX:pu2X,
       pu1FrameWidth:.92,pu2FrameWidth:1.08,
@@ -181,8 +183,10 @@ export class OffsetMachineTemplate {
     const infeed=this.group(board,'feedboard-infeed-gripper','Infeed gripper bar reference',[0,0,0],[.32,.22,-.45],['IMG_1626.jpeg'],'Gripper bar menunjukkan serah-terima lembar menuju impression zone PU1; jumlah finger, cam dan phasing tidak diverifikasi.');
     this.box(infeed,[.055,.055,1.36],[.49,1.26,0],'steel',.012);
     for(let n=0;n<7;n++){const z=-.60+n*.20;this.box(infeed,[.10,.025,.055],[.52,1.29,z],'graphite',.008);}
-    this.delivery(6.1);
-    this.transfer(4.68);
+    this.coatingUnit(4.70);
+    this.dryerExtension(5.18);
+    this.inspectionBridge(5.38);
+    this.delivery(6.32);
     const utility=this.group(this.root,'drive-utilities','Kabinet utilitas eksternal drive side',[1.9,0,-2.0],[0,.2,-.8],['IMG_2389(1).jpeg','IMG_2395.jpeg'],'Kabinet eksternal dan routing terlihat pada drive side; isi internal tidak dimodelkan.');
     this.box(utility,[1.55,1.68,.40],[0,.86,0],'graphite',.035);
     for(let i=0;i<4;i++)this.tube(utility,[[-.55+i*.22,.08,.18],[-.55+i*.22,.34,.28],[-.42+i*.20,.62,.22]],.018,'rubber');
@@ -206,19 +210,17 @@ export class OffsetMachineTemplate {
     this.controls(cover,[i===0?.28:.32,1.43,1.355]);
     this.box(cover,[i===0?.40:.46,.052,.018],[-.11,1.80,1.36],'graphite',.008);
     this.box(cover,[i===0?.30:.34,.026,.018],[-.11,1.72,1.36],'black',.005);
-    if(i===0){
-      const top=this.group(g,'press-0-top-deck','PU1 · photo-derived top housing & vent deck',[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg'],'Exterior geometry follows the actual top-view photographs only. The OEM PDFs define roller and service topology, not the outer top-cover shape.');
-      this.box(top,[.68,.065,1.58],[-.05,2.27,0],'graphite',.022);
-      this.box(top,[.58,.018,1.34],[-.05,2.314,0],'black',.006);
-      for(let n=0;n<12;n++)this.box(top,[.50,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
-      const bridge=this.group(g,'press-0-fountain-support','PU1 · ink-fountain support bridge from actual photos',[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Two end supports, pivots and the transverse fountain member follow the real photos. The PDF roller diagram is used only for the internal roller topology below this exterior.');
-      this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
-      this.box(bridge,[.12,.055,1.46],[-.04,2.68,0],'red',.012);
-      for(const z of [-.73,.73]){
-        const arm=this.box(bridge,[.095,.44,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
-        this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
-        this.box(bridge,[.14,.055,.10],[.10,2.66,z],'black',.009);
-      }
+    const top=this.group(g,`press-${i}-top-deck`,`${i===0?'PU1':'PU'+(i+1)} · photo-derived upper housing & vent deck`,[0,0,0],[0,.30,.72],['IMG_1628(2).jpeg','IMG_1628.jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Upper housing follows the actual top/operator-side photos: a low dark deck with a long ventilation field and clear separation from the ink fountain. It is not derived from the roller diagram.');
+    this.box(top,[i===0?.68:.78,.065,1.58],[-.05,2.27,0],'graphite',.022);
+    this.box(top,[i===0?.58:.66,.018,1.34],[-.05,2.314,0],'black',.006);
+    for(let n=0;n<12;n++)this.box(top,[i===0?.50:.58,.010,.022],[-.05,2.329,-.55+n*.10],'steel',.003);
+    const bridge=this.group(g,`press-${i}-fountain-support`,`PU${i+1} · ink-fountain support bridge`,[0,0,0],[0,.42,-.55],['IMG_1628(2).jpeg','IMG_1970.jpeg','IMG_1971.jpeg'],'Twin end supports and transverse fountain member follow the photographed external arrangement. Internal roller relationships use the OEM roller map.');
+    this.box(bridge,[.16,.10,1.56],[.02,2.62,0],'graphite',.016);
+    this.box(bridge,[.12,.045,1.46],[-.04,2.67,0],i%3===0?'red':'steel',.010);
+    for(const z of [-.73,.73]){
+      const arm=this.box(bridge,[.095,.38,.075],[.18,2.43,z],'graphite',.015);arm.rotation.z=-.08;
+      this.cylinder(bridge,.050,.080,[.20,2.22,z],'steel','z');
+      this.box(bridge,[.14,.055,.10],[.10,2.65,z],'black',.009);
     }
     const stair=this.group(g,'press-'+i+'-steps','Pijakan antarunit',[0,0,0],[0,.12,1.35],sources,i===0?'PU1 step diposisikan di access bay antara PU1–PU2; tidak menembus cover atau frame. Dimensi tetap visual-only.':'Pijakan mengikuti pola exterior foto; ukuran bukan data engineering.');
     if(i===0){
@@ -243,120 +245,126 @@ export class OffsetMachineTemplate {
       const lip=this.box(ink,[.20,.032,1.52],[-.31,2.52,0],'light');lip.rotation.z=-.30;
       for(const side of [-1,1])this.cylinder(ink,.050,.07,[.18,2.44,side*.79],'steel','z');
     }else{
-      this.box(ink,[.42,.08,1.69],[-.10,2.4,0],'steel',.025);
-      this.cylinder(ink,.105,1.6,[-.08,2.51,0],i===1?'blue':'rubber');
-      const lip=this.box(ink,[.24,.035,1.63],[-.29,2.55,0],'light');lip.rotation.z=-.32;
+      this.box(ink,[.42,.075,1.62],[-.10,2.40,0],'steel',.022);
+      this.cylinder(ink,.098,1.54,[-.08,2.50,0],i===1?'blue':'rubber');
+      const lip=this.box(ink,[.22,.032,1.56],[-.29,2.54,0],'light');lip.rotation.z=-.30;
       for(const side of [-1,1]){
-        this.box(ink,[.08,.4,.075],[.26,2.55,side*.81],'graphite',.018);
-        this.cylinder(ink,.064,.08,[.25,2.48,side*.83],'steel');
+        this.cylinder(ink,.052,.075,[.22,2.45,side*.79],'steel','z');
+        this.box(ink,[.06,.28,.06],[.22,2.50,side*.78],'graphite',.014);
       }
-      this.box(ink,[.26,.10,1.70],[.28,2.8,0],'graphite',.02);
-      this.tube(ink,[[.24,2.62,-.70],[.42,2.5,-.79],[.34,2.37,-.94]],.018);
+      this.tube(ink,[[.20,2.58,-.68],[.34,2.48,-.78],[.30,2.37,-.90]],.014);
     }
-    if(i<=1)this.printingUnitInternals(g,i);
+    this.printingUnitInternals(g,i);
   }
   printingUnitInternals(g,i){
     const id=`press-${i}`,label=`PU${i+1}`;
-    const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg'];
-    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · cylinder & sheet-transfer reference`,[0,0,0],[0,.12,-.48],photos,'Susunan plate, blanket, impression dan transfer merupakan rekonstruksi fungsional untuk inspeksi digital. Diameter, bearer, gear train dan timing belum diverifikasi dari mesin terpasang.');
-    // Neutral sectional references stay inside the verified housing envelope.
-    const cylinderSpec=i===0?[
+    const photos=['IMG_1970.jpeg','IMG_1971.jpeg','IMG_1165.jpeg','IMG_0947.jpeg','IMG_1628(2).jpeg'];
+    const oem=['SMCD102_roller_remove_procedure.pdf','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'];
+    const markDetail=mesh=>{if(mesh)mesh.userData.detail=true;return mesh;};
+
+    // Primary cylinder train: functional order only. The service PDF supports the
+    // printing-pressure/register functions, while exact installed cylinder CAD is unavailable.
+    const cylinders=this.group(g,`${id}-cylinder-train`,`${label} · plate / blanket / impression / transfer cylinders`,[0,0,0],[0,.12,-.48],photos,'Cylinder order is reconstructed inside the photo-derived housing. Bearer diameters, gear train, pressure setting and angular timing are not engineering dimensions.');
+    const cylinderSpec=[
       ['plate cylinder reference',.215,[.16,1.79,0],'steel'],
       ['blanket cylinder reference',.245,[-.12,1.39,0],'rubber'],
       ['impression cylinder reference',.255,[.16,.95,0],'steel'],
       ['transfer cylinder reference',.225,[-.12,.55,0],'graphite']
-    ]:[
-      ['plate cylinder reference',.215,[.17,1.78,0],'steel'],
-      ['blanket cylinder reference',.245,[-.06,1.42,0],'rubber'],
-      ['impression cylinder reference',.255,[.13,1.02,0],'steel'],
-      ['transfer cylinder reference',.225,[-.10,.66,0],'graphite']
     ];
-    if(i===0)this.root.userData.pu1CylinderLayout=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
+    if(!this.root.userData.printingUnitCylinderLayout)this.root.userData.printingUnitCylinderLayout={};
+    this.root.userData.printingUnitCylinderLayout[`PU${i+1}`]=Object.freeze(cylinderSpec.map(([name,r,[x,y,z]])=>Object.freeze({name,radius:r,center:Object.freeze([x,y,z])})));
+    if(i===0)this.root.userData.pu1CylinderLayout=this.root.userData.printingUnitCylinderLayout.PU1;
     for(const [name,r,pos,kind] of cylinderSpec){const roller=this.cylinder(cylinders,r,1.52,pos,kind);roller.name=name;}
     for(const z of [-.79,.79]){
-      this.cylinder(cylinders,.285,.035,[i===0?.16:.13,i===0?.95:1.02,z],'graphite');
-      this.cylinder(cylinders,.255,.035,[i===0?-.12:-.10,i===0?.55:.66,z],'graphite');
+      this.cylinder(cylinders,.285,.035,[.16,.95,z],'graphite');
+      this.cylinder(cylinders,.255,.035,[-.12,.55,z],'graphite');
     }
-    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),'printing-unit-sheet-path','paper',[.02,i===0?1.10:1.16,0],[Math.PI/2,0,Math.PI/2]);
-    path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.28;path.material.side=THREE.DoubleSide;
-    if(i===0){
-      const impressionGripper=this.group(g,'press-0-impression-gripper','PU1 · impression-cylinder gripper bar, fingers & pads',[0,0,0],[.18,.18,-.58],photos,'Assembly menunjukkan fungsi penjepitan leading edge pada impression cylinder. Jumlah finger, pitch, sudut buka, preload dan phasing aktual belum diverifikasi.');
-      this.cylinder(impressionGripper,.028,1.36,[.13,1.245,0],'steel','z');
-      this.box(impressionGripper,[.07,.055,1.36],[.13,1.21,0],'graphite',.01);
-      for(let n=0;n<8;n++){
-        const z=-.595+n*.17;
-        this.box(impressionGripper,[.12,.025,.050],[.19,1.245,z],'graphite',.007);
-        this.box(impressionGripper,[.055,.014,.070],[.245,1.255,z],'steel',.005);
-        this.cylinder(impressionGripper,.018,.045,[.135,1.275,z],'steel','z');
-      }
-      const control=this.group(g,'press-0-gripper-control','PU1 · gripper cam, follower, lever & spring reference',[0,0,0],[.22,.20,-.72],photos,'Drive-side control train is a functional reference. Cam profile, dwell, spring rate, lubrication point and angular timing are not service data.');
-      this.cylinder(control,.115,.025,[.13,1.02,.815],'graphite','z');
-      this.cylinder(control,.032,.035,[.28,1.08,.82],'steel','z');
-      const lever=this.box(control,[.20,.035,.045],[.22,1.14,.82],'steel',.008);lever.rotation.z=-.52;
-      this.cylinder(control,.024,.055,[.13,1.245,.81],'steel','z');
-      for(const y of [1.18,1.22])this.cylinder(control,.018,.05,[.16,y,.81],'rubber','z');
-    }
+    const path=this.mesh(cylinders,()=>new THREE.PlaneGeometry(.78,1.34,1,8),`printing-unit-sheet-path-${i}`,'paper',[.02,1.10,0],[Math.PI/2,0,Math.PI/2]);
+    path.name='sheet path reference';path.material.transparent=true;path.material.opacity=.22;path.material.side=THREE.DoubleSide;path.userData.detail=true;
 
-    const damp=this.group(g,`${id}-dampening`,`${label} · dampening reference`,[0,0,0],[0,.48,-.35],i===0?[...photos,'SMCD102_roller_remove_procedure.pdf']:photos,i===0?'PU1 memakai peta OEM SM/CD102: FEAW 16, ZW 17, pan roller T/18, metering roller DW/19 dan distributor FR. Posisi visual mengikuti sectional reference; setting nip tetap data servis.':'Pan dan roller dampening ditampilkan sebagai referensi fungsi; tipe sistem, jumlah roller dan setelan air/alkohol belum diverifikasi.');
+    // Impression-cylinder gripper and drive-side opening control.
+    const impressionGripper=this.group(g,`${id}-impression-gripper`,`${label} · impression-cylinder gripper bar`,[0,0,0],[.18,.18,-.58],photos,'Leading-edge gripper function is represented consistently on all eight units. Finger count/pitch and opening timing remain visual references.');
+    markDetail(this.cylinder(impressionGripper,.028,1.36,[.13,1.245,0],'steel','z'));
+    this.box(impressionGripper,[.07,.055,1.36],[.13,1.21,0],'graphite',.01).userData.detail=true;
+    for(let n=0;n<8;n++){
+      const z=-.595+n*.17;
+      this.box(impressionGripper,[.12,.025,.050],[.19,1.245,z],'graphite',.007).userData.detail=true;
+      this.box(impressionGripper,[.055,.014,.070],[.245,1.255,z],'steel',.005).userData.detail=true;
+    }
+    const control=this.group(g,`${id}-gripper-control`,`${label} · gripper cam / follower reference`,[0,0,0],[.22,.20,-.72],photos,'Drive-side control train is explanatory; cam dwell, spring rate and angular timing are not service values.');
+    markDetail(this.cylinder(control,.115,.025,[.13,1.02,.815],'graphite','z'));
+    markDetail(this.cylinder(control,.032,.035,[.28,1.08,.82],'steel','z'));
+    const lever=this.box(control,[.20,.035,.045],[.22,1.14,.82],'steel',.008);lever.rotation.z=-.52;lever.userData.detail=true;
+
+    // Dampening: OEM SM/CD102 roller designations 16–19 and FR.
+    const damp=this.group(g,`${id}-dampening`,`${label} · Alcolor dampening system`,[0,0,0],[0,.48,-.35],[...photos,...oem],'Roller identities and nominal diameters follow the supplied SM/CD102 roller procedure. Positions are sectional visual coordinates, not nip-setting values.');
     this.box(damp,[.34,.075,1.50],[-.22,2.06,0],'steel',.025);
-    if(i!==0){
-      this.cylinder(damp,.092,1.45,[-.12,2.16,0],'rubber');
-      this.cylinder(damp,.072,1.43,[.03,2.27,0],'steel');
-    }
     for(const z of [-.72,.72])this.box(damp,[.18,.28,.06],[-.10,2.17,z],'graphite',.015);
-    if(i===0){
-      const dampForm=this.group(g,'press-0-dampening-form','PU1 · OEM dampening roller map 16–19 + FR',[0,0,0],[0,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Peta dan diameter roller berasal dari prosedur OEM SM/CD102. Koordinat adalah rekonstruksi sectional non-overlap di dalam housing; bukan koordinat CAD atau nilai penyetelan.');
-      const dampRollers=[
-        ['16','Dampening form roller FEAW',78,[-.11,1.70,0],'rubber'],
-        ['17','Intermediate roller ZW',56,[-.22,1.78,0],'steel'],
-        ['19','Metering roller DW',98,[-.34,1.87,0],'steel'],
-        ['18','Water pan roller T',108,[-.43,2.02,0],'rubber'],
-        ['FR','Dampening distributor FR',85,[-.33,1.70,0],'steel']
-      ];
-      for(const [code,name,diameter,pos,kind] of dampRollers){
-        const roller=this.group(dampForm,`press-0-damp-roller-${code}`,`PU1 · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; model radius is visually scaled and must not be measured as engineering geometry.`);
-        this.cylinder(roller,diameter*.00085,1.38,pos,kind);
-      }
-      const plateClamp=this.group(g,'press-0-plate-clamp','PU1 · plate-cylinder clamp/channel reference',[0,0,0],[.12,.18,.42],photos,'Clamp channel menunjukkan lokasi fungsi pada plate cylinder. Bentuk clamp, torque dan register mechanism aktual tidak diverifikasi.');
-      this.box(plateClamp,[.055,.035,1.34],[.17,1.995,0],'graphite',.008);
-      for(const z of [-.64,.64])this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z');
+    const dampForm=this.group(g,`${id}-dampening-form`,`${label} · dampening roller map 16–19 + FR`,[0,0,0],[0,.46,-.28],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM designations: 16/FEAW, 17/ZW, 18/T, 19/DW and FR. Nominal diameters are preserved in metadata and relative visual scaling.');
+    const dampRollers=[
+      ['16','Dampening form roller FEAW',78,[-.11,1.70,0],'rubber'],
+      ['17','Intermediate roller ZW',56,[-.22,1.78,0],'steel'],
+      ['19','Metering roller DW',98,[-.34,1.87,0],'steel'],
+      ['18','Water pan roller T',108,[-.43,2.02,0],'rubber'],
+      ['FR','Dampening distributor FR',85,[-.33,1.70,0],'steel']
+    ];
+    for(const [code,name,diameter,pos,kind] of dampRollers){
+      const roller=this.group(dampForm,`${id}-damp-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.18,-.24],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; coordinates are visual-only.`);
+      markDetail(this.cylinder(roller,diameter*.00085,1.38,pos,kind));
     }
 
-    const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train reference`,[0,0,0],[0,.68,.25],i===0?[...photos,'SMCD102_roller_remove_procedure.pdf']:photos,i===0?'Roller 1–15 dan distributor A–D mengikuti diagram serta diameter OEM SM/CD102; posisi dalam housing adalah rekonstruksi non-overlap.':'Roller train melengkapi fountain yang terlihat pada foto. Jumlah, diameter, pressure strip dan osilasi merupakan visual reference, bukan data servis.');
-    if(i===0){
-      const rollerMap=[
-        ['13','Inking form roller 4',80,[-.10,1.97,0],'rubber'],['2','Inking form roller 3',66,[.04,2.08,0],'rubber'],['1','Inking form roller 2',72,[.20,2.09,0],'rubber'],['14','Inking form roller 1',60,[.35,2.00,0],'rubber'],
-        ['3','Ink transfer roller',56,[-.11,2.12,0],'steel'],['4','Ink transfer roller',80,[-.23,2.24,0],'rubber'],['5','Ink transfer roller',68,[-.10,2.34,0],'steel'],['6','Ink transfer roller',72,[.04,2.24,0],'rubber'],['7','Ink transfer roller',56,[-.23,2.42,0],'steel'],['8','Ink transfer roller',60,[-.04,2.48,0],'rubber'],['9','Ink transfer roller',66,[.30,2.42,0],'rubber'],['10','Ink transfer roller',56,[.18,2.32,0],'steel'],['11','Ink transfer roller',80,[.33,2.26,0],'rubber'],['12','Ink transfer roller',68,[.43,2.13,0],'steel'],['15','Ink vibrator',59,[-.30,2.55,0],'rubber']
-      ];
-      for(const [code,name,diameter,pos,kind] of rollerMap){
-        const roller=this.group(inking,`press-0-ink-roller-${code}`,`PU1 · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows Fig. 11 topology and is not service-measurable.`);
-        this.cylinder(roller,diameter*.00085,1.40,pos,kind);
-      }
-    }else{
-      for(const [x,y,r,kind] of [[-.18,2.35,.105,'rubber'],[-.02,2.25,.085,'steel'],[.14,2.15,.095,'rubber'],[.20,1.98,.075,'steel'],[.04,1.91,.082,'rubber']])this.cylinder(inking,r,1.44,[x,y,0],kind);
+    const plateClamp=this.group(g,`${id}-plate-clamp`,`${label} · plate-cylinder clamp / AutoPlate reference`,[0,0,0],[.12,.18,.42],[...photos,'pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Plate-clamping function is supported by the supplied CD102 manual. Clamp geometry and register setting are not reconstructed as service dimensions.');
+    this.box(plateClamp,[.055,.035,1.34],[.17,1.995,0],'graphite',.008).userData.detail=true;
+    for(const z of [-.64,.64])markDetail(this.cylinder(plateClamp,.042,.035,[.17,1.99,z],'steel','z'));
+
+    // Inking: exact designations/nominal diameters from the supplied OEM roller procedure.
+    const inking=this.group(g,`${id}-inking-train`,`${label} · inking roller train 1–15`,[0,0,0],[0,.68,.25],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Roller numbers 1–15 and distributor rollers A–D follow the supplied OEM topology. Coordinates are fitted inside the photographed housing without volumetric overlap.');
+    const rollerMap=[
+      ['13','Inking form roller 4',80,[-.10,1.97,0],'rubber'],['2','Inking form roller 3',66,[.04,2.08,0],'rubber'],['1','Inking form roller 2',72,[.20,2.09,0],'rubber'],['14','Inking form roller 1',60,[.35,2.00,0],'rubber'],
+      ['3','Ink transfer roller',56,[-.11,2.12,0],'steel'],['4','Ink transfer roller',80,[-.23,2.24,0],'rubber'],['5','Ink transfer roller',68,[-.10,2.34,0],'steel'],['6','Ink transfer roller',72,[.04,2.24,0],'rubber'],['7','Ink transfer roller',56,[-.23,2.42,0],'steel'],['8','Ink transfer roller',60,[-.04,2.48,0],'rubber'],['9','Ink transfer roller',66,[.30,2.42,0],'rubber'],['10','Ink transfer roller',56,[.18,2.32,0],'steel'],['11','Ink transfer roller',80,[.33,2.26,0],'rubber'],['12','Ink transfer roller',68,[.43,2.13,0],'steel'],['15','Ink vibrator / ductor',59,[-.30,2.55,0],'rubber']
+    ];
+    for(const [code,name,diameter,pos,kind] of rollerMap){
+      const roller=this.group(inking,`${id}-ink-roller-${code}`,`${label} · ${code} ${name}`,[0,0,0],[0,.22,.20],[...photos,'SMCD102_roller_remove_procedure.pdf'],`OEM nominal diameter ${diameter} mm; visual position follows Fig. 11 topology.`);
+      markDetail(this.cylinder(roller,diameter*.00085,1.40,pos,kind));
     }
     for(const z of [-.75,.75])this.box(inking,[.48,.42,.055],[.03,2.14,z],'graphite',.018);
-    if(i===0){
-      const distribution=this.group(g,'press-0-inking-distribution','PU1 · OEM distributor rollers A–D',[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'Distributor A–D masing-masing berdiameter nominal 85 mm pada dokumen OEM. Oscillation stroke, journal, bearing dan pressure strip tidak dimodelkan.');
-      for(const [code,pos] of [['A',[-.16,2.60,0]],['B',[.02,2.64,0]],['C',[.20,2.60,0]],['D',[.42,2.58,0]]]){
-        const roller=this.group(distribution,`press-0-ink-distributor-${code}`,`PU1 · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm; visual coordinate is reconstructed from roller diagram.');
-        this.cylinder(roller,.072,1.40,pos,'steel');
-      }
-      for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
+
+    const distribution=this.group(g,`${id}-inking-distribution`,`${label} · distributor rollers A–D`,[0,0,0],[0,.62,.22],[...photos,'SMCD102_roller_remove_procedure.pdf'],'A–D are 85 mm nominal distributor rollers in the supplied procedure. Oscillation stroke and bearing details are not inferred.');
+    for(const [code,pos] of [['A',[-.16,2.60,0]],['B',[.02,2.64,0]],['C',[.20,2.60,0]],['D',[.42,2.58,0]]]){
+      const roller=this.group(distribution,`${id}-ink-distributor-${code}`,`${label} · Distributor ${code}`,[0,0,0],[0,.20,.18],[...photos,'SMCD102_roller_remove_procedure.pdf'],'OEM nominal diameter 85 mm.');
+      markDetail(this.cylinder(roller,.072,1.40,pos,'steel'));
+    }
+    for(const z of [-.68,.68])this.box(distribution,[.38,.30,.045],[-.01,2.10,z],'graphite',.012);
+
+    // Register drives are located on the operator side in the supplied service manual.
+    const register=this.group(g,`${id}-register-drives`,`${label} · register adjustment drives`,[0,0,0],[.18,.20,.72],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Diagonal, lateral and circumferential register drives are functionally located on the operator side; housings are simplified visual references.');
+    for(const [name,y,z] of [['diagonal',1.38,.90],['lateral',1.15,.92],['circumferential',.92,.90]]){
+      const drive=this.group(register,`${id}-register-${name}`,`${label} · ${name} register drive`,[0,0,0],[.12,.10,.22],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+      this.box(drive,[.16,.16,.10],[.33,y,z],'graphite',.018).userData.detail=true;
+      markDetail(this.cylinder(drive,.030,.10,[.42,y,z],'steel','x'));
     }
 
-    const access=this.group(g,`${id}-service-access`,`${label} · service access & guards`,[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard menandai batas akses operator/drive. Interlock, latch dan titik pelumasan tetap reference-only.');
+    // Washup-device zones are explicitly listed in the supplied service manual.
+    const wash=this.group(g,`${id}-washup`,`${label} · washup device references`,[0,0,0],[.10,.12,-.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Blanket, inking-roller and impression-cylinder washup devices are represented as service zones. Brush geometry and chemical routing are not used as maintenance dimensions.');
+    for(const [name,y,x] of [['blanket',1.47,-.34],['inking',2.28,-.38],['impression',.96,.39]]){
+      const w=this.group(wash,`${id}-wash-${name}`,`${label} · ${name} washup zone`,[0,0,0],[.10,.10,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);
+      this.box(w,[.08,.10,1.28],[x,y,0],'graphite',.012).userData.detail=true;
+      markDetail(this.cylinder(w,.025,1.20,[x+.05,y-.03,0],'rubber'));
+    }
+
+    const access=this.group(g,`${id}-service-access`,`${label} · service access & guards`,[0,0,0],[.20,.15,.70],['IMG_1627.jpeg','IMG_1628.jpeg','IMG_2389(1).jpeg'],'Guard boundaries follow the photographed operator/drive-side access. Interlocks and lubrication points remain reference-only.');
     this.box(access,[.42,.55,.035],[.51,1.47,.73],'black',.018);
     this.box(access,[.42,.55,.035],[.51,1.47,-.73],'black',.018);
     for(const z of [-.75,.75])this.cylinder(access,.027,.24,[.52,1.48,z],'steel','y');
   }
-  interUnitTransfer(x){
+  interUnitTransfer(x,index=0){
     const photos=['IMG_1165.jpeg','IMG_0947.jpeg','IMG_1627.jpeg','IMG_1628.jpeg'];
-    const transfer=this.group(this.root,'transfer-pu1-pu2','PU1 → PU2 · inter-unit sheet transfer',[x,0,0],[0,.25,-.65],photos,'Lokasi transfer mengikuti celah antar-housing. Diameter drum, cam profile, gripper timing dan preload tidak boleh dipakai sebagai data penyetelan.');
+    const from=index+1,to=index+2,base=`transfer-pu${from}-pu${to}`;
+    const transfer=this.group(this.root,base,`PU${from} → PU${to} · inter-unit sheet transfer`,[x,0,0],[0,.25,-.65],photos,'Transfer drum dan sheet-guide ditempatkan pada setiap celah printing unit. Diameter, cam profile, gripper timing dan preload tetap reference-only.');
     this.cylinder(transfer,.235,1.48,[0,.70,0],'graphite');
     for(const z of [-.76,.76])this.cylinder(transfer,.258,.035,[0,.70,z],'steel');
     for(const a of [-.16,.16]){
-      const bar=this.group(transfer,`transfer-pu1-pu2-gripper-${a<0?'a':'b'}`,`Gripper bar ${a<0?'A':'B'} · visual reference`,[0,0,0],[a<0?-.35:.35,.18,0],photos,'Gripper bar dan fingers adalah representasi inspeksi. Pitch, jumlah aktual, spring force dan phasing belum diverifikasi.');
+      const bar=this.group(transfer,`${base}-gripper-${a<0?'a':'b'}`,`Gripper bar ${a<0?'A':'B'} · visual reference`,[0,0,0],[a<0?-.35:.35,.18,0],photos,'Gripper bar dan fingers adalah representasi inspeksi. Pitch, jumlah aktual, spring force dan phasing belum diverifikasi.');
       this.box(bar,[.055,.055,1.38],[a,.91,0],'steel',.012);
       for(let n=0;n<7;n++){
         const z=-.60+n*.20;
@@ -366,18 +374,18 @@ export class OffsetMachineTemplate {
       }
       for(const z of [-.69,.69])this.box(bar,[.11,.13,.05],[a,.90,z],'graphite',.01);
     }
-    const shaft=this.group(transfer,'transfer-pu1-pu2-gripper-shaft','PU1 → PU2 · gripper shaft, supports & return-spring reference',[0,0,0],[0,.22,-.52],photos,'Shaft and spring reference completes the visible gripper kinematic chain; torsion, preload, bearing and material specification remain unverified.');
+    const shaft=this.group(transfer,`${base}-gripper-shaft`,'PU1 → PU2 · gripper shaft, supports & return-spring reference',[0,0,0],[0,.22,-.52],photos,'Shaft and spring reference completes the visible gripper kinematic chain; torsion, preload, bearing and material specification remain unverified.');
     this.cylinder(shaft,.030,1.42,[0,.895,0],'steel','z');
     for(const z of [-.72,.72]){this.cylinder(shaft,.066,.055,[0,.895,z],'graphite','z');this.cylinder(shaft,.025,.085,[.08,.87,z],'steel','z');}
-    const cam=this.group(transfer,'transfer-pu1-pu2-gripper-cam','PU1 → PU2 · opening cam, follower & lever reference',[0,0,0],[.28,.20,-.72],photos,'Cam-control geometry is explanatory only. Opening/closing angle, dwell and synchronization with PU1/PU2 are not measured.');
+    const cam=this.group(transfer,`${base}-gripper-cam`,'PU1 → PU2 · opening cam, follower & lever reference',[0,0,0],[.28,.20,-.72],photos,'Cam-control geometry is explanatory only. Opening/closing angle, dwell and synchronization with PU1/PU2 are not measured.');
     this.cylinder(cam,.125,.025,[0,.70,.815],'graphite','z');
     this.cylinder(cam,.036,.04,[.16,.80,.82],'steel','z');
     const camLever=this.box(cam,[.22,.040,.050],[.10,.84,.82],'steel',.008);camLever.rotation.z=.62;
-    const guide=this.group(transfer,'transfer-pu1-pu2-guide','PU1 → PU2 · sheet guide reference',[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
+    const guide=this.group(transfer,`${base}-guide`,'PU1 → PU2 · sheet guide reference',[0,0,0],[0,.15,.45],photos,'Guide arc menunjukkan lintasan lembar konseptual; clearance aktual terhadap sheet dan drum tidak terukur.');
     const arc=new THREE.CatmullRomCurve3([[-.42,.78,-.66],[-.18,.96,-.66],[.18,.96,-.66],[.42,.78,-.66]].map(V));
-    this.mesh(guide,()=>new THREE.TubeGeometry(arc,20,.018,6,false),'pu1-pu2-guide-arc','steel',[0,0,0]);
+    this.mesh(guide,()=>new THREE.TubeGeometry(arc,20,.018,6,false),`interunit-guide-arc-${index}`,'steel',[0,0,0]);
     const arc2=arc.clone();arc2.points=arc.points.map(p=>new THREE.Vector3(p.x,p.y,.66));
-    this.mesh(guide,()=>new THREE.TubeGeometry(arc2,20,.018,6,false),'pu1-pu2-guide-arc-2','steel',[0,0,0]);
+    this.mesh(guide,()=>new THREE.TubeGeometry(arc2,20,.018,6,false),`interunit-guide-arc-2-${index}`,'steel',[0,0,0]);
   }
   feeder(x){
     const g=this.group(this.root,'feeder','Feeder · rangka terbuka',[x,0,0],[-1.6,0,0],['IMG_1624.jpeg','IMG_1625.jpeg']);
@@ -417,41 +425,119 @@ export class OffsetMachineTemplate {
       const drive=this.group(feederDrives,`feeder-drive-${code.toLowerCase()}`,`Feeder drive ${code}`,[0,0,0],[-.18,.18,pos[2]<0?-.35:.35],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],`${code} diidentifikasi pada manual OEM; geometri housing adalah reference-only.`);
       this.box(drive,[.16,.18,.12],pos,'graphite',.018);this.cylinder(drive,.034,.10,[pos[0]+.10,pos[1],pos[2]],'graphite','x');
     }
+    const centering=this.group(g,'feeder-pile-centering','Pile centering sensor & support reference',[0,0,0],[-.40,.18,.62],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'11B10 senses the lateral pile edge and 11M9 corrects pile position. The manual states a required distance of 130 ± 2 mm and sensor position about 25 mm below the upper pile edge; values are metadata, not model scale.');
+    this.box(centering,[.12,.22,.08],[-.48,1.24,.80],'graphite',.012);
+    this.cylinder(centering,.022,.08,[-.40,1.24,.80],'glass','x');
+    this.box(centering,[1.18,.055,1.58],[0,.20,0],'steel',.010);
+    const limits=this.group(g,'feeder-pile-limit-sensors','Pile-height / limit sensors',[0,0,0],[-.35,.16,-.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Upper main-pile limitation, auxiliary-pile detection and bottom limitation are represented as sensor locations only.');
+    for(const [name,y,z] of [['upper',1.30,-.86],['auxiliary',.82,-.86],['bottom',.28,-.86]]){const sn=this.group(limits,`feeder-limit-${name}`,`Feeder ${name} pile sensor`,[0,0,0],[-.12,.08,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.10,.08,.06],[-.60,y,z],'graphite',.010);}
+    const nonstop=this.group(g,'feeder-nonstop','Non-stop / auxiliary pile support reference',[0,0,0],[-.55,.15,0],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The supplied manual describes main/auxiliary pile control on NON-STOP feeders. Installed rake configuration is represented conservatively.');
+    for(const z of [-.62,-.31,0,.31,.62])this.box(nonstop,[.55,.035,.035],[-.34,.44,z],'steel',.006);
+    this.box(nonstop,[.08,.44,1.42],[-.64,.57,0],'graphite',.012);
+    const monitoring=this.group(g,'feeder-sheet-monitoring','Sheet arrival & double-sheet monitoring',[0,0,0],[-.15,.28,.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Sheet-arrival monitoring and double-sheet detection are explicitly documented. Four detector heads are shown as a functional reference following Heidelberg product information.');
+    for(const z of [-.54,-.18,.18,.54]){this.box(monitoring,[.10,.10,.08],[.36,1.56,z],'black',.014);this.cylinder(monitoring,.018,.04,[.42,1.52,z],'glass','x');}
     const panel=this.group(g,'feeder-panel','Meja kontrol feeder',[0,0,0],[0,0,.8],['IMG_1624.jpeg']);
     this.box(panel,[1.22,.64,.3],[.1,.61,1.13],'graphite',.04);
     const desk=this.box(panel,[1.3,.075,.45],[.1,.99,1.17],'light',.035);desk.rotation.x=.12;
     for(let i=0;i<5;i++)this.cylinder(panel,.025,.028,[-.30+i*.12,1.047,1.23],i===0?'red':'black','y');
   }
-  transfer(x){
-    const g=this.group(this.root,'transfer','Coating / inspeksi menuju delivery',[x,0,0],[.8,.25,0],['IMG_1629.jpeg','IMG_1630.jpeg'],'Hood, platform dan gantry direkonstruksi dari foto; fungsi internal serta spesifikasi inspeksi tidak diverifikasi.');
-    this.box(g,[1.62,1.0,2.08],[0,.78,0],'graphite',.04);
-    this.box(g,[1.5,.075,1.78],[0,1.32,0],'black',.02);
-    for(let i=0;i<5;i++)this.cylinder(g,.032,1.78,[-.6+i*.3,1.38,0]);
-    const hood=this.box(g,[1.48,.18,1.96],[.05,1.58,0],'light',.04);hood.rotation.z=-.22;
-    for(const z of [-.97,.97])this.box(g,[.12,1.16,.13],[-.12,1.99,z],'light',.018);
-    const beam=this.box(g,[.18,.15,2.07],[-.12,2.6,0],'light',.025);beam.rotation.x=-.08;
-    for(const z of [-.55,.55]){this.box(g,[.30,.22,.34],[-.12,2.43,z],'graphite',.045);this.cylinder(g,.052,.035,[-.22,2.39,z],'glass','x');}
-    this.box(g,[.52,.48,.42],[.52,1.88,.78],'black',.025);
+  coatingUnit(x){
+    const photos=['IMG_1629.jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg'];
+    const g=this.group(this.root,'coater','Coating unit · housing & chamber reference',[x,0,0],[.8,.25,0],photos,'Exterior follows the photographed transition after PU8. Chamber-blade/coating-cylinder functions follow Heidelberg CD102 product information; exact installed roller diameters and coating settings are not inferred.');
+    const frame=this.group(g,'coater-frame','Coating unit side frames',[0,0,0],[.25,.15,-.55],photos);
+    this.box(frame,[1.15,.42,2.02],[0,.49,0],'black',.035);
+    for(const z of [-1.03,1.03])this.box(frame,[.98,1.55,.24],[0,1.42,z],'graphite',.035);
+    this.box(frame,[.98,.20,1.92],[0,2.22,0],'graphite',.04);
+    const op=this.group(g,'coater-operator-cover','Coater operator-side silver cover',[0,0,0],[.15,.20,1.0],photos);
+    this.shell(op,[.02,.48,1.13],.82,1.88,.35,1);
+    this.tread(op,[.42,.09,.46],[.53,.77,1.42]);
+    this.tread(op,[.37,.09,.37],[.53,1.03,1.34]);
+    const chamber=this.group(g,'coater-chamber','Chamber blade & coating roller functional reference',[0,0,0],[0,.62,-.20],['IMG_1629.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The chamber-blade system is supported by Heidelberg product information. Geometry is functional/sectional only.');
+    this.box(chamber,[.38,.12,1.55],[-.14,2.02,0],'graphite',.018);
+    this.cylinder(chamber,.115,1.46,[-.02,1.80,0],'steel');
+    this.cylinder(chamber,.235,1.48,[.10,1.48,0],'rubber');
+    this.cylinder(chamber,.255,1.50,[-.08,1.06,0],'steel');
+    const blade=this.box(chamber,[.11,.06,1.48],[-.20,1.90,0],'light',.012);blade.rotation.z=-.18;
+    const service=this.group(g,'coater-service','Coater drive-side service panel',[0,0,0],[.10,.15,-1.1],['IMG_2389(1).jpeg','IMG_2390(1).jpeg']);
+    this.box(service,[.88,1.48,.20],[0,1.35,-1.12],'graphite',.028);
+    this.grille(service,[.02,1.54,-1.235],.64,.34,'z');
+    this.tube(service,[[.25,.65,-1.23],[.39,.42,-1.32],[.31,.18,-1.43]],.022,'rubber');
+  }
+  dryerExtension(x){
+    const photos=['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'];
+    const g=this.group(this.root,'dryer-extension','Dryer / extension deck',[x,0,0],[.8,.25,0],photos,'The sloped hood and long checker-plate deck are taken from the actual machine photos. Dryer internals are represented only as functional zones; lamp type and installed configuration are not asserted.');
+    this.box(g,[1.18,.92,2.02],[0,.72,0],'graphite',.035);
+    this.tread(g,[1.28,.09,1.94],[0,1.23,0]);
+    const hood=this.group(g,'dryer-hood','Sloped dryer / extension hood',[0,0,0],[.35,.55,0],photos);
+    const h1=this.box(hood,[1.02,.18,1.92],[-.08,1.64,0],'graphite',.028);h1.rotation.z=-.36;
+    const h2=this.box(hood,[.62,.16,1.92],[.36,1.86,0],'graphite',.025);h2.rotation.z=-.12;
+    for(const z of [-.78,0,.78])this.box(hood,[.32,.035,.22],[.08,1.84,z],'black',.008);
+    const lamps=this.group(g,'dryer-modules','Dryer module / airflow references',[0,0,0],[0,.58,-.25],photos,'Short-distance dryer function is supported by Heidelberg product information; visible hood only is photo-confirmed.');
+    for(const x0 of [-.32,0,.32]){this.box(lamps,[.24,.08,1.40],[x0,1.48,0],'light',.012);this.box(lamps,[.18,.025,1.30],[x0,1.42,0],'red',.006);}
+    const path=this.group(g,'dryer-sheet-path','Sheet transport through extension',[0,0,0],[.35,.20,0],photos);
+    for(const x0 of [-.45,-.15,.15,.45])this.cylinder(path,.035,1.42,[x0,1.29,0],'steel');
+  }
+  inspectionBridge(x){
+    const photos=['IMG_1630.jpeg','IMG_1631.jpeg','IMG_1633.jpeg','IMG_2391(1).jpeg'];
+    const g=this.group(this.root,'inspection-bridge','FA-Swan inline inspection bridge',[x,0,0],[.25,.85,0],photos,'Bridge proportions and camera pods follow the actual Focusight/AVT installation visible on Offset 5. Optical specifications and calibration are not inferred.');
+    for(const z of [-.86,.86]){
+      this.box(g,[.16,1.48,.18],[0,1.98,z],'light',.025);
+      this.box(g,[.23,.12,.28],[0,1.25,z],'graphite',.018);
+    }
+    this.box(g,[.18,.16,1.90],[0,2.72,0],'graphite',.024);
+    this.box(g,[.12,.05,1.70],[.01,2.64,0],'light',.014);
+    for(const z of [-.50,.50]){
+      const pod=this.group(g,`inspection-camera-${z<0?'a':'b'}`,`Inspection camera pod ${z<0?'A':'B'}`,[0,0,0],[0,.30,z<0?-.45:.45],photos);
+      const box=this.box(pod,[.32,.24,.34],[.05,2.88,z],'graphite',.035);box.rotation.z=-.15;
+      this.cylinder(pod,.065,.04,[-.08,2.80,z],'glass','x');
+      this.box(pod,[.20,.035,.24],[.10,2.98,z],'steel',.008);
+    }
+    const lights=this.group(g,'inspection-lighting','Inspection lighting bars',[0,0,0],[0,.25,.45],photos);
+    for(const z of [-.42,.42])this.box(lights,[.36,.045,.28],[-.02,2.55,z],'light',.008);
+    const control=this.group(g,'inspection-control','Inspection support / control enclosure',[0,0,0],[.20,.18,.55],photos);
+    this.box(control,[.44,.48,.34],[.42,1.78,.78],'graphite',.025);
   }
   delivery(x){
-    const g=this.group(this.root,'delivery','Delivery · panel & pagar',[x,0,0],[1.8,0,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
-    const frame=this.group(g,'delivery-frame','Rangka delivery',[0,0,0],[.15,0,-.45],['IMG_2312.jpeg']);
+    const photos=['IMG_2312.jpeg','IMG_1656.jpeg','IMG_2388(2).jpeg','IMG_2389(1).jpeg'];
+    const g=this.group(this.root,'delivery','Delivery · pile, controls & end frame',[x,0,0],[1.8,0,0],photos,'Exterior silhouette, front control face, vertical pile gate and operator-side steps follow the actual machine photos. Pile-control device names follow the supplied CD102 service manual.');
+    const frame=this.group(g,'delivery-frame','Delivery end frame & columns',[0,0,0],[.15,0,-.45],photos);
     for(const x0 of [-.68,.77])for(const z of [-1.06,1.06])this.box(frame,[.22,1.65,.26],[x0,.94,z],'graphite',.025);
     this.box(frame,[1.72,.16,2.24],[.04,1.61,0],'graphite',.025);
-    this.box(frame,[1.12,.11,1.78],[.1,.26,0],'steel');this.box(frame,[1.05,.87,1.66],[.1,.76,0],'paper',.012);
-    const hood=this.group(g,'delivery-hood','Panel atas & jendela inspeksi',[0,0,0],[0,.7,0],['IMG_2312.jpeg','IMG_1656.jpeg']);
-    this.box(hood,[1.64,.78,.21],[0,2.05,-1.07],'graphite',.06);
-    this.box(hood,[1.65,.15,2.3],[0,2.5,0],'light',.03);
-    this.box(hood,[.16,.80,2.3],[.84,2.03,0],'graphite',.025);
-    for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.08,z],'light',.025);
-    this.box(hood,[.045,.53,1.40],[.948,2.05,0],'glass',.012);
-    this.box(hood,[.035,.35,.82],[.971,2.08,0],'black',.01);
-    this.box(hood,[.06,.18,2.28],[.95,2.52,0],'light',.018);
-    for(const z of [-.97,.97])for(let i=0;i<4;i++)this.cylinder(hood,.025,.024,[1,2.35-i*.115,z],i===0?'red':'black','x');
-    this.cylinder(hood,.035,2.2,[1,1.72,0],'steel');
-    const gate=this.group(g,'delivery-gate','Pagar vertikal delivery',[0,0,0],[.85,0,0],['IMG_2312.jpeg']);
+    this.box(frame,[1.66,.34,2.20],[.04,2.23,0],'light',.035);
+    this.box(frame,[1.38,.46,.10],[.00,2.07,-1.10],'light',.018);
+    this.box(frame,[1.05,.34,.025],[.10,2.07,-1.165],'glass',.008);
+    for(const z of [-.82,.82])this.controls(frame,[.60,2.18,z],'x',4);
+
+    const pile=this.group(g,'delivery-pile','Delivery main pile & pile table',[0,0,0],[.15,-.10,0],['IMG_2312.jpeg','IMG_1656.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Pile table and sheet stack are photo-derived. Main/auxiliary pile drive and sensors are functional references from the supplied manual.');
+    this.box(pile,[1.22,.10,1.72],[.08,.20,0],'steel',.012);
+    this.box(pile,[1.10,.72,1.60],[.08,.61,0],'paper',.010);
+    for(let n=0;n<18;n++)this.box(pile,[1.105,.006,1.605],[.08,.28+n*.035,0],'light');
+    for(const z of [-.88,.88])this.chain(pile,[.72,.20,z],1.25);
+    const pileSensors=this.group(pile,'delivery-pile-sensors','Delivery pile sensors 12B65 / 12B69 / 12B129 / 12S34',[0,0,0],[.18,.14,.44],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Changeover fast/slow, pile-height control, upper edge of pile and lower limit are represented as sensor zones only.');
+    for(const [name,y,z] of [['12B65',1.18,-.91],['12B69',.98,-.91],['12B129',1.34,.91],['12S34',.26,.91]]){const sn=this.group(pileSensors,`delivery-sensor-${name.toLowerCase()}`,`Delivery sensor ${name}`,[0,0,0],[.08,.08,z<0?-.16:.16],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.09,.07,.06],[.66,y,z],'graphite',.010);}
+
+    const sheetBrake=this.group(g,'delivery-sheet-brake','Sheet brake / slowdown zone',[0,0,0],[.45,.25,0],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf','IMG_2312.jpeg'],'Delivery sheet slowdown is documented in the supplied manual; sheet-brake placement is a functional visual reference.');
+    for(const z of [-.54,0,.54]){this.cylinder(sheetBrake,.055,.28,[-.54,1.46,z],'rubber','z');this.box(sheetBrake,[.20,.06,.32],[-.50,1.39,z],'graphite',.010);}
+    const joggers=this.group(g,'delivery-joggers','Delivery joggers D.S. / O.S.',[0,0,0],[.35,.18,.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'12M6 / 12M7 jogger function is represented at the pile sides; exact stroke is not inferred.');
+    for(const z of [-.86,.86]){this.box(joggers,[.18,.34,.07],[.34,.95,z],'graphite',.015);this.box(joggers,[.34,.05,.10],[.18,.84,z],'steel',.008);}
+
+    const hood=this.group(g,'delivery-hood','Delivery upper hood & side enclosure',[0,0,0],[0,.7,0],photos);
+    this.box(hood,[1.64,.72,.22],[0,1.95,-1.07],'graphite',.06);
+    this.box(hood,[1.65,.14,2.28],[0,2.49,0],'light',.03);
+    this.box(hood,[.18,.80,2.28],[.84,2.00,0],'graphite',.025);
+    for(const z of [-.92,.92])this.box(hood,[.065,.71,.41],[.94,2.06,z],'light',.025);
+    this.box(hood,[.045,.53,1.40],[.948,2.04,0],'glass',.012);
+    this.box(hood,[.035,.35,.82],[.971,2.06,0],'black',.010);
+    this.cylinder(hood,.035,2.18,[1,1.70,0],'steel');
+
+    const gate=this.group(g,'delivery-gate','Vertical delivery pile gate',[0,0,0],[.85,0,0],['IMG_2312.jpeg']);
     for(let i=0;i<13;i++)this.cylinder(gate,.014,1.23,[.96,.92,-.88+i*.147],'steel','y');
-    this.cylinder(gate,.021,1.92,[.96,.3,0]);this.cylinder(gate,.021,1.92,[.96,1.53,0]);
+    this.cylinder(gate,.021,1.92,[.96,.30,0]);this.cylinder(gate,.021,1.92,[.96,1.53,0]);
+
+    const steps=this.group(g,'delivery-steps','Delivery operator access steps',[0,0,0],[.35,.10,1.0],['IMG_2312.jpeg','IMG_2388(2).jpeg']);
+    this.tread(steps,[.52,.12,.82],[-.70,.45,1.46]);
+    this.tread(steps,[.44,.12,.70],[-.36,.68,1.46]);
+    this.box(steps,[.10,.42,.15],[-.52,.32,1.38],'graphite');
   }
   resolvePart(object){let p=object;while(p&&p!==this.root){if(p.userData.selectable)return p;p=p.parent;}return null;}
   findNode(nodeId){return nodeId==='MACHINE-OFFSET5'?this.root:this.nodes.find(n=>n.userData.nodeId===nodeId)||null;}

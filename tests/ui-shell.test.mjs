@@ -16,12 +16,12 @@ test('runtime hooks required by the 3D application remain available',()=>{
 });
 
 test('geometry baseline remains unchanged while the user interface is rebuilt',()=>{
-  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v16');
+  assert.equal(PHOTO_RECONSTRUCTION.version,'offset5-photo-pdf-v18');
   assert.equal(PHOTO_RECONSTRUCTION.repeatedHousings,8);
 });
 
 test('test-user shell uses clear user-facing navigation',()=>{
-  for(const label of ['Mesin 3D','Denah Pabrik','Daftar Mesin','Struktur Mesin','Referensi','Panel Tampilan','Panduan'])assert.match(html,new RegExp(label));
+  for(const label of ['Mesin 3D','Denah Pabrik','Daftar Mesin','Struktur Mesin','Referensi','Panel Tampilan','Panduan'])assert.match(html,new RegExp(label));assert.match(html,/id="taxonomy-count"/);
   assert.match(html,/Mode uji/);
   assert.match(html,/Siap diuji/);
 });
@@ -76,6 +76,6 @@ test('conditional controls explain requirements rather than failing silently',()
 });
 
 test('service worker refreshes the redesigned shell',()=>{
-  assert.match(sw,/offset5-test-user-ux-v17-20260919/);
+  assert.match(sw,/offset5-full-machine-v18-20260919/);
   for(const asset of ['ui-v5.css','responsive-v5.css','src/ui-v5.js','src/app.js'])assert.match(sw,new RegExp(asset.replaceAll('/','\\/')));
 });

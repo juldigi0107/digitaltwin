@@ -24,7 +24,7 @@ test('subassembly selection resolves meshes and isolation preserves parent chain
 });
 test('geometry is finite, sourced and instanced; visual dimensions remain nonengineering',()=>{
  const t=new OffsetMachineTemplate();assert.equal(t.root.userData.dimensionUnit,'VISUAL_ONLY');
- assert.equal(t.root.userData.installedConfiguration,'UNVERIFIED');
+ assert.equal(t.root.userData.installedConfiguration,'PHOTO_CONFIRMED_CD102_8_PLUS_L');
  assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
  for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
  const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<20);
@@ -32,7 +32,7 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v16');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v18');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -41,8 +41,8 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z<0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('press-0-drive')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('drive-utilities')).getCenter(new THREE.Vector3()).z>0);
- assert.ok(size.x>=15.5&&size.x<=16.1);assert.ok(size.y>=2.8&&size.y<=3.0);assert.ok(size.z>=3.8&&size.z<=4.4);
- assert.ok(t.meshes.length<380,'mobile mesh budget exceeded');
+ assert.ok(size.x>=15.5&&size.x<=16.1);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=3.8&&size.z<=4.4);
+ assert.ok(t.meshes.length<1200,`full-detail mesh budget exceeded: ${t.meshes.length}`);
  for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['feeder-pile-guides','feeder-head-linkage','feeder-rear-edge','feedboard-transport','feedboard-register','feedboard-infeed-gripper'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-0-cylinder-train','press-0-dampening','press-0-inking-train','press-0-service-access'])assert.ok(t.findNode(id),`missing ${id}`);
@@ -50,7 +50,7 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  for(const id of ['press-0-impression-gripper','press-0-gripper-control','transfer-pu1-pu2-gripper-shaft','transfer-pu1-pu2-gripper-cam'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-0-top-deck','press-0-fountain-support'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['press-1-cylinder-train','press-1-dampening','press-1-inking-train','press-1-service-access','transfer-pu1-pu2','transfer-pu1-pu2-gripper-a','transfer-pu1-pu2-gripper-b','transfer-pu1-pu2-guide'])assert.ok(t.findNode(id),`missing ${id}`);
- assert.equal(t.findNode('press-2-cylinder-train'),null,'PU3 internals must remain unchanged');
+ for(let i=0;i<8;i++){for(const id of [`press-${i}-cylinder-train`,`press-${i}-dampening-form`,`press-${i}-inking-train`,`press-${i}-inking-distribution`,`press-${i}-register-drives`,`press-${i}-washup`,`press-${i}-top-deck`])assert.ok(t.findNode(id),`missing ${id}`);}
  assert.ok(t.meshes.filter(m=>m.isInstancedMesh).length>=14,'chains and treads must stay instanced');
  t.dispose();
 });
@@ -114,5 +114,64 @@ test('PU1 top exterior follows actual-photo scope and does not depend on generat
  assert.ok(Math.max(Math.abs(cover.min.z),Math.abs(cover.max.z))>1.20,'broad silver shoulder cover disappeared from PU1');
  assert.equal(t.findNode('press-0-side-service-grille'),null,'rejected generated-target service grille must not remain');
  assert.equal(t.root.userData.pu1ExteriorLayout.geometryBasis,'USER_PHOTOS_EXTERIOR + OEM_PDF_INTERNAL');
+ t.dispose();
+});
+
+
+test('all eight printing units carry the complete OEM roller topology without roller overlap',()=>{
+ const t=new OffsetMachineTemplate();
+ for(let unit=0;unit<8;unit++){
+  const rollers=[];
+  for(const n of t.nodes.filter(n=>new RegExp('^press-'+unit+'-(ink-roller-|ink-distributor-|damp-roller-)').test(n.userData.nodeId))){
+   const mesh=n.children.find(c=>c.isMesh);assert.ok(mesh,`missing geometry for ${n.userData.nodeId}`);
+   mesh.getWorldPosition(mesh.userData.testCenter=new THREE.Vector3());
+   rollers.push({id:n.userData.nodeId,r:mesh.geometry.parameters.radiusTop,p:mesh.userData.testCenter});
+  }
+  assert.equal(rollers.filter(r=>r.id.includes('ink-roller-')).length,15,`PU${unit+1} inking roller count`);
+  assert.equal(rollers.filter(r=>r.id.includes('ink-distributor-')).length,4,`PU${unit+1} distributor count`);
+  assert.equal(rollers.filter(r=>r.id.includes('damp-roller-')).length,5,`PU${unit+1} dampening roller count`);
+  for(let i=0;i<rollers.length;i++)for(let j=i+1;j<rollers.length;j++){
+   const a=rollers[i],b=rollers[j],distance=Math.hypot(a.p.x-b.p.x,a.p.y-b.p.y);
+   assert.ok(distance>=a.r+b.r-.001,`${a.id} overlaps ${b.id}`);
+  }
+ }
+ t.dispose();
+});
+
+test('sheet-transfer chain exists between every adjacent printing unit',()=>{
+ const t=new OffsetMachineTemplate();
+ for(let n=1;n<=7;n++){
+  const base=`transfer-pu${n}-pu${n+1}`;
+  for(const id of [base,`${base}-gripper-a`,`${base}-gripper-b`,`${base}-gripper-shaft`,`${base}-gripper-cam`,`${base}-guide`])assert.ok(t.findNode(id),`missing ${id}`);
+ }
+ t.dispose();
+});
+
+test('feeder-to-delivery functional assemblies are present in process order',()=>{
+ const t=new OffsetMachineTemplate();
+ for(const id of ['feeder','feed-board','feeder-pile-centering','feeder-nonstop','feeder-sheet-monitoring','coater','coater-chamber','dryer-extension','dryer-hood','inspection-bridge','inspection-camera-a','inspection-camera-b','delivery','delivery-pile','delivery-sheet-brake','delivery-joggers','delivery-pile-sensors'])assert.ok(t.findNode(id),`missing ${id}`);
+ const xs=['feeder','feed-board','press-1','press-8','coater','dryer-extension','inspection-bridge','delivery'].map(id=>t.findNode(id).getWorldPosition(new THREE.Vector3()).x);
+ for(let i=1;i<xs.length;i++)assert.ok(xs[i]>xs[i-1],`process order not increasing at index ${i}`);
+ t.dispose();
+});
+
+test('mobile low-detail mode hides deep roller details while preserving exterior and primary cylinders',()=>{
+ const t=new OffsetMachineTemplate();
+ const deep=t.meshes.filter(m=>m.userData.detail);
+ assert.ok(deep.length>120,'expected deep-detail meshes');
+ t.setLow(true);
+ assert.ok(deep.every(m=>!m.visible),'deep details must hide in low mode');
+ assert.ok(t.findNode('press-0-frame').visible);
+ assert.ok(t.findNode('press-0-cylinder-train').visible);
+ t.dispose();
+});
+
+
+test('inspection bridge remains above the press housings without inflating the machine envelope',()=>{
+ const t=new OffsetMachineTemplate();
+ const bridge=new THREE.Box3().setFromObject(t.findNode('inspection-bridge'));
+ const pu=new THREE.Box3().setFromObject(t.findNode('press-4'));
+ assert.ok(bridge.max.y>pu.max.y,'inspection bridge should visibly clear the printing-unit housings');
+ assert.ok(bridge.max.y<3.25,'inspection bridge is vertically exaggerated');
  t.dispose();
 });
