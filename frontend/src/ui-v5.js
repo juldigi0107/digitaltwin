@@ -27,6 +27,7 @@ const UNIQUE_PHOTOS=PHOTO_REGISTRY.length;
 const ACTIVE_GEOMETRY_PHOTOS=PHOTO_REGISTRY.filter(p=>p.kind==='active_geometry_reference').length;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function setText(selector,value){const el=$(selector);if(el)el.textContent=value;}
+function uiNotice(message,error=false){const el=$('#toast');if(!el)return;el.textContent=message;el.classList.toggle('error',error);el.hidden=false;clearTimeout(uiNotice.timer);uiNotice.timer=setTimeout(()=>{el.hidden=true;},error?7000:4200);}
 function patchReferenceCopy(){
   const notice=$('#scene-notice div>span');if(notice)notice.textContent=`${UNIQUE_PHOTOS} foto unik terdaftar · ${ACTIVE_GEOMETRY_PHOTOS} foto aktif pada geometry baseline stabil. Skala dan posisi DWG belum diterapkan.`;
   setText('#photo-unique-count',String(UNIQUE_PHOTOS));setText('#photo-active-count',String(ACTIVE_GEOMETRY_PHOTOS));setText('#source-photo-count',`${UNIQUE_PHOTOS} UNIQUE / ${ACTIVE_GEOMETRY_PHOTOS} ACTIVE`);
@@ -49,6 +50,17 @@ function bindNav(){
   $('#nav-layout')?.addEventListener('click',()=>{$('#mode-2d')?.classList.add('active');$('#mode-3d')?.classList.remove('active');});
   $('#nav-machine')?.addEventListener('click',()=>{$('#mode-3d')?.classList.add('active');$('#mode-2d')?.classList.remove('active');});
   $('#ui-theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-mode'));
+  const navInfo=(id,message,target)=>$('#'+id)?.addEventListener('click',()=>{if(target)$('#'+target)?.click();uiNotice(message);document.body.classList.remove('nav-open');});
+  navInfo('nav-machines','Machines: membuka daftar aset mesin yang tersedia.','nav-assets');
+  navInfo('nav-prepress','Prepress: data area belum terhubung; daftar aset yang tersedia dibuka.','nav-assets');
+  navInfo('nav-finishing','Finishing: data area belum terhubung; daftar aset yang tersedia dibuka.','nav-assets');
+  navInfo('nav-utilities','Utilities belum memiliki data backend aktif pada build ini.');
+  navInfo('nav-relationships','Utility relationships belum memiliki data backend aktif pada build ini.');
+  navInfo('nav-documents','Documents: membuka Source Documents untuk bukti yang sudah tersedia.','nav-sources');
+  navInfo('nav-analytics','Analytics belum memiliki telemetry backend aktif pada build ini.');
+  navInfo('nav-alerts','Alerts belum terhubung ke data live; tidak ada alarm yang difabrikasi.');
+  $('#filter-close')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f){f.hidden=true;uiNotice('Layer & Filter disembunyikan. Tekan ALL untuk menampilkannya lagi.');}});
+  $('#legend-all')?.addEventListener('click',()=>{const f=$('.floating-filter');if(f)f.hidden=false;$('#legend-all')?.classList.add('active');uiNotice('Filter aset direset ke ALL untuk data yang tersedia.');});
   $('#ui-workbench-toggle')?.addEventListener('click',()=>{document.body.classList.remove('nav-open','mobile-panel-open');document.body.classList.toggle('ui-workbench-open');});
   $('#ui-close-workbench')?.addEventListener('click',()=>document.body.classList.remove('ui-workbench-open'));
   $('#ui-asset-panel')?.addEventListener('click',()=>{document.body.classList.remove('panel-hidden','nav-open','ui-workbench-open');document.body.classList.add('mobile-panel-open');$('#detail-panel')?.scrollTo({top:0,behavior:'smooth'});});
@@ -70,7 +82,7 @@ function bindZoomProxy(){
   $('#asset-docs-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="sources"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
-function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-pdf-v15';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 VISUAL TARGET · PHOTO-ALIGNED V15';}
+function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-pdf-v16';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 PHOTO EXTERIOR + OEM-PDF INTERNALS · V16';}
 function bindResponsiveLayout(){
   const query=window.matchMedia('(max-width: 767px)');
   const sync=()=>{
