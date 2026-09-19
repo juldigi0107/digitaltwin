@@ -51,9 +51,14 @@ test('mobile workspace cannot inherit desktop grid columns',()=>{
   assert.match(responsiveCss,/\.panel-hidden main\.twin-shell\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/\.center-stack\{display:block!important;width:100%!important/);
   assert.match(responsiveCss,/#viewport\{width:100%!important;max-width:100%!important;right:0!important\}/);
-  assert.match(sw,/pu1-top-view-phase20-20260919/);
+  assert.match(sw,/command-center-ui-phase21-20260919/);
   assert.match(html,/id="dwg-canvas"/);
   assert.match(sw,/src\/data\/plant-layout-data\.js/);
+});
+
+test('command-center shell exposes search, KPI, filters, legend and telemetry',()=>{
+  for(const cls of ['global-search','top-kpis','floating-filter','asset-legend','telemetry-strip','inspector-actions'])assert.match(html,new RegExp(`class="[^"]*${cls}`));
+  assert.match(ui,/asset-focus-shortcut/);
 });
 
 

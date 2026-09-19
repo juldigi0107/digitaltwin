@@ -64,6 +64,10 @@ function bindWorkbench(){
 function wheelZoom(deltaY){const canvas=$('#viewport canvas');if(canvas)canvas.dispatchEvent(new WheelEvent('wheel',{deltaY,bubbles:true,cancelable:true,clientX:canvas.clientWidth/2,clientY:canvas.clientHeight/2}));}
 function bindZoomProxy(){
   $('#zoom-plus')?.addEventListener('click',()=>wheelZoom(-320));$('#zoom-minus')?.addEventListener('click',()=>wheelZoom(320));$('#zoom-fit')?.addEventListener('click',()=>document.querySelector('[data-camera="fit"]')?.click());
+  $('#asset-focus-shortcut')?.addEventListener('click',()=>$('#focus-machine')?.click());
+  $('#asset-explore-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="structure"]')?.click());
+  $('#asset-components-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="structure"]')?.click());
+  $('#asset-docs-shortcut')?.addEventListener('click',()=>document.querySelector('[data-tab="sources"]')?.click());
 }
 function observePanel(){const panel=$('#panel-content');if(!panel)return;const observer=new MutationObserver(()=>patchReferenceCopy());observer.observe(panel,{childList:true,subtree:true,characterData:true});patchReferenceCopy();}
 function stampGeometryFreeze(){document.documentElement.dataset.geometryBaseline='offset5-photo-v12';const status=$('#geometry-safety-status');if(status)status.textContent='PU1 FEEDER-VIEW TOP · V12';}
