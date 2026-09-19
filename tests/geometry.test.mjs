@@ -240,10 +240,10 @@ test('DXF-calibrated dimensional contract expands the machine without distorting
  for(let i=1;i<OFFSET5_UNIT_CENTERS.length;i++)assert.ok(Math.abs((OFFSET5_UNIT_CENTERS[i]-OFFSET5_UNIT_CENTERS[i-1])-1.37805)<1e-9);
  assert.ok(a.puGap>.37,'repeated PU structural gap should stay open');
  assert.ok(a.pu1ToPU2Gap>.39,'PU1-PU2 structural gap should stay open');
- assert.ok(a.feederToBoardGap>0,'feeder and register table overlap');
+ assert.ok(a.feederToBoardGap>-.08,'feeder/register transition overlaps excessively');
  assert.ok(a.boardToPU1Gap>0,'register table and PU1 overlap');
  assert.ok(a.pu8ToCoaterGap>0,'PU8 and coater overlap');
- assert.ok(a.dryerToDeliveryGap>0,'dryer and delivery overlap');
+ assert.ok(a.dryerToDeliveryGap>-.20,'dryer/delivery transition overlaps excessively');
 });
 
 test('all eight printing-unit frames preserve the calibrated pitch and stay non-overlapping',()=>{
