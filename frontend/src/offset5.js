@@ -425,6 +425,17 @@ export class OffsetMachineTemplate {
       const drive=this.group(feederDrives,`feeder-drive-${code.toLowerCase()}`,`Feeder drive ${code}`,[0,0,0],[-.18,.18,pos[2]<0?-.35:.35],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],`${code} diidentifikasi pada manual OEM; geometri housing adalah reference-only.`);
       this.box(drive,[.16,.18,.12],pos,'graphite',.018);this.cylinder(drive,.034,.10,[pos[0]+.10,pos[1],pos[2]],'graphite','x');
     }
+    const centering=this.group(g,'feeder-pile-centering','Pile centering sensor & support reference',[0,0,0],[-.40,.18,.62],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'11B10 senses the lateral pile edge and 11M9 corrects pile position. The manual states a required distance of 130 ± 2 mm and sensor position about 25 mm below the upper pile edge; values are metadata, not model scale.');
+    this.box(centering,[.12,.22,.08],[-.48,1.24,.80],'graphite',.012);
+    this.cylinder(centering,.022,.08,[-.40,1.24,.80],'glass','x');
+    this.box(centering,[1.18,.055,1.58],[0,.20,0],'steel',.010);
+    const limits=this.group(g,'feeder-pile-limit-sensors','Pile-height / limit sensors',[0,0,0],[-.35,.16,-.55],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Upper main-pile limitation, auxiliary-pile detection and bottom limitation are represented as sensor locations only.');
+    for(const [name,y,z] of [['upper',1.30,-.86],['auxiliary',.82,-.86],['bottom',.28,-.86]]){const sn=this.group(limits,`feeder-limit-${name}`,`Feeder ${name} pile sensor`,[0,0,0],[-.12,.08,-.18],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf']);this.box(sn,[.10,.08,.06],[-.60,y,z],'graphite',.010);}
+    const nonstop=this.group(g,'feeder-nonstop','Non-stop / auxiliary pile support reference',[0,0,0],[-.55,.15,0],['IMG_1625.jpeg','pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'The supplied manual describes main/auxiliary pile control on NON-STOP feeders. Installed rake configuration is represented conservatively.');
+    for(const z of [-.62,-.31,0,.31,.62])this.box(nonstop,[.55,.035,.035],[-.34,.44,z],'steel',.006);
+    this.box(nonstop,[.08,.44,1.42],[-.64,.57,0],'graphite',.012);
+    const monitoring=this.group(g,'feeder-sheet-monitoring','Sheet arrival & double-sheet monitoring',[0,0,0],[-.15,.28,.52],['pdfcoffee.com_cd102pdf-4-pdf-free.pdf'],'Sheet-arrival monitoring and double-sheet detection are explicitly documented. Four detector heads are shown as a functional reference following Heidelberg product information.');
+    for(const z of [-.54,-.18,.18,.54]){this.box(monitoring,[.10,.10,.08],[.36,1.56,z],'black',.014);this.cylinder(monitoring,.018,.04,[.42,1.52,z],'glass','x');}
     const panel=this.group(g,'feeder-panel','Meja kontrol feeder',[0,0,0],[0,0,.8],['IMG_1624.jpeg']);
     this.box(panel,[1.22,.64,.3],[.1,.61,1.13],'graphite',.04);
     const desk=this.box(panel,[1.3,.075,.45],[.1,.99,1.17],'light',.035);desk.rotation.x=.12;
