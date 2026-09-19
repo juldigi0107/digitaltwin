@@ -11,7 +11,7 @@ import {OFFSET5_DIMENSIONS,OFFSET5_UNIT_CENTERS,offset5DimensionAudit} from './d
 // Internal coordinates remain functional/visual unless a supplied OEM document states
 // a value explicitly; no unverified service setting is promoted to engineering truth.
 export const PHOTO_RECONSTRUCTION = {
-  version: 'offset5-photo-pdf-v27',
+  version: 'offset5-photo-pdf-v28',
   status: 'FULL MACHINE · USER PHOTOS EXTERIOR + OEM PDF FUNCTIONAL TOPOLOGY',
   dimensionUnit: 'PHOTO_CORRECTED_INTERUNIT_ACCESS_WITH_DXF_PLACEMENT',
   internalDimensionStatus: 'VISUAL_ONLY_UNLESS_OEM_SPECIFIED',
@@ -25,7 +25,7 @@ const V=(a)=>new THREE.Vector3(...a);
 export class OffsetMachineTemplate {
   constructor(){
     this.root=new THREE.Group();this.root.name='MACHINE-OFFSET5';
-    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v8',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
+    this.root.userData={assetId:'MACHINE-OFFSET5',...PHOTO_RECONSTRUCTION,orientation:ORIENTATION,taxonomyVersion:'offset5-taxonomy-v9',machineEnvelope:OFFSET5_DIMENSIONS,dimensionAudit:offset5DimensionAudit()};
     this.parts=[];this.nodes=[];this.meshes=[];this.geometries=new Map();this.materials=new Map();this.ghosted=false;
     this.palette={graphite:0x30383d,black:0x151b20,silver:0xaeb8b8,steel:0x889598,light:0xd1d4c9,paper:0xeee9d5,rubber:0x20252a,glass:0x23333a,red:0xb33c32,yellow:0xe2b541,blue:0x243e70};
     this.build();this.alignOperatorSide();this.batchMeshes();this.tagAdaptiveDetails();
@@ -147,7 +147,7 @@ export class OffsetMachineTemplate {
     }
   }
   tagAdaptiveDetails(){
-    const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-lubrication|-pneumatic-service|-inspection-points|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|feeder-separator-brushes|gripper-spring|coater-supply|coater-chamber-locks|coater-blade-adjusters|dryer-ventilation|dryer-air-plenum|dryer-monitoring|inspection-cabling|inspection-calibration|inspection-trigger|delivery-chain-path|delivery-drive-sprockets|delivery-chain-tensioners|delivery-pile-lift|delivery-powder-jogger-air)$/;
+    const deep=/(-operator-details|-drive-details|-drive-gears|-ink-fountain-controls|-sheet-guides|-dampening-pan|-lubrication|-pneumatic-service|-inspection-points|feedboard-lay-mechanism|feeder-air-controls|feeder-pallet-lift|feeder-suction-cups|feeder-separator-brushes|gripper-spring|coater-supply|coater-chamber-locks|coater-blade-adjusters|dryer-ventilation|dryer-air-plenum|dryer-monitoring|inspection-cabling|inspection-calibration|inspection-trigger|delivery-chain-path|delivery-drive-sprockets|delivery-chain-tensioners|delivery-pile-lift|delivery-powder-jogger-air|pu8-coater-access|coater-dryer-service-bay|dryer-delivery-access)$/;
     for(const node of this.nodes)if(deep.test(node.userData.nodeId))node.traverse(object=>{if(object.isMesh)object.userData.detail=true;});
   }
   build(){
@@ -159,7 +159,8 @@ export class OffsetMachineTemplate {
     this.tread(deck,[D.operatorGalleryLength,.12,D.operatorWalkwayWidth],[D.operatorGalleryCenterX,.46,D.operatorWalkwayCenterZ]);
     // Local access pads at feeder and delivery keep the long gallery from looking like one generic slab.
     this.tread(deck,[1.18,.12,.78],[-8.10,.38,1.73]);
-    this.tread(deck,[1.54,.12,.80],[7.78,.38,1.73]);
+    this.tread(deck,[3.30,.12,.80],[7.95,.38,1.73]);
+    this.tread(deck,[2.55,.12,.80],[10.72,.38,1.73]);
     // Drive-side service strip follows the CAD/service correlation and the supplied drive-side photos.
     this.tread(deck,[D.driveGalleryLength,.10,D.driveWalkwayWidth],[D.driveGalleryCenterX,.43,D.driveWalkwayCenterZ]);
     for(let i=0;i<11;i++)this.cylinder(deck,.025,.72,[-7.35+i*1.62,.83,-1.91],'steel','y');
@@ -222,6 +223,7 @@ export class OffsetMachineTemplate {
     this.dryerExtension(D.dryerCenterX);
     this.inspectionBridge(D.inspectionCenterX);
     this.delivery(D.deliveryCenterX);
+    this.downstreamAccess(D);
     const utility=this.group(this.root,'drive-utilities','Kabinet utilitas eksternal drive side',[2.2,0,D.utilityCenterZ],[0,.2,-.8],['IMG_2389(1).jpeg','IMG_2395.jpeg'],'Kabinet eksternal dan routing terlihat pada drive side; posisi lateral mengikuti service-inclusive envelope DXF, isi internal tidak dimodelkan.');
     this.box(utility,[1.55,1.68,.40],[0,.86,0],'graphite',.035);
     for(let i=0;i<4;i++)this.tube(utility,[[-.55+i*.22,.08,.18],[-.55+i*.22,.34,.28],[-.42+i*.20,.62,.22]],.018,'rubber');
@@ -587,6 +589,35 @@ export class OffsetMachineTemplate {
     this.box(service,[.88,1.48,.20],[0,1.35,-1.12],'graphite',.028);
     this.grille(service,[.02,1.54,-1.235],.64,.34,'z');
     this.tube(service,[[.25,.65,-1.23],[.39,.42,-1.32],[.31,.18,-1.43]],.022,'rubber');
+  }
+  downstreamAccess(D){
+    const photos=['IMG_1629.jpeg','IMG_1662.jpeg','IMG_2391(1).jpeg','IMG_2392.jpeg'];
+    const pu8Right=OFFSET5_UNIT_CENTERS.at(-1)+D.printingUnitFrameWidth/2;
+    const coaterLeft=D.coaterCenterX-D.coaterLength/2;
+    const puCoater=this.group(this.root,'pu8-coater-access','PU8 / coater operator access landing',[(pu8Right+coaterLeft)/2,0,0],[.15,.16,.68],photos,'Clear operator transition after PU8 follows the photographed checker-plate access language. Dimensions are visual access allowances, not a certified safety layout.');
+    this.tread(puCoater,[Math.max(.34,coaterLeft-pu8Right),.10,.84],[0,.52,1.47]);
+    this.tread(puCoater,[.42,.10,.66],[-.03,.29,1.58]);
+    this.box(puCoater,[.09,.42,.12],[0,.30,1.37],'graphite',.012);
+    for(const z of [1.10,1.82])this.cylinder(puCoater,.020,.62,[0,.88,z],'steel','y');
+    this.cylinder(puCoater,.020,.72,[0,1.19,1.46],'steel','z');
+
+    const coaterRight=D.coaterCenterX+D.coaterLength/2;
+    const dryerLeft=D.dryerCenterX-D.dryerLength/2;
+    const transition=this.group(this.root,'coater-dryer-service-bay','Coater / dryer service transition',[(coaterRight+dryerLeft)/2,0,0],[.18,.14,.62],photos,'Separated coater-to-dryer service bay provides visible machine spacing and protected operator footing.');
+    this.tread(transition,[Math.max(.30,dryerLeft-coaterRight),.10,.82],[0,.53,1.48]);
+    this.cylinder(transition,.030,1.48,[0,1.30,0],'steel','z');
+    for(const z of [-.72,.72])this.box(transition,[.09,.70,.09],[0,.88,z],'graphite',.012);
+    this.tube(transition,[[-.12,1.64,-.72],[0,1.77,-.72],[.12,1.64,-.72]],.018,'rubber');
+
+    const dryerRight=D.dryerCenterX+D.dryerLength/2;
+    const deliveryLeft=D.deliveryCenterX-D.deliveryBodyLength/2;
+    const access=this.group(this.root,'dryer-delivery-access','Dryer / inspection / delivery operator access',[(dryerRight+deliveryLeft)/2,0,0],[.28,.18,.78],photos,'The delivery approach is deliberately opened for inspection and operator access; tread and guard geometry is photo-derived and not a certified platform drawing.');
+    this.tread(access,[Math.max(.48,deliveryLeft-dryerRight),.11,.88],[0,.54,1.47]);
+    this.tread(access,[.58,.11,.72],[.02,.30,1.62]);
+    this.box(access,[.12,.44,.16],[0,.31,1.38],'graphite',.014);
+    for(const x0 of [-.20,.20])this.cylinder(access,.022,.72,[x0,.91,1.92],'steel','y');
+    this.cylinder(access,.022,.45,[0,1.26,1.92],'steel','x');
+    this.cylinder(access,.018,.45,[0,.96,1.92],'steel','x');
   }
   dryerExtension(x){
     const photos=['IMG_1629.jpeg','IMG_1631.jpeg','IMG_1633.jpeg'];

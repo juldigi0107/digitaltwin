@@ -28,12 +28,12 @@ test('geometry is finite, sourced and instanced; visual dimensions remain noneng
  assert.equal(t.root.userData.installedConfiguration,'PHOTO_CONFIRMED_CD102_8_PLUS_L');
  assert.ok(t.meshes.some(m=>m.isInstancedMesh));assert.ok(t.nodes.every(n=>n.userData.sourceFiles.length));
  for(const m of t.meshes){const a=m.geometry.attributes.position.array;assert.ok(a.every(Number.isFinite));}
- const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<21.10);
+ const box=new THREE.Box3().setFromObject(t.root);assert.ok(box.min.y>=-.01);assert.ok(box.max.x-box.min.x<22.50);
  t.setLow(true);assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.reset();assert.ok(t.meshes.filter(m=>m.userData.detail).every(m=>!m.visible));t.dispose();
 });
 test('photo-aligned geometry preserves orientation and bounded machine envelope',()=>{
  const t=new OffsetMachineTemplate(),box=new THREE.Box3().setFromObject(t.root),size=box.getSize(new THREE.Vector3());
- assert.equal(t.root.userData.version,'offset5-photo-pdf-v27');
+ assert.equal(t.root.userData.version,'offset5-photo-pdf-v28');
  assert.equal(t.root.userData.sideAlignment,'PHOTO_VERIFIED_OPERATOR_NEGATIVE_Z');
  assert.equal(t.root.userData.driveSideAlignment,'PHOTO_VERIFIED_DRIVE_POSITIVE_Z');
  assert.ok(t.findNode('feeder').position.x<t.findNode('delivery').position.x);
@@ -42,7 +42,7 @@ test('photo-aligned geometry preserves orientation and bounded machine envelope'
  assert.ok(new THREE.Box3().setFromObject(cover).getCenter(new THREE.Vector3()).z<0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('press-0-drive')).getCenter(new THREE.Vector3()).z>0);
  assert.ok(new THREE.Box3().setFromObject(t.findNode('drive-utilities')).getCenter(new THREE.Vector3()).z>0);
- assert.ok(size.x>=20.80&&size.x<=21.05,`photo-corrected longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.15&&size.z<=4.65,`lateral service envelope unexpected: ${size.z}`);
+ assert.ok(size.x>=22.35&&size.x<=22.45,`photo-corrected longitudinal service envelope unexpected: ${size.x}`);assert.ok(size.y>=2.8&&size.y<=3.25,'inspection bridge / machine height envelope unexpected');assert.ok(size.z>=4.15&&size.z<=4.65,`lateral service envelope unexpected: ${size.z}`);
  assert.ok(t.meshes.length<1500,`full-detail mesh budget exceeded: ${t.meshes.length}`);
  for(const id of ['feeder-separation','feeder-air','vacuum-table','feedboard-guides','feedboard-detection'])assert.ok(t.findNode(id),`missing ${id}`);
  for(const id of ['feeder-pile-guides','feeder-head-linkage','feeder-rear-edge','feedboard-transport','feedboard-register','feedboard-infeed-gripper'])assert.ok(t.findNode(id),`missing ${id}`);
@@ -186,9 +186,9 @@ test('inspection bridge remains above the press housings without inflating the m
 
 test('photo-corrected dimensional contract preserves process order and operator access',()=>{
  const d=OFFSET5_DIMENSIONS,a=offset5DimensionAudit();
- assert.equal(d.structuralBody.length,19.80);
+ assert.equal(d.structuralBody.length,21.22);
  assert.equal(d.structuralBody.width,3.5367);
- assert.equal(d.serviceInclusive.length,20.90);
+ assert.equal(d.serviceInclusive.length,22.40);
  assert.equal(d.serviceInclusive.width,4.3801);
  assert.equal(d.repeatedPitch.value,1.58);
  assert.equal(OFFSET5_UNIT_CENTERS.length,8);
@@ -197,8 +197,9 @@ test('photo-corrected dimensional contract preserves process order and operator 
  assert.ok(a.pu1ToPU2Gap>=.60,'PU1-PU2 access bay should stay open');
  assert.ok(a.feederToBoardGap>-.08,'feeder/register transition overlaps excessively');
  assert.ok(a.boardToPU1Gap>0,'register table and PU1 overlap');
- assert.ok(a.pu8ToCoaterGap>0,'PU8 and coater overlap');
- assert.ok(a.dryerToDeliveryGap>-.20,'dryer/delivery transition overlaps excessively');
+ assert.ok(a.pu8ToCoaterGap>=.45,'PU8/coater access landing is too narrow');
+ assert.ok(a.coaterToDryerGap>=.34,'coater/dryer service transition is too narrow');
+ assert.ok(a.dryerToDeliveryGap>=.50,'dryer/delivery access landing is too narrow');
 });
 
 test('all eight printing-unit frames preserve the calibrated pitch and stay non-overlapping',()=>{

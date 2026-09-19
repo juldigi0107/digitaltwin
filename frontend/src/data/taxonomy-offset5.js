@@ -149,6 +149,7 @@ for(const [key,name,refs,parts] of [
  ['FRAME','Coating Unit Housing',['coater-frame','coater-operator-cover'],['Side Frames','Operator-side Cover']],
  ['CHAMBER','Chamber Blade System',['coater-chamber','coater-chamber-locks','coater-blade-adjusters'],['Chamber Blade Reference','Coating Roller','End Locks / Bearing Collars','Blade Adjusters / End Seals / Drain']],
  ['SUPPLY','Coating Circulation & Tray',['coater-supply'],['Drip / Catch Tray','Chamber Connections','Circulation Hose / Gauge Reference']],
+ ['ACCESS','PU8 / Coater Operator Access',['pu8-coater-access'],['Checker-plate Landing','Lower Access Step','Guard Rail']],
  ['SERVICE','Coater Service Side',['coater-service'],['Drive-side Service Panel','Vent / Hose Reference']]
 ]){
  const sid=`O5.COATER.${key}`;add(sid,'O5.COATER',3,'Sub',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.35,.22,key==='SERVICE'?-.45:.25]});
@@ -159,6 +160,7 @@ for(const [key,name,refs,parts] of [
 for(const [key,name,refs,parts] of [
  ['HOOD','Sloped Extension Hood',['dryer-hood'],['Upper Sloped Panel','Vent / Access Panel']],
  ['MODULE','Dryer Modules',['dryer-modules','dryer-ventilation','dryer-air-plenum','dryer-monitoring'],['Dryer / Airflow Module Reference','Lamp / Air Outlet Reference','Extraction Plenum / Fan Grilles','Temperature / Airflow Monitoring Points']],
+ ['SERVICE','Coater / Dryer Service Transition',['coater-dryer-service-bay'],['Transition Deck','Protective Cross Rail','Cable / Hose Bridge']],
  ['PATH','Sheet Transport',['dryer-sheet-path'],['Transport Roller / Sheet Path']]
 ]){
  const sid=`O5.DRYER.${key}`;add(sid,'O5.DRYER',3,'Sub',name,{meshRefs:refs,sourceRefs:['SRC-USER-PHOTOS','SRC-HEIDELBERG-CD102'],confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.35,.25,0]});
@@ -187,7 +189,8 @@ for(const [key,name,refs,parts] of [
  ['SENSOR','Pile Sensors',['delivery-pile-sensors'],['12B65 Fast/Slow','12B69 Pile Height','12B129 Upper Edge','12S34 Bottom Limit']],
  ['HOOD','Upper Hood / Enclosure',['delivery-hood'],['Upper Hood','Side Enclosure','Window']],
  ['GATE','Pile Gate',['delivery-gate'],['Vertical Gate Bars','Lower / Upper Rail']],
- ['STEP','Operator Steps',['delivery-steps'],['Lower Step','Upper Step','Support']]
+ ['STEP','Operator Steps',['delivery-steps'],['Lower Step','Upper Step','Support']],
+ ['ACCESS','Dryer / Inspection / Delivery Access',['dryer-delivery-access'],['Service Landing','Approach Step','Guard Rail / Handrail']]
 ]){
  const sid=`O5.DELIVERY.${key}`;add(sid,'O5.DELIVERY',3,'Sub',name,{meshRefs:refs,sourceRefs:photoManual,confidence:CONFIDENCE.REFERENCE_PLUS_PHOTO,explodeVector:[.45,.18,key==='STEP'?.45:0]});
  const bid=`${sid}.B1`;add(bid,sid,4,'Block',name,{meshRefs:refs,sourceRefs:manual,confidence:CONFIDENCE.MEDIUM,explodeVector:[.18,.12,0]});parts.forEach((p,i)=>{const pid=`${bid}.P${i+1}`;add(pid,bid,5,'Part',p,{meshRefs:i===0?refs:[],sourceRefs:manual,confidence:i===0?CONFIDENCE.MEDIUM:CONFIDENCE.HIGH,explodeVector:[.08,.07,(i-1)*.10]});add(`${pid}.S1`,pid,6,'Spesifik Part',`${p} · delivery reference`,{sourceRefs:manual,confidence:CONFIDENCE.HIGH,explodeVector:[.05,.05,.08],maintenanceTag:'OEM_MANUAL_REFERENCE'});});
